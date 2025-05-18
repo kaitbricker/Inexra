@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  INSTAGRAM
+  LINKEDIN
+  TWITTER
+}
+
+model User {
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String
+  name              String?
+  profilePicture    String?
+  status            UserStatus         @default(ACTIVE)
+  notificationPrefs Json?
+  apiKey            String?
+  roles             UserRole[]
+  auditLogs         AuditLog[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  role              String             @default("user")
+  messages          Message[]
+  conversations     Conversation[]
+  templates         Template[]
+  templateApprovals TemplateApproval[]
+  Role              Role?              @relation(fields: [roleId], references: [id])
+  roleId            String?
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+model Template {
+  id        String              @id @default(cuid())
+  name      String
+  content   String
+  category  String
+  keywords  String[]
+  tags      String[] // New field for custom tags
+  isPublic  Boolean             @default(false)
+  status    String              @default("draft") // draft, pending, approved, rejected
+  version   Int                 @default(1)
+  variables Json? // Store template variables and their types
+  metadata  Json? // Store additional metadata like color, icon, etc.
+  userId    String
+  user      User                @relation(fields: [userId], references: [id])
+  messages  Message[]
+  versions  TemplateVersion[]
+  analytics TemplateAnalytics[]
+  approvals TemplateApproval[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([keywords])
+  @@index([tags])
+  @@index([status])
+}
+
+model TemplateVersion {
+  id         String   @id @default(cuid())
+  templateId String
+  template   Template @relation(fields: [templateId], references: [id])
+  version    Int
+  content    String
+  variables  Json?
+  changes    String? // Description of changes from previous version
+  metadata   Json? // Store version-specific metadata
+  createdAt  DateTime @default(now())
+  createdBy  String // User ID who created this version
+
+  @@unique([templateId, version])
+  @@index([templateId])
+}
+
+model TemplateAnalytics {
+  id              String   @id @default(cuid())
+  templateId      String
+  template        Template @relation(fields: [templateId], references: [id])
+  usageCount      Int      @default(0)
+  avgResponseTime Int? // Average time to respond using this template (in seconds)
+  engagementRate  Float? // Click-through or response rate
+  conversionRate  Float? // Lead conversion rate
+  sentimentScore  Float? // Average sentiment score of responses
+  categoryStats   Json? // Store category-specific statistics
+  timeStats       Json? // Store time-based statistics (hourly, daily, weekly)
+  lastUsed        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([templateId])
+  @@index([lastUsed])
+}
+
+model TemplateApproval {
+  id         String   @id @default(cuid())
+  templateId String
+  template   Template @relation(fields: [templateId], references: [id])
+  approverId String
+  approver   User     @relation(fields: [approverId], references: [id])
+  status     String // pending, approved, rejected
+  comments   String?
+  metadata   Json? // Store approval-specific metadata
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([templateId])
+  @@index([approverId])
+  @@index([status])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String
+  sentiment      Float?
+  leadScore      Float?
+  keywords       String[]
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  templateId     String?
+  template       Template?    @relation(fields: [templateId], references: [id])
+  variables      Json? // Store actual values used for template variables
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([conversationId])
+  @@index([sentiment])
+  @@index([leadScore])
+  @@index([keywords])
+  @@index([templateId])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  title     String
+  status    String    @default("active")
+  priority  String    @default("normal")
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  UserRole    UserRole[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  roles       Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserRole {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  role       Role     @relation(fields: [roleId], references: [id])
+  roleId     String
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+}

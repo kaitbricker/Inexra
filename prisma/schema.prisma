@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(USER)
+  status        Status    @default(ACTIVE)
+  lastActive    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  messages      Message[]
+  templateUsage TemplateUsage[]
+}
+
+model Template {
+  id          String    @id @default(cuid())
+  name        String
+  category    String
+  content     String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  usage       TemplateUsage[]
+  messages    Message[]
+}
+
+model TemplateUsage {
+  id          String    @id @default(cuid())
+  template    Template  @relation(fields: [templateId], references: [id])
+  templateId  String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  responseRate Float?
+  conversionRate Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([templateId])
+  @@index([userId])
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  content     String
+  responseTime Float?
+  template    Template? @relation(fields: [templateId], references: [id])
+  templateId  String?
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([templateId])
+  @@index([userId])
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  lastActive  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+} 

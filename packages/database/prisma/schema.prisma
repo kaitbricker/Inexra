@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CREATOR
+  BASIC_USER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum Platform {
+  INSTAGRAM
+  LINKEDIN
+  TWITTER
+}
+
+enum ConversationStatus {
+  OPEN
+  ACTIVE
+  ARCHIVED
+}
+
+model User {
+  id                String    @id @default(cuid())
+  name              String?
+  email             String    @unique
+  passwordHash      String?
+  profileImage      String?
+  role              UserRole  @default(BASIC_USER)
+  status            AccountStatus @default(ACTIVE)
+  socialAccounts    SocialAccount[]
+  messages          Message[]
+  conversations     Conversation[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model SocialAccount {
+  id                String    @id @default(cuid())
+  platform          Platform
+  platformUserId    String
+  accessToken       String
+  refreshToken      String?
+  tokenExpiresAt    DateTime?
+  metadata          Json?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  messages          Message[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([platform, platformUserId])
+}
+
+model Message {
+  id                String    @id @default(cuid())
+  content           String    @db.Text
+  platform          Platform
+  platformMessageId String
+  senderId          String
+  recipientId       String
+  sentimentScore    Float?
+  leadScore         Float?
+  keywords          String[]
+  socialAccount     SocialAccount @relation(fields: [socialAccountId], references: [id])
+  socialAccountId   String
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    String
+  user              User      @relation(fields: [userId], references: [id])
+  userId            String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([platform, platformMessageId])
+}
+
+model Conversation {
+  id                String    @id @default(cuid())
+  status            ConversationStatus @default(OPEN)
+  sentimentSummary  Float?
+  engagementScore   Float?
+  messages          Message[]
+  leadScore         LeadScore?
+  user              User      @relation(fields: [userId], references: [id])
+  userId            String
+  lastMessageAt     DateTime  @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model LeadScore {
+  id                String    @id @default(cuid())
+  score             Float
+  priorityLevel     Int
+  nextAction        String?
+  sentimentTrend    Json?
+  engagementMetrics Json?
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    String    @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+} 
