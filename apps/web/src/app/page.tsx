@@ -1,3 +1,5 @@
+'use client';
+
 import { UserDashboard } from '@/components/user-management/UserDashboard';
 import { RoleManagement } from '@/components/user-management/RoleManagement';
 import { AuditLogViewer } from '@/components/user-management/AuditLogViewer';
