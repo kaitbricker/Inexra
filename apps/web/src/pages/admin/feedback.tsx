@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useToast } from '@/hooks/useToast';
 import dynamic from 'next/dynamic';
 import { Spinner } from '@/components/ui/Spinner';
+import { GetServerSideProps } from 'next';
 
 interface Feedback {
   id: string;
@@ -27,6 +28,12 @@ const FeedbackList = dynamic(
     loading: () => <Spinner />
   }
 );
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    props: {}
+  };
+};
 
 export default function FeedbackPage() {
   const { data: session, status } = useSession();
