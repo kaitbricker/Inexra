@@ -324,7 +324,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="createdAt"
-                  tickFormatter={(date) =>
+                  tickFormatter={(date: string) =>
                     formatDistanceToNow(new Date(date), { addSuffix: true })
                   }
                 />
