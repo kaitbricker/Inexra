@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import {
   LineChart,
@@ -86,8 +86,15 @@ export function Dashboard({
   className = '',
 }: DashboardProps) {
   const [isRealTime, setIsRealTime] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
-  const isDark = typeof window !== 'undefined' ? theme === 'dark' : false;
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use a default light theme during SSR
+  const isDark = mounted ? theme === 'dark' : false;
 
   const chartTheme = {
     text: isDark ? '#e2e8f0' : '#1a202c',
