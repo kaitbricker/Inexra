@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useWebSocket } from '../services/websocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface Notification {
   id: string;
@@ -12,7 +12,7 @@ interface Notification {
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { onMessage, onConversation, onAccount, onError } = useWebSocket();
+  const { send, connected } = useWebSocket();
 
   const addNotification = useCallback((notification: Omit<Notification, 'id' | 'read'>) => {
     setNotifications((prev) => [
@@ -38,53 +38,44 @@ export function useNotifications() {
   }, []);
 
   useEffect(() => {
-    const unsubscribeMessage = onMessage((message) => {
-      addNotification({
-        type: 'message',
-        title: 'New Message',
-        message: message.content,
-        timestamp: new Date(message.createdAt),
-      });
-    });
+    if (!connected) return;
 
-    const unsubscribeConversation = onConversation((conversation) => {
-      if (conversation.priority === 'HIGH') {
+    const handleMessage = (data: any) => {
+      if (data.type === 'message') {
+        addNotification({
+          type: 'message',
+          title: 'New Message',
+          message: data.content,
+          timestamp: new Date(data.createdAt),
+        });
+      } else if (data.type === 'conversation' && data.priority === 'HIGH') {
         addNotification({
           type: 'conversation',
           title: 'High Priority Conversation',
-          message: `Conversation ${conversation.id} has been marked as high priority`,
-          timestamp: new Date(conversation.updatedAt),
+          message: `Conversation ${data.id} has been marked as high priority`,
+          timestamp: new Date(data.updatedAt),
         });
-      }
-    });
-
-    const unsubscribeAccount = onAccount((account) => {
-      if (account.status === 'ERROR') {
+      } else if (data.type === 'account' && data.status === 'ERROR') {
         addNotification({
           type: 'account',
           title: 'Account Error',
-          message: `Error with ${account.platform} account`,
-          timestamp: new Date(account.lastSyncAt),
+          message: `Error with ${data.platform} account`,
+          timestamp: new Date(data.lastSyncAt),
+        });
+      } else if (data.type === 'error') {
+        addNotification({
+          type: 'error',
+          title: 'Error',
+          message: data.message,
+          timestamp: new Date(data.timestamp),
         });
       }
-    });
-
-    const unsubscribeError = onError((error) => {
-      addNotification({
-        type: 'error',
-        title: 'Error',
-        message: error.message,
-        timestamp: new Date(error.timestamp),
-      });
-    });
+    };
 
     return () => {
-      unsubscribeMessage();
-      unsubscribeConversation();
-      unsubscribeAccount();
-      unsubscribeError();
+      // Cleanup is handled by the useWebSocket hook
     };
-  }, [onMessage, onConversation, onAccount, onError, addNotification]);
+  }, [connected, addNotification]);
 
   return {
     notifications,

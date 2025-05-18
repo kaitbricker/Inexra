@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useWebSocket } from '../services/websocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import {
   LineChart,
   Line,
