@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Advanced analytics dashboard with real-time tracking",
   "private": true,
+  "packageManager": "pnpm@10.11.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
