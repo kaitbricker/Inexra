@@ -74,10 +74,7 @@ export function UserAnalytics() {
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
-        <div className={cn(
-          'p-6 rounded-lg shadow-lg',
-          isDark ? 'bg-gray-800' : 'bg-white'
-        )}>
+        <div className={cn('p-6 rounded-lg shadow-lg', isDark ? 'bg-gray-800' : 'bg-white')}>
           <h3 className="text-lg font-semibold mb-2">User Retention</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -86,21 +83,13 @@ export function UserAnalytics() {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="rate"
-                  stroke="#4F46E5"
-                  strokeWidth={2}
-                />
+                <Line type="monotone" dataKey="rate" stroke="#4F46E5" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className={cn(
-          'p-6 rounded-lg shadow-lg',
-          isDark ? 'bg-gray-800' : 'bg-white'
-        )}>
+        <div className={cn('p-6 rounded-lg shadow-lg', isDark ? 'bg-gray-800' : 'bg-white')}>
           <h3 className="text-lg font-semibold mb-2">Referral Performance</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -116,10 +105,7 @@ export function UserAnalytics() {
           </div>
         </div>
 
-        <div className={cn(
-          'p-6 rounded-lg shadow-lg',
-          isDark ? 'bg-gray-800' : 'bg-white'
-        )}>
+        <div className={cn('p-6 rounded-lg shadow-lg', isDark ? 'bg-gray-800' : 'bg-white')}>
           <h3 className="text-lg font-semibold mb-2">User Segments</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -148,10 +134,7 @@ export function UserAnalytics() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className={cn(
-          'p-6 rounded-lg shadow-lg',
-          isDark ? 'bg-gray-800' : 'bg-white'
-        )}
+        className={cn('p-6 rounded-lg shadow-lg', isDark ? 'bg-gray-800' : 'bg-white')}
       >
         <h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -170,9 +153,12 @@ export function UserAnalytics() {
           <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900">
             <p className="text-sm text-yellow-600 dark:text-yellow-200">Conversion Rate</p>
             <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-100">
-              {((data.referrals.reduce((sum, item) => sum + item.conversions, 0) /
-                data.referrals.reduce((sum, item) => sum + item.count, 0)) *
-                100).toFixed(1)}%
+              {(
+                (data.referrals.reduce((sum, item) => sum + item.conversions, 0) /
+                  data.referrals.reduce((sum, item) => sum + item.count, 0)) *
+                100
+              ).toFixed(1)}
+              %
             </p>
           </div>
           <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900">
@@ -185,4 +171,4 @@ export function UserAnalytics() {
       </motion.div>
     </div>
   );
-} 
+}

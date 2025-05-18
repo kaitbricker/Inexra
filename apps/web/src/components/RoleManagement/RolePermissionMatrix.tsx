@@ -9,4 +9,4 @@ const RolePermissionMatrix: React.FC = () => {
   );
 };
 
-export default RolePermissionMatrix; 
+export default RolePermissionMatrix;

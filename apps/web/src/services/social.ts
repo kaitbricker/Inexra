@@ -125,11 +125,7 @@ export class SocialService {
     throw new Error('Not implemented');
   }
 
-  async fetchMessages(
-    accountId: string,
-    page = 1,
-    limit = 50
-  ): Promise<Message[]> {
+  async fetchMessages(accountId: string, page = 1, limit = 50): Promise<Message[]> {
     const account = await prisma.socialAccount.findUnique({
       where: { id: accountId },
     });
@@ -199,9 +195,7 @@ export class SocialService {
     throw new Error('Not implemented');
   }
 
-  async groupMessagesIntoConversations(
-    messages: Message[]
-  ): Promise<Map<string, Message[]>> {
+  async groupMessagesIntoConversations(messages: Message[]): Promise<Map<string, Message[]>> {
     const conversations = new Map<string, Message[]>();
 
     for (const message of messages) {
@@ -219,4 +213,4 @@ export class SocialService {
     const [sender, recipient] = [message.senderId, message.recipientId].sort();
     return `${message.platform}:${sender}:${recipient}`;
   }
-} 
+}

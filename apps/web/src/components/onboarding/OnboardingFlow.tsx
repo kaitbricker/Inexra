@@ -22,7 +22,8 @@ const steps: Record<string, OnboardingStep[]> = {
   admin: [
     {
       target: '.dashboard-overview',
-      content: 'Welcome to your admin dashboard! Here you can manage users, roles, and monitor system performance.',
+      content:
+        'Welcome to your admin dashboard! Here you can manage users, roles, and monitor system performance.',
       title: 'Dashboard Overview',
       placement: 'bottom',
     },
@@ -34,7 +35,7 @@ const steps: Record<string, OnboardingStep[]> = {
     },
     {
       target: '.analytics',
-      content: 'View detailed analytics and insights about your team\'s performance.',
+      content: "View detailed analytics and insights about your team's performance.",
       title: 'Analytics',
       placement: 'left',
     },
@@ -153,12 +154,7 @@ export function OnboardingFlow({ role }: OnboardingFlowProps) {
               className="flex items-center space-x-2"
             >
               <span>Start Tour</span>
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -172,4 +168,4 @@ export function OnboardingFlow({ role }: OnboardingFlowProps) {
       </AnimatePresence>
     </div>
   );
-} 
+}

@@ -30,9 +30,7 @@ export function Card({
     flat: '',
   };
 
-  const hoverClasses = hoverEffect
-    ? 'transition-transform duration-200 hover:scale-[1.02]'
-    : '';
+  const hoverClasses = hoverEffect ? 'transition-transform duration-200 hover:scale-[1.02]' : '';
 
   const cardClasses = `${baseClasses} ${variantClasses[variant]} ${hoverClasses} ${className}`;
 
@@ -40,29 +38,19 @@ export function Card({
     <>
       {(title || subtitle) && (
         <div className="px-6 py-4 border-b border-gray-200">
-          {title && (
-            <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
-          )}
-          {subtitle && (
-            <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-          )}
+          {title && <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>}
+          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
         </div>
       )}
       <div className="px-6 py-4">{children}</div>
       {footer && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-          {footer}
-        </div>
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">{footer}</div>
       )}
     </>
   );
 
   const cardContent = onClick ? (
-    <button
-      type="button"
-      className="w-full text-left"
-      onClick={onClick}
-    >
+    <button type="button" className="w-full text-left" onClick={onClick}>
       {content}
     </button>
   ) : (
@@ -89,12 +77,7 @@ interface CardGridProps {
   className?: string;
 }
 
-export function CardGrid({
-  children,
-  columns = 3,
-  gap = 'md',
-  className = '',
-}: CardGridProps) {
+export function CardGrid({ children, columns = 3, gap = 'md', className = '' }: CardGridProps) {
   const columnClasses = {
     1: 'grid-cols-1',
     2: 'grid-cols-1 sm:grid-cols-2',
@@ -109,9 +92,7 @@ export function CardGrid({
   };
 
   return (
-    <div
-      className={`grid ${columnClasses[columns]} ${gapClasses[gap]} ${className}`}
-    >
+    <div className={`grid ${columnClasses[columns]} ${gapClasses[gap]} ${className}`}>
       {children}
     </div>
   );
@@ -123,9 +104,5 @@ interface CardListProps {
 }
 
 export function CardList({ children, className = '' }: CardListProps) {
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {children}
-    </div>
-  );
-} 
+  return <div className={`space-y-4 ${className}`}>{children}</div>;
+}

@@ -65,9 +65,7 @@ export function FeedbackWidget({ className = '' }: FeedbackWidgetProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={`mb-4 w-96 rounded-lg shadow-lg ${
-              isDark ? 'bg-gray-800' : 'bg-white'
-            } p-4`}
+            className={`mb-4 w-96 rounded-lg shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'} p-4`}
           >
             <form onSubmit={handleSubmit} className="space-y-4">
               <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -76,7 +74,7 @@ export function FeedbackWidget({ className = '' }: FeedbackWidgetProps) {
               <Select
                 label="Feedback Type"
                 value={type}
-                onChange={(e) => setType(e.target.value as FeedbackType)}
+                onChange={e => setType(e.target.value as FeedbackType)}
                 options={[
                   { value: 'bug', label: 'Bug Report' },
                   { value: 'feature', label: 'Feature Request' },
@@ -87,7 +85,7 @@ export function FeedbackWidget({ className = '' }: FeedbackWidgetProps) {
               <Textarea
                 label="Your Feedback"
                 value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
+                onChange={e => setFeedback(e.target.value)}
                 placeholder="Tell us what you think..."
                 rows={4}
                 required
@@ -119,12 +117,7 @@ export function FeedbackWidget({ className = '' }: FeedbackWidgetProps) {
         } text-white`}
         aria-label="Open feedback form"
       >
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -135,4 +128,4 @@ export function FeedbackWidget({ className = '' }: FeedbackWidgetProps) {
       </motion.button>
     </div>
   );
-} 
+}

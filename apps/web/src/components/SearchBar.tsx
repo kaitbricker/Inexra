@@ -53,7 +53,7 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
     (keyword: string) => {
       handleFilterChange(
         'keywords',
-        filters.keywords.filter((k) => k !== keyword)
+        filters.keywords.filter(k => k !== keyword)
       );
     },
     [filters.keywords, handleFilterChange]
@@ -66,7 +66,7 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={e => setQuery(e.target.value)}
             placeholder="Search messages and conversations..."
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -82,9 +82,7 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`p-2 rounded-lg ${
-            showFilters
-              ? 'bg-blue-100 text-blue-600'
-              : 'text-gray-600 hover:bg-gray-100'
+            showFilters ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <FunnelIcon className="h-5 w-5" />
@@ -101,14 +99,10 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sentiment
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sentiment</label>
                 <select
                   value={filters.sentiment}
-                  onChange={(e) =>
-                    handleFilterChange('sentiment', e.target.value)
-                  }
+                  onChange={e => handleFilterChange('sentiment', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">All</option>
@@ -119,14 +113,10 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                 <select
                   value={filters.priority}
-                  onChange={(e) =>
-                    handleFilterChange('priority', e.target.value)
-                  }
+                  onChange={e => handleFilterChange('priority', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">All</option>
@@ -137,14 +127,10 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date Range
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
                 <select
                   value={filters.dateRange}
-                  onChange={(e) =>
-                    handleFilterChange('dateRange', e.target.value)
-                  }
+                  onChange={e => handleFilterChange('dateRange', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">All Time</option>
@@ -156,11 +142,9 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Keywords
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
               <div className="flex flex-wrap gap-2">
-                {filters.keywords.map((keyword) => (
+                {filters.keywords.map(keyword => (
                   <span
                     key={keyword}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -177,7 +161,7 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
                 <input
                   type="text"
                   placeholder="Add keyword..."
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter' && e.currentTarget.value) {
                       addKeyword(e.currentTarget.value);
                       e.currentTarget.value = '';
@@ -192,4 +176,4 @@ export default function SearchBar({ onSearch, onFilterChange }: SearchBarProps) 
       </AnimatePresence>
     </div>
   );
-} 
+}

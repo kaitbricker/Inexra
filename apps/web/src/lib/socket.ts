@@ -57,7 +57,7 @@ class SocketService {
   private setupEventHandlers() {
     if (!this.io) return;
 
-    this.io.on('connection', async (socket) => {
+    this.io.on('connection', async socket => {
       const userId = socket.handshake.auth.userId;
       if (!userId) {
         socket.disconnect();
@@ -66,7 +66,7 @@ class SocketService {
 
       // Check connection limit
       const userConnections = Array.from(this.users.values()).filter(
-        (u) => u.userId === userId
+        u => u.userId === userId
       ).length;
 
       if (userConnections >= this.MAX_CONNECTIONS_PER_USER) {
@@ -87,7 +87,7 @@ class SocketService {
       socket.join(`user:${userId}`);
 
       // Handle message events
-      socket.on('message:new', async (data) => {
+      socket.on('message:new', async data => {
         try {
           const message = await prisma.message.create({
             data: {
@@ -100,10 +100,7 @@ class SocketService {
           });
 
           // Broadcast to conversation room
-          this.io?.to(`conversation:${message.conversationId}`).emit(
-            'message:created',
-            message
-          );
+          this.io?.to(`conversation:${message.conversationId}`).emit('message:created', message);
 
           // Notify other users in the conversation
           const conversation = await prisma.conversation.findUnique({
@@ -113,11 +110,11 @@ class SocketService {
 
           if (conversation) {
             const participants = new Set([
-              ...conversation.messages.map((m) => m.senderId),
-              ...conversation.messages.map((m) => m.recipientId),
+              ...conversation.messages.map(m => m.senderId),
+              ...conversation.messages.map(m => m.recipientId),
             ]);
 
-            participants.forEach((participantId) => {
+            participants.forEach(participantId => {
               if (participantId !== userId) {
                 this.io?.to(`user:${participantId}`).emit('notification:new_message', {
                   conversationId: message.conversationId,
@@ -133,18 +130,18 @@ class SocketService {
       });
 
       // Handle conversation events
-      socket.on('conversation:join', (conversationId) => {
+      socket.on('conversation:join', conversationId => {
         socket.join(`conversation:${conversationId}`);
         user.rooms.add(`conversation:${conversationId}`);
       });
 
-      socket.on('conversation:leave', (conversationId) => {
+      socket.on('conversation:leave', conversationId => {
         socket.leave(`conversation:${conversationId}`);
         user.rooms.delete(`conversation:${conversationId}`);
       });
 
       // Handle lead score updates
-      socket.on('lead:update', async (data) => {
+      socket.on('lead:update', async data => {
         try {
           const { conversationId, score } = data;
           const conversation = await prisma.conversation.update({
@@ -155,10 +152,7 @@ class SocketService {
             },
           });
 
-          this.io?.to(`conversation:${conversationId}`).emit(
-            'lead:updated',
-            conversation
-          );
+          this.io?.to(`conversation:${conversationId}`).emit('lead:updated', conversation);
 
           // Notify high-priority leads
           if (conversation.priority === 'high') {
@@ -194,4 +188,4 @@ class SocketService {
   }
 }
 
-export const socketService = SocketService.getInstance(); 
+export const socketService = SocketService.getInstance();

@@ -121,15 +121,9 @@ export function Alert({
       className={`rounded-md p-4 ${classes.container} ${className}`}
     >
       <div className="flex">
-        {showIcon && (
-          <div className={`flex-shrink-0 ${classes.icon}`}>
-            {icons[variant]}
-          </div>
-        )}
+        {showIcon && <div className={`flex-shrink-0 ${classes.icon}`}>{icons[variant]}</div>}
         <div className="ml-3 flex-1">
-          {title && (
-            <h3 className={`text-sm font-medium ${classes.title}`}>{title}</h3>
-          )}
+          {title && <h3 className={`text-sm font-medium ${classes.title}`}>{title}</h3>}
           <div className={`text-sm ${classes.message}`}>{message}</div>
         </div>
         <div className="ml-auto pl-3">
@@ -169,11 +163,7 @@ interface AlertGroupProps {
 }
 
 export function AlertGroup({ children, className = '' }: AlertGroupProps) {
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`space-y-4 ${className}`}>{children}</div>;
 }
 
 interface AlertTitleProps {
@@ -182,11 +172,7 @@ interface AlertTitleProps {
 }
 
 export function AlertTitle({ children, className = '' }: AlertTitleProps) {
-  return (
-    <h3 className={`text-sm font-medium ${className}`}>
-      {children}
-    </h3>
-  );
+  return <h3 className={`text-sm font-medium ${className}`}>{children}</h3>;
 }
 
 interface AlertMessageProps {
@@ -195,9 +181,5 @@ interface AlertMessageProps {
 }
 
 export function AlertMessage({ children, className = '' }: AlertMessageProps) {
-  return (
-    <div className={`text-sm ${className}`}>
-      {children}
-    </div>
-  );
-} 
+  return <div className={`text-sm ${className}`}>{children}</div>;
+}

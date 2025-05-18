@@ -25,7 +25,7 @@ export function initSentry() {
 
 export function captureException(error: Error, context?: Record<string, any>) {
   if (process.env.NODE_ENV === 'production') {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       if (context) {
         Object.entries(context).forEach(([key, value]) => {
           scope.setExtra(key, value);
@@ -42,4 +42,4 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
     Sentry.captureMessage(message, level);
   }
   console.log(`[${level.toUpperCase()}] ${message}`);
-} 
+}

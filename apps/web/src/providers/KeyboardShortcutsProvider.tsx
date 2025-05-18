@@ -15,15 +15,9 @@ interface KeyboardShortcutsContextType {
   getShortcuts: () => Shortcut[];
 }
 
-const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextType | undefined>(
-  undefined
-);
+const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextType | undefined>(undefined);
 
-export function KeyboardShortcutsProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function KeyboardShortcutsProvider({ children }: { children: React.ReactNode }) {
   const shortcuts = new Map<string, Shortcut>();
 
   const registerShortcut = useCallback((shortcut: Shortcut) => {
@@ -71,9 +65,7 @@ export function KeyboardShortcutsProvider({
 export function useKeyboardShortcuts() {
   const context = useContext(KeyboardShortcutsContext);
   if (context === undefined) {
-    throw new Error(
-      'useKeyboardShortcuts must be used within a KeyboardShortcutsProvider'
-    );
+    throw new Error('useKeyboardShortcuts must be used within a KeyboardShortcutsProvider');
   }
   return context;
 }
@@ -117,4 +109,4 @@ export const SHORTCUTS = {
     key: '?',
     description: 'Show keyboard shortcuts',
   },
-} as const; 
+} as const;

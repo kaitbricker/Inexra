@@ -12,7 +12,7 @@ export default function DashboardPage() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async context => {
   const session = await getSession(context);
 
   if (!session) {
@@ -29,4 +29,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       session,
     },
   };
-}; 
+};

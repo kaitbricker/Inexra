@@ -9,4 +9,4 @@ const RoleCard: React.FC = () => {
   );
 };
 
-export default RoleCard; 
+export default RoleCard;

@@ -100,4 +100,4 @@ export function trackError(type: string, source: string) {
 // Function to track active users
 export function trackActiveUser() {
   activeUsers.inc();
-} 
+}

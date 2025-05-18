@@ -43,8 +43,8 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    const unsubscribe = subscribe('profile:update', (data) => {
-      setProfile((currentProfile) =>
+    const unsubscribe = subscribe('profile:update', data => {
+      setProfile(currentProfile =>
         currentProfile && currentProfile.id === data.id
           ? { ...currentProfile, ...data }
           : currentProfile
@@ -74,7 +74,7 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
       setLoading(true);
       setError(null);
       const response = await userApi.updateUser(id, data);
-      setProfile((currentProfile) =>
+      setProfile(currentProfile =>
         currentProfile && currentProfile.id === id
           ? { ...currentProfile, ...response.data }
           : currentProfile
@@ -93,7 +93,7 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
       setLoading(true);
       setError(null);
       const response = await userApi.updateUserSettings(id, { settings });
-      setProfile((currentProfile) =>
+      setProfile(currentProfile =>
         currentProfile && currentProfile.id === id
           ? { ...currentProfile, settings: { ...currentProfile.settings, ...settings } }
           : currentProfile
@@ -112,7 +112,7 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
       setLoading(true);
       setError(null);
       const response = await userApi.createApiKey(id);
-      setProfile((currentProfile) =>
+      setProfile(currentProfile =>
         currentProfile && currentProfile.id === id
           ? {
               ...currentProfile,
@@ -134,11 +134,11 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
       setLoading(true);
       setError(null);
       await userApi.deleteApiKey(id, keyId);
-      setProfile((currentProfile) =>
+      setProfile(currentProfile =>
         currentProfile && currentProfile.id === id
           ? {
               ...currentProfile,
-              apiKeys: currentProfile.apiKeys.filter((key) => key.id !== keyId),
+              apiKeys: currentProfile.apiKeys.filter(key => key.id !== keyId),
             }
           : currentProfile
       );
@@ -162,4 +162,4 @@ const useProfileSettings = (): UseProfileSettingsReturn => {
   };
 };
 
-export default useProfileSettings; 
+export default useProfileSettings;

@@ -3,10 +3,7 @@ import { getSession } from 'next-auth/react';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rateLimit';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -39,20 +36,19 @@ export default async function handler(
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      
+
       const usersOnDay = retention.filter(
         user => user.createdAt.toISOString().split('T')[0] <= dateStr
       );
-      
+
       const activeUsers = usersOnDay.filter(
         user => user.lastLoginAt && user.lastLoginAt.toISOString().split('T')[0] >= dateStr
       );
 
       return {
         date: dateStr,
-        rate: usersOnDay.length > 0
-          ? Math.round((activeUsers.length / usersOnDay.length) * 100)
-          : 0,
+        rate:
+          usersOnDay.length > 0 ? Math.round((activeUsers.length / usersOnDay.length) * 100) : 0,
       };
     }).reverse();
 
@@ -74,7 +70,7 @@ export default async function handler(
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      
+
       const dayReferrals = referrals.filter(
         ref => ref.createdAt.toISOString().split('T')[0] === dateStr
       );
@@ -106,4 +102,4 @@ export default async function handler(
     console.error('Error handling analytics request:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-} 
+}

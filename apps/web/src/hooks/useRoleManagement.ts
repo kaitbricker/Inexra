@@ -35,11 +35,9 @@ const useRoleManagement = (): UseRoleManagementReturn => {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    const unsubscribe = subscribe('role:update', (data) => {
-      setRoles((currentRoles) =>
-        currentRoles.map((role) =>
-          role.id === data.id ? { ...role, ...data } : role
-        )
+    const unsubscribe = subscribe('role:update', data => {
+      setRoles(currentRoles =>
+        currentRoles.map(role => (role.id === data.id ? { ...role, ...data } : role))
       );
     });
 
@@ -48,25 +46,28 @@ const useRoleManagement = (): UseRoleManagementReturn => {
     };
   }, [subscribe]);
 
-  const fetchRoles = useCallback(async (params?: { page?: number; limit?: number; search?: string }) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await roleApi.getRoles(params);
-      setRoles(response.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch roles');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchRoles = useCallback(
+    async (params?: { page?: number; limit?: number; search?: string }) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await roleApi.getRoles(params);
+        setRoles(response.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch roles');
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const createRole = useCallback(async (data: Partial<Role>) => {
     try {
       setLoading(true);
       setError(null);
       const response = await roleApi.createRole(data);
-      setRoles((currentRoles) => [...currentRoles, response.data]);
+      setRoles(currentRoles => [...currentRoles, response.data]);
       return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create role');
@@ -81,8 +82,8 @@ const useRoleManagement = (): UseRoleManagementReturn => {
       setLoading(true);
       setError(null);
       const response = await roleApi.updateRole(id, data);
-      setRoles((currentRoles) =>
-        currentRoles.map((role) => (role.id === id ? { ...role, ...response.data } : role))
+      setRoles(currentRoles =>
+        currentRoles.map(role => (role.id === id ? { ...role, ...response.data } : role))
       );
       return response.data;
     } catch (err) {
@@ -98,7 +99,7 @@ const useRoleManagement = (): UseRoleManagementReturn => {
       setLoading(true);
       setError(null);
       await roleApi.deleteRole(id);
-      setRoles((currentRoles) => currentRoles.filter((role) => role.id !== id));
+      setRoles(currentRoles => currentRoles.filter(role => role.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete role');
       throw err;
@@ -118,4 +119,4 @@ const useRoleManagement = (): UseRoleManagementReturn => {
   };
 };
 
-export default useRoleManagement; 
+export default useRoleManagement;

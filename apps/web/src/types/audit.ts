@@ -29,4 +29,4 @@ export interface AuditLogResponse {
   totalLogs: number;
   currentPage: number;
   totalPages: number;
-} 
+}

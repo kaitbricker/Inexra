@@ -12,17 +12,14 @@ const querySchema = z.object({
   status: z.enum(['active', 'suspended', 'pending']).optional(),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Apply rate limiting
-    await new Promise((resolve) => rateLimit(req, res, resolve));
+    await new Promise(resolve => rateLimit(req, res, resolve));
 
     // Validate session and permissions
     const session = await getSession({ req });
@@ -32,7 +29,9 @@ export default async function handler(
 
     // Parse and validate query parameters
     const query = querySchema.parse(req.query);
-    const startDate = query.startDate ? new Date(query.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const startDate = query.startDate
+      ? new Date(query.startDate)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
     const endDate = query.endDate ? new Date(query.endDate) : new Date();
 
     // Build filter conditions
@@ -46,94 +45,88 @@ export default async function handler(
     };
 
     // Fetch user engagement metrics
-    const [
-      totalUsers,
-      activeUsers,
-      newUsers,
-      userActivity,
-      messageStats,
-      responseTimeStats,
-    ] = await Promise.all([
-      // Total users
-      prisma.user.count({ where }),
-      // Active users (users with activity in the last 24 hours)
-      prisma.user.count({
-        where: {
-          ...where,
-          lastActiveAt: {
-            gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          },
-        },
-      }),
-      // New users
-      prisma.user.count({
-        where: {
-          ...where,
-          createdAt: {
-            gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          },
-        },
-      }),
-      // User activity over time
-      prisma.user.findMany({
-        where,
-        select: {
-          createdAt: true,
-          lastActiveAt: true,
-          _count: {
-            select: {
-              messages: true,
-              sessions: true,
+    const [totalUsers, activeUsers, newUsers, userActivity, messageStats, responseTimeStats] =
+      await Promise.all([
+        // Total users
+        prisma.user.count({ where }),
+        // Active users (users with activity in the last 24 hours)
+        prisma.user.count({
+          where: {
+            ...where,
+            lastActiveAt: {
+              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
             },
           },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-      // Message statistics
-      prisma.message.groupBy({
-        by: ['createdAt'],
-        where: {
-          user: where,
-        },
-        _count: true,
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-      // Response time statistics
-      prisma.message.groupBy({
-        by: ['createdAt'],
-        where: {
-          user: where,
-          responseTime: {
-            not: null,
+        }),
+        // New users
+        prisma.user.count({
+          where: {
+            ...where,
+            createdAt: {
+              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            },
           },
-        },
-        _avg: {
-          responseTime: true,
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-    ]);
+        }),
+        // User activity over time
+        prisma.user.findMany({
+          where,
+          select: {
+            createdAt: true,
+            lastActiveAt: true,
+            _count: {
+              select: {
+                messages: true,
+                sessions: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+        // Message statistics
+        prisma.message.groupBy({
+          by: ['createdAt'],
+          where: {
+            user: where,
+          },
+          _count: true,
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+        // Response time statistics
+        prisma.message.groupBy({
+          by: ['createdAt'],
+          where: {
+            user: where,
+            responseTime: {
+              not: null,
+            },
+          },
+          _avg: {
+            responseTime: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+      ]);
 
     // Process and aggregate data
-    const activityData = userActivity.map((activity) => ({
+    const activityData = userActivity.map(activity => ({
       date: activity.createdAt.toISOString().split('T')[0],
       users: 1,
       messages: activity._count.messages,
       sessions: activity._count.sessions,
     }));
 
-    const messageData = messageStats.map((stat) => ({
+    const messageData = messageStats.map(stat => ({
       date: stat.createdAt.toISOString().split('T')[0],
       count: stat._count,
     }));
 
-    const responseTimeData = responseTimeStats.map((stat) => ({
+    const responseTimeData = responseTimeStats.map(stat => ({
       date: stat.createdAt.toISOString().split('T')[0],
       averageTime: stat._avg.responseTime,
     }));
@@ -144,14 +137,12 @@ export default async function handler(
       return ((current - previous) / previous) * 100;
     };
 
-    const previousPeriodStart = new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime()));
+    const previousPeriodStart = new Date(
+      startDate.getTime() - (endDate.getTime() - startDate.getTime())
+    );
     const previousPeriodEnd = startDate;
 
-    const [
-      previousTotalUsers,
-      previousActiveUsers,
-      previousNewUsers,
-    ] = await Promise.all([
+    const [previousTotalUsers, previousActiveUsers, previousNewUsers] = await Promise.all([
       prisma.user.count({
         where: {
           ...where,
@@ -210,4 +201,4 @@ export default async function handler(
     }
     return res.status(500).json({ error: 'Internal server error' });
   }
-} 
+}

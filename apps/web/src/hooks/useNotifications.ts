@@ -15,7 +15,7 @@ export function useNotifications() {
   const { send, connected } = useWebSocket();
 
   const addNotification = useCallback((notification: Omit<Notification, 'id' | 'read'>) => {
-    setNotifications((prev) => [
+    setNotifications(prev => [
       {
         ...notification,
         id: Math.random().toString(36).substr(2, 9),
@@ -26,8 +26,8 @@ export function useNotifications() {
   }, []);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
+    setNotifications(prev =>
+      prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
@@ -82,4 +82,4 @@ export function useNotifications() {
     markAsRead,
     clearAll,
   };
-} 
+}

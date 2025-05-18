@@ -109,4 +109,4 @@ export function useTemplateSelection({
     insertTemplate,
     getSuggestedTemplates,
   };
-} 
+}

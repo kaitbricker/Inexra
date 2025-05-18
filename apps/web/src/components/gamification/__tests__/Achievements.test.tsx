@@ -3,7 +3,7 @@ import { Achievements } from '../Achievements';
 
 // Mock the API calls
 jest.mock('@/lib/api', () => ({
-  get: jest.fn((url) => {
+  get: jest.fn(url => {
     if (url === '/api/achievements') {
       return Promise.resolve({
         data: [
@@ -69,4 +69,4 @@ describe('Achievements', () => {
       expect(screen.getByText('Failed to load achievements')).toBeInTheDocument();
     });
   });
-}); 
+});

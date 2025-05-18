@@ -58,14 +58,21 @@ export function useSocket(options: SocketOptions = {}): UseSocketReturn {
       setIsConnected(false);
     });
 
-    socket.on('error', (error) => {
+    socket.on('error', error => {
       console.error('Socket error:', error);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [session?.user?.id, autoConnect, reconnection, reconnectionAttempts, reconnectionDelay, timeout]);
+  }, [
+    session?.user?.id,
+    autoConnect,
+    reconnection,
+    reconnectionAttempts,
+    reconnectionDelay,
+    timeout,
+  ]);
 
   const joinConversation = useCallback((conversationId: string) => {
     socketRef.current?.emit('conversation:join', conversationId);
@@ -91,4 +98,4 @@ export function useSocket(options: SocketOptions = {}): UseSocketReturn {
     sendMessage,
     updateLeadScore,
   };
-} 
+}

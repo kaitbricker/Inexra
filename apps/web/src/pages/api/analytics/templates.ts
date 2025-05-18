@@ -12,17 +12,14 @@ const querySchema = z.object({
   status: z.enum(['active', 'archived', 'draft']).optional(),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Apply rate limiting
-    await new Promise((resolve) => rateLimit(req, res, resolve));
+    await new Promise(resolve => rateLimit(req, res, resolve));
 
     // Validate session and permissions
     const session = await getSession({ req });
@@ -32,7 +29,9 @@ export default async function handler(
 
     // Parse and validate query parameters
     const query = querySchema.parse(req.query);
-    const startDate = query.startDate ? new Date(query.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
+    const startDate = query.startDate
+      ? new Date(query.startDate)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to last 30 days
     const endDate = query.endDate ? new Date(query.endDate) : new Date();
 
     // Build filter conditions
@@ -46,75 +45,70 @@ export default async function handler(
     };
 
     // Fetch template performance metrics
-    const [
-      totalTemplates,
-      activeTemplates,
-      templateUsage,
-      responseRates,
-      conversionRates,
-    ] = await Promise.all([
-      // Total templates
-      prisma.template.count({ where }),
-      // Active templates (used in the last 24 hours)
-      prisma.template.count({
-        where: {
-          ...where,
-          lastUsedAt: {
-            gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    const [totalTemplates, activeTemplates, templateUsage, responseRates, conversionRates] =
+      await Promise.all([
+        // Total templates
+        prisma.template.count({ where }),
+        // Active templates (used in the last 24 hours)
+        prisma.template.count({
+          where: {
+            ...where,
+            lastUsedAt: {
+              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            },
           },
-        },
-      }),
-      // Template usage over time
-      prisma.templateUsage.groupBy({
-        by: ['templateId', 'createdAt'],
-        where: {
-          template: where,
-        },
-        _count: true,
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-      // Response rates
-      prisma.templateUsage.groupBy({
-        by: ['templateId', 'createdAt'],
-        where: {
-          template: where,
-          responseReceived: true,
-        },
-        _count: true,
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-      // Conversion rates
-      prisma.templateUsage.groupBy({
-        by: ['templateId', 'createdAt'],
-        where: {
-          template: where,
-          converted: true,
-        },
-        _count: true,
-        orderBy: {
-          createdAt: 'asc',
-        },
-      }),
-    ]);
+        }),
+        // Template usage over time
+        prisma.templateUsage.groupBy({
+          by: ['templateId', 'createdAt'],
+          where: {
+            template: where,
+          },
+          _count: true,
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+        // Response rates
+        prisma.templateUsage.groupBy({
+          by: ['templateId', 'createdAt'],
+          where: {
+            template: where,
+            responseReceived: true,
+          },
+          _count: true,
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+        // Conversion rates
+        prisma.templateUsage.groupBy({
+          by: ['templateId', 'createdAt'],
+          where: {
+            template: where,
+            converted: true,
+          },
+          _count: true,
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
+      ]);
 
     // Process and aggregate data
-    const usageData = templateUsage.map((usage) => ({
+    const usageData = templateUsage.map(usage => ({
       date: usage.createdAt.toISOString().split('T')[0],
       templateId: usage.templateId,
       count: usage._count,
     }));
 
-    const responseRateData = responseRates.map((rate) => ({
+    const responseRateData = responseRates.map(rate => ({
       date: rate.createdAt.toISOString().split('T')[0],
       templateId: rate.templateId,
       count: rate._count,
     }));
 
-    const conversionRateData = conversionRates.map((rate) => ({
+    const conversionRateData = conversionRates.map(rate => ({
       date: rate.createdAt.toISOString().split('T')[0],
       templateId: rate.templateId,
       count: rate._count,
@@ -126,13 +120,12 @@ export default async function handler(
       return ((current - previous) / previous) * 100;
     };
 
-    const previousPeriodStart = new Date(startDate.getTime() - (endDate.getTime() - startDate.getTime()));
+    const previousPeriodStart = new Date(
+      startDate.getTime() - (endDate.getTime() - startDate.getTime())
+    );
     const previousPeriodEnd = startDate;
 
-    const [
-      previousTotalTemplates,
-      previousActiveTemplates,
-    ] = await Promise.all([
+    const [previousTotalTemplates, previousActiveTemplates] = await Promise.all([
       prisma.template.count({
         where: {
           ...where,
@@ -195,4 +188,4 @@ export default async function handler(
     }
     return res.status(500).json({ error: 'Internal server error' });
   }
-} 
+}

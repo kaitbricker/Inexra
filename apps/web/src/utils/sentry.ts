@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/nextjs';
 
 export const captureException = (error: Error, context?: Record<string, any>) => {
-  Sentry.withScope((scope) => {
+  Sentry.withScope(scope => {
     if (context) {
       Object.entries(context).forEach(([key, value]) => {
         scope.setExtra(key, value);
@@ -53,4 +53,4 @@ export const withSentry = <T>(fn: () => Promise<T>): Promise<T> => {
       }
     }
   );
-}; 
+};

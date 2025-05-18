@@ -21,4 +21,4 @@ declare module '@heroicons/react/24/outline' {
   export const ClockIcon: any;
   export const TagIcon: any;
   export const DocumentDuplicateIcon: any;
-} 
+}

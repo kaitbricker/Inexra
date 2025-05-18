@@ -21,7 +21,7 @@ class DatabaseManager {
     // Initialize read replicas if configured
     const readReplicaUrls = process.env.DATABASE_READ_REPLICA_URLS?.split(',') || [];
     this.readClients = readReplicaUrls.map(
-      (url) =>
+      url =>
         new PrismaClient({
           datasources: {
             db: {
@@ -66,7 +66,7 @@ class DatabaseManager {
   async healthCheck(): Promise<boolean> {
     try {
       await this.writeClient.$queryRaw`SELECT 1`;
-      await Promise.all(this.readClients.map((client) => client.$queryRaw`SELECT 1`));
+      await Promise.all(this.readClients.map(client => client.$queryRaw`SELECT 1`));
       return true;
     } catch (error) {
       console.error('Database health check failed:', error);
@@ -77,8 +77,8 @@ class DatabaseManager {
   // Graceful shutdown
   async disconnect(): Promise<void> {
     await this.writeClient.$disconnect();
-    await Promise.all(this.readClients.map((client) => client.$disconnect()));
+    await Promise.all(this.readClients.map(client => client.$disconnect()));
   }
 }
 
-export const db = DatabaseManager.getInstance(); 
+export const db = DatabaseManager.getInstance();

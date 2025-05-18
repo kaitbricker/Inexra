@@ -23,7 +23,10 @@ export function rateLimit(options: RateLimitOptions) {
       if (tokenCount.length >= limit) {
         res.setHeader('X-RateLimit-Limit', limit);
         res.setHeader('X-RateLimit-Remaining', 0);
-        res.setHeader('X-RateLimit-Reset', Math.ceil(tokenCount[0] / 1000) + options.interval / 1000);
+        res.setHeader(
+          'X-RateLimit-Reset',
+          Math.ceil(tokenCount[0] / 1000) + options.interval / 1000
+        );
         throw new Error('Rate limit exceeded');
       }
 
@@ -43,4 +46,4 @@ export function rateLimit(options: RateLimitOptions) {
       }
     },
   };
-} 
+}

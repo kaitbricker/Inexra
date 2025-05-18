@@ -21,7 +21,7 @@ export function Badge({
   onRemove,
 }: BadgeProps) {
   const baseClasses = 'inline-flex items-center font-medium rounded-full';
-  
+
   const variantClasses = {
     default: 'bg-gray-100 text-gray-800',
     success: 'bg-green-100 text-green-800',
@@ -45,18 +45,13 @@ export function Badge({
         <button
           type="button"
           className="ml-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-current hover:bg-current hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-2"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onRemove?.();
           }}
         >
           <span className="sr-only">Remove</span>
-          <svg
-            className="h-3 w-3"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+          <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path
               fillRule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -90,11 +85,7 @@ interface BadgeGroupProps {
 }
 
 export function BadgeGroup({ children, className = '' }: BadgeGroupProps) {
-  return (
-    <div className={`flex flex-wrap gap-2 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`flex flex-wrap gap-2 ${className}`}>{children}</div>;
 }
 
 interface StatusBadgeProps extends Omit<BadgeProps, 'variant'> {
@@ -124,15 +115,14 @@ export function StatusBadge({ status, ...props }: StatusBadgeProps) {
   const config = statusConfig[status];
 
   return (
-    <Badge
-      variant={config.variant}
-      {...props}
-    >
+    <Badge variant={config.variant} {...props}>
       <span className="relative flex h-2 w-2 mr-1.5">
-        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75`} />
+        <span
+          className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75`}
+        />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
       </span>
       {config.label}
     </Badge>
   );
-} 
+}

@@ -83,15 +83,12 @@ export default function Dashboard() {
     getSuggestedTemplates,
   } = useMessageTemplates();
 
-  const {
-    insertTemplate,
-    getSuggestedTemplates: getContextualTemplates,
-  } = useTemplateSelection({
-    onTemplateInserted: (template) => {
+  const { insertTemplate, getSuggestedTemplates: getContextualTemplates } = useTemplateSelection({
+    onTemplateInserted: template => {
       // Show success notification
       console.log('Template inserted:', template);
     },
-    onError: (error) => {
+    onError: error => {
       // Show error notification
       console.error('Error inserting template:', error);
     },
@@ -102,14 +99,10 @@ export default function Dashboard() {
 
     const handleMessage = (data: any) => {
       if (data.type === 'message') {
-        setMessages((prev) => [...prev, data]);
+        setMessages(prev => [...prev, data]);
         updateKeywordFrequencies([...messages, data]);
       } else if (data.type === 'conversation') {
-        setConversations((prev) =>
-          prev.map((c) =>
-            c.id === data.id ? { ...c, ...data } : c
-          )
-        );
+        setConversations(prev => prev.map(c => (c.id === data.id ? { ...c, ...data } : c)));
       }
     };
 
@@ -121,12 +114,12 @@ export default function Dashboard() {
   const updateKeywordFrequencies = (msgs: Message[]) => {
     const now = Date.now();
     const filteredMessages = msgs.filter(
-      (msg) => now - new Date(msg.createdAt).getTime() <= timeRangeMap[timeRange]
+      msg => now - new Date(msg.createdAt).getTime() <= timeRangeMap[timeRange]
     );
 
     const frequencies: Record<string, number> = {};
-    filteredMessages.forEach((msg) => {
-      msg.keywords.forEach((keyword) => {
+    filteredMessages.forEach(msg => {
+      msg.keywords.forEach(keyword => {
         frequencies[keyword] = (frequencies[keyword] || 0) + 1;
       });
     });
@@ -151,15 +144,15 @@ export default function Dashboard() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (msg) =>
+        msg =>
           msg.content.toLowerCase().includes(query) ||
-          msg.keywords.some((k) => k.toLowerCase().includes(query))
+          msg.keywords.some(k => k.toLowerCase().includes(query))
       );
     }
 
     // Apply sentiment filter
     if (searchFilters.sentiment !== 'all') {
-      filtered = filtered.filter((msg) => {
+      filtered = filtered.filter(msg => {
         const score = msg.sentimentScore;
         switch (searchFilters.sentiment) {
           case 'positive':
@@ -177,11 +170,9 @@ export default function Dashboard() {
     // Apply priority filter
     if (searchFilters.priority !== 'all') {
       const conversationIds = conversations
-        .filter((c) => c.priority === searchFilters.priority.toUpperCase())
-        .map((c) => c.id);
-      filtered = filtered.filter((msg) =>
-        conversationIds.includes(msg.conversationId)
-      );
+        .filter(c => c.priority === searchFilters.priority.toUpperCase())
+        .map(c => c.id);
+      filtered = filtered.filter(msg => conversationIds.includes(msg.conversationId));
     }
 
     // Apply date range filter
@@ -193,7 +184,7 @@ export default function Dashboard() {
         '7d': 7 * 24 * 60 * 60 * 1000,
       };
       filtered = filtered.filter(
-        (msg) =>
+        msg =>
           now.getTime() - new Date(msg.createdAt).getTime() <=
           timeRanges[searchFilters.dateRange as '1h' | '24h' | '7d']
       );
@@ -201,10 +192,8 @@ export default function Dashboard() {
 
     // Apply keyword filter
     if (searchFilters.keywords.length > 0) {
-      filtered = filtered.filter((msg) =>
-        searchFilters.keywords.some((keyword) =>
-          msg.keywords.includes(keyword.toLowerCase())
-        )
+      filtered = filtered.filter(msg =>
+        searchFilters.keywords.some(keyword => msg.keywords.includes(keyword.toLowerCase()))
       );
     }
 
@@ -213,16 +202,16 @@ export default function Dashboard() {
 
   const getFilteredConversations = useCallback(() => {
     const now = Date.now();
-    return conversations.filter((conv) => {
+    return conversations.filter(conv => {
       let matchesTimeRange = true;
       if (searchFilters.dateRange !== 'all') {
         matchesTimeRange =
-          now - new Date(conv.createdAt).getTime() <= timeRangeMap[searchFilters.dateRange as TimeRange];
+          now - new Date(conv.createdAt).getTime() <=
+          timeRangeMap[searchFilters.dateRange as TimeRange];
       }
 
       const matchesPriority =
-        searchFilters.priority === 'all' ||
-        conv.priority.toLowerCase() === searchFilters.priority;
+        searchFilters.priority === 'all' || conv.priority.toLowerCase() === searchFilters.priority;
 
       const matchesSentiment =
         searchFilters.sentiment === 'all' ||
@@ -232,9 +221,7 @@ export default function Dashboard() {
 
       const matchesKeywords =
         searchFilters.keywords.length === 0 ||
-        searchFilters.keywords.some((keyword) =>
-          conv.keywords.includes(keyword)
-        );
+        searchFilters.keywords.some(keyword => conv.keywords.includes(keyword));
 
       return matchesTimeRange && matchesPriority && matchesSentiment && matchesKeywords;
     });
@@ -293,7 +280,7 @@ export default function Dashboard() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex space-x-2">
-          {(['1h', '24h', '7d'] as const).map((range) => (
+          {(['1h', '24h', '7d'] as const).map(range => (
             <button
               key={range}
               onClick={() => handleTimeRangeChange(range as TimeRange)}
@@ -329,11 +316,7 @@ export default function Dashboard() {
                   }
                 />
                 <YAxis domain={[0, 1]} />
-                <Tooltip
-                  labelFormatter={(date: string) =>
-                    new Date(date).toLocaleString()
-                  }
-                />
+                <Tooltip labelFormatter={(date: string) => new Date(date).toLocaleString()} />
                 <Legend />
                 <Line
                   type="monotone"
@@ -388,35 +371,37 @@ export default function Dashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Recent Messages</h2>
           <div className="space-y-4">
-            {getFilteredMessages().slice(-5).map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="border-b pb-4 last:border-b-0"
-              >
-                <p className="text-sm text-gray-600">{message.content}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{
-                        backgroundColor: getSentimentColor(message.sentimentScore),
-                      }}
-                    />
+            {getFilteredMessages()
+              .slice(-5)
+              .map(message => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="border-b pb-4 last:border-b-0"
+                >
+                  <p className="text-sm text-gray-600">{message.content}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: getSentimentColor(message.sentimentScore),
+                        }}
+                      />
+                      <span className="text-xs text-gray-500">
+                        {message.sentimentScore.toFixed(2)}
+                      </span>
+                    </div>
                     <span className="text-xs text-gray-500">
-                      {message.sentimentScore.toFixed(2)}
+                      {formatDistanceToNow(new Date(message.createdAt), {
+                        addSuffix: true,
+                      })}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(message.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
           </div>
         </motion.div>
 
@@ -429,9 +414,9 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold mb-4">Active Conversations</h2>
           <div className="space-y-4">
             {getFilteredConversations()
-              .filter((c) => c.status === 'OPEN')
+              .filter(c => c.status === 'OPEN')
               .slice(-5)
-              .map((conversation) => (
+              .map(conversation => (
                 <motion.div
                   key={conversation.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -440,16 +425,14 @@ export default function Dashboard() {
                   className="border-b pb-4 last:border-b-0"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">
-                      Conversation {conversation.id}
-                    </span>
+                    <span className="text-sm font-medium">Conversation {conversation.id}</span>
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         conversation.priority === 'HIGH'
                           ? 'bg-red-100 text-red-800'
                           : conversation.priority === 'MEDIUM'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-green-100 text-green-800'
                       }`}
                     >
                       {conversation.priority}
@@ -488,8 +471,8 @@ export default function Dashboard() {
                           entry.priority === 'HIGH'
                             ? '#EF4444'
                             : entry.priority === 'MEDIUM'
-                            ? '#F59E0B'
-                            : '#10B981',
+                              ? '#F59E0B'
+                              : '#10B981',
                       }}
                     />
                   ))}
@@ -520,4 +503,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-} 
+}

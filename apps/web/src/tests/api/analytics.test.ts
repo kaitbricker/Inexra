@@ -54,7 +54,7 @@ describe('Analytics API Endpoints', () => {
   });
 
   afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    await new Promise(resolve => server.close(resolve));
   });
 
   beforeEach(() => {
@@ -97,13 +97,11 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('returns user analytics data', async () => {
-      const response = await request(server)
-        .get('/api/analytics/users')
-        .query({
-          startDate: '2024-01-01',
-          endDate: '2024-01-31',
-          role: 'user',
-        });
+      const response = await request(server).get('/api/analytics/users').query({
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        role: 'user',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -126,12 +124,10 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('validates query parameters', async () => {
-      const response = await request(server)
-        .get('/api/analytics/users')
-        .query({
-          startDate: 'invalid-date',
-          endDate: '2024-01-31',
-        });
+      const response = await request(server).get('/api/analytics/users').query({
+        startDate: 'invalid-date',
+        endDate: '2024-01-31',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
@@ -181,13 +177,11 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('returns template analytics data', async () => {
-      const response = await request(server)
-        .get('/api/analytics/templates')
-        .query({
-          startDate: '2024-01-01',
-          endDate: '2024-01-31',
-          category: 'sales',
-        });
+      const response = await request(server).get('/api/analytics/templates').query({
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        category: 'sales',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -209,11 +203,9 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('validates query parameters', async () => {
-      const response = await request(server)
-        .get('/api/analytics/templates')
-        .query({
-          category: 'invalid-category',
-        });
+      const response = await request(server).get('/api/analytics/templates').query({
+        category: 'invalid-category',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
@@ -251,11 +243,9 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('returns real-time activity data', async () => {
-      const response = await request(server)
-        .get('/api/analytics/activity')
-        .query({
-          role: 'user',
-        });
+      const response = await request(server).get('/api/analytics/activity').query({
+        role: 'user',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -275,11 +265,9 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('validates query parameters', async () => {
-      const response = await request(server)
-        .get('/api/analytics/activity')
-        .query({
-          role: 'invalid-role',
-        });
+      const response = await request(server).get('/api/analytics/activity').query({
+        role: 'invalid-role',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
@@ -295,4 +283,4 @@ describe('Analytics API Endpoints', () => {
       expect(prisma.session.findMany).not.toHaveBeenCalled();
     });
   });
-}); 
+});

@@ -50,7 +50,10 @@ describe('ReferralService', () => {
 
       (prisma.referral.findUnique as jest.Mock).mockResolvedValue(mockReferral);
       (prisma.referral.count as jest.Mock).mockResolvedValue(6);
-      (prisma.referral.update as jest.Mock).mockResolvedValue({ ...mockReferral, status: 'completed' });
+      (prisma.referral.update as jest.Mock).mockResolvedValue({
+        ...mockReferral,
+        status: 'completed',
+      });
       (prisma.user.update as jest.Mock).mockResolvedValue({ id: 'user1', balance: 15 });
 
       await ReferralService.processReferral('1');
@@ -87,7 +90,9 @@ describe('ReferralService', () => {
 
       (prisma.referral.findUnique as jest.Mock).mockResolvedValue(mockReferral);
 
-      await expect(ReferralService.processReferral('1')).rejects.toThrow('Referral already processed');
+      await expect(ReferralService.processReferral('1')).rejects.toThrow(
+        'Referral already processed'
+      );
     });
   });
 
@@ -184,4 +189,4 @@ describe('Referral Rewards Cron Job', () => {
       },
     });
   });
-}); 
+});

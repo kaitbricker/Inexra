@@ -9,4 +9,4 @@ const UserCard: React.FC = () => {
   );
 };
 
-export default UserCard; 
+export default UserCard;

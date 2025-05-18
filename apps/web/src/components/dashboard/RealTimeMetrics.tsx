@@ -35,7 +35,7 @@ export function RealTimeMetrics() {
     if (!socket) return;
 
     const handleNewMessage = (data: any) => {
-      setMessageMetrics((prev) => {
+      setMessageMetrics(prev => {
         const newMetrics = [...prev];
         const timestamp = Date.now();
         const sentiment = data.metadata?.sentiment || 0;
@@ -48,12 +48,12 @@ export function RealTimeMetrics() {
 
         // Keep only last 30 minutes of data
         const thirtyMinutesAgo = timestamp - 30 * 60 * 1000;
-        return newMetrics.filter((m) => m.timestamp > thirtyMinutesAgo);
+        return newMetrics.filter(m => m.timestamp > thirtyMinutesAgo);
       });
     };
 
     const handleLeadUpdate = (data: any) => {
-      setLeadMetrics((prev) => {
+      setLeadMetrics(prev => {
         const newMetrics = [...prev];
         const timestamp = Date.now();
         const priority = data.priority;
@@ -74,7 +74,7 @@ export function RealTimeMetrics() {
 
         // Keep only last 30 minutes of data
         const thirtyMinutesAgo = timestamp - 30 * 60 * 1000;
-        return newMetrics.filter((m) => m.timestamp > thirtyMinutesAgo);
+        return newMetrics.filter(m => m.timestamp > thirtyMinutesAgo);
       });
     };
 
@@ -107,29 +107,13 @@ export function RealTimeMetrics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
-                tickFormatter={(timestamp) =>
-                  new Date(timestamp).toLocaleTimeString()
-                }
+                tickFormatter={timestamp => new Date(timestamp).toLocaleTimeString()}
               />
               <YAxis />
-              <Tooltip
-                labelFormatter={(timestamp) =>
-                  new Date(timestamp).toLocaleString()
-                }
-              />
+              <Tooltip labelFormatter={timestamp => new Date(timestamp).toLocaleString()} />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="count"
-                stroke="#8884d8"
-                name="Messages"
-              />
-              <Line
-                type="monotone"
-                dataKey="sentiment"
-                stroke="#82ca9d"
-                name="Sentiment"
-              />
+              <Line type="monotone" dataKey="count" stroke="#8884d8" name="Messages" />
+              <Line type="monotone" dataKey="sentiment" stroke="#82ca9d" name="Sentiment" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -143,35 +127,14 @@ export function RealTimeMetrics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
-                tickFormatter={(timestamp) =>
-                  new Date(timestamp).toLocaleTimeString()
-                }
+                tickFormatter={timestamp => new Date(timestamp).toLocaleTimeString()}
               />
               <YAxis />
-              <Tooltip
-                labelFormatter={(timestamp) =>
-                  new Date(timestamp).toLocaleString()
-                }
-              />
+              <Tooltip labelFormatter={timestamp => new Date(timestamp).toLocaleString()} />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="high"
-                stroke="#ef4444"
-                name="High Priority"
-              />
-              <Line
-                type="monotone"
-                dataKey="medium"
-                stroke="#f59e0b"
-                name="Medium Priority"
-              />
-              <Line
-                type="monotone"
-                dataKey="low"
-                stroke="#10b981"
-                name="Low Priority"
-              />
+              <Line type="monotone" dataKey="high" stroke="#ef4444" name="High Priority" />
+              <Line type="monotone" dataKey="medium" stroke="#f59e0b" name="Medium Priority" />
+              <Line type="monotone" dataKey="low" stroke="#10b981" name="Low Priority" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -196,16 +159,12 @@ export function RealTimeMetrics() {
         <div className="flex items-center justify-center h-32">
           <div className="flex items-center space-x-2">
             <div
-              className={`w-3 h-3 rounded-full ${
-                isConnected ? 'bg-green-500' : 'bg-red-500'
-              }`}
+              className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
             />
-            <span className="text-lg">
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </span>
+            <span className="text-lg">{isConnected ? 'Connected' : 'Disconnected'}</span>
           </div>
         </div>
       </div>
     </motion.div>
   );
-} 
+}

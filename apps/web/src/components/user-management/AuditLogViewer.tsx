@@ -70,12 +70,12 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
         <Input
           placeholder="Search logs..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
         <Select
           value={actionFilter}
-          onChange={(e) => setActionFilter(e.target.value as AuditAction | 'all')}
+          onChange={e => setActionFilter(e.target.value as AuditAction | 'all')}
         >
           <option value="all">All Actions</option>
           <option value="create">Create</option>
@@ -87,16 +87,12 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
         <Input
           type="date"
           value={dateRange.start}
-          onChange={(e) =>
-            setDateRange((prev) => ({ ...prev, start: e.target.value }))
-          }
+          onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))}
         />
         <Input
           type="date"
           value={dateRange.end}
-          onChange={(e) =>
-            setDateRange((prev) => ({ ...prev, end: e.target.value }))
-          }
+          onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))}
         />
       </div>
 
@@ -111,14 +107,12 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
           </tr>
         </thead>
         <tbody>
-          {logs.map((log) => (
+          {logs.map(log => (
             <tr key={log.id}>
               <td>{format(new Date(log.timestamp), 'MMM d, yyyy HH:mm:ss')}</td>
               <td>{log.user.name}</td>
               <td>
-                <span className={getActionColor(log.action)}>
-                  {log.action}
-                </span>
+                <span className={getActionColor(log.action)}>{log.action}</span>
               </td>
               <td>{log.resource}</td>
               <td>
@@ -138,14 +132,14 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((p) => p + 1)}
+            onClick={() => setCurrentPage(p => p + 1)}
             disabled={logs.length < itemsPerPage}
           >
             Next
@@ -154,4 +148,4 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
       </div>
     </div>
   );
-}; 
+};

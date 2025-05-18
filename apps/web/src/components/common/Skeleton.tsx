@@ -17,7 +17,7 @@ export function Skeleton({
   width,
 }: SkeletonProps) {
   const baseClasses = 'bg-gray-200';
-  
+
   const variantClasses = {
     text: 'rounded',
     circular: 'rounded-full',
@@ -75,11 +75,7 @@ interface SkeletonAvatarProps extends Omit<SkeletonProps, 'variant'> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function SkeletonAvatar({
-  size = 'md',
-  className = '',
-  ...props
-}: SkeletonAvatarProps) {
+export function SkeletonAvatar({ size = 'md', className = '', ...props }: SkeletonAvatarProps) {
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
@@ -87,13 +83,7 @@ export function SkeletonAvatar({
     xl: 'h-14 w-14',
   };
 
-  return (
-    <Skeleton
-      variant="circular"
-      className={`${sizeClasses[size]} ${className}`}
-      {...props}
-    />
-  );
+  return <Skeleton variant="circular" className={`${sizeClasses[size]} ${className}`} {...props} />;
 }
 
 interface SkeletonImageProps extends Omit<SkeletonProps, 'variant'> {
@@ -127,11 +117,7 @@ interface SkeletonGroupProps {
 }
 
 export function SkeletonGroup({ children, className = '' }: SkeletonGroupProps) {
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`space-y-4 ${className}`}>{children}</div>;
 }
 
 interface SkeletonStackProps {
@@ -140,9 +126,5 @@ interface SkeletonStackProps {
 }
 
 export function SkeletonStack({ children, className = '' }: SkeletonStackProps) {
-  return (
-    <div className={`flex flex-col space-y-4 ${className}`}>
-      {children}
-    </div>
-  );
-} 
+  return <div className={`flex flex-col space-y-4 ${className}`}>{children}</div>;
+}

@@ -114,4 +114,4 @@ export function ConfirmModal({
       <p className="text-sm text-gray-500">{message}</p>
     </Modal>
   );
-} 
+}

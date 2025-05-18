@@ -31,10 +31,8 @@ export const useUsers = (filters: UserFilters = {}) => {
   const updateUser = async (userId: string, data: Partial<User>) => {
     try {
       const response = await api.patch<User>(`/api/users/${userId}`, data);
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId ? { ...user, ...response.data } : user
-        )
+      setUsers(prevUsers =>
+        prevUsers.map(user => (user.id === userId ? { ...user, ...response.data } : user))
       );
       return response.data;
     } catch (err) {
@@ -45,8 +43,8 @@ export const useUsers = (filters: UserFilters = {}) => {
   const deleteUser = async (userId: string) => {
     try {
       await api.delete(`/api/users/${userId}`);
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-      setTotalUsers((prev) => prev - 1);
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+      setTotalUsers(prev => prev - 1);
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to delete user');
     }
@@ -69,4 +67,4 @@ export const useUsers = (filters: UserFilters = {}) => {
     deleteUser,
     resetPassword,
   };
-}; 
+};

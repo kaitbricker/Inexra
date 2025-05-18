@@ -11,7 +11,7 @@ interface EmailTemplate {
 }
 
 const templates: Record<string, (user: User) => EmailTemplate> = {
-  welcome: (user) => ({
+  welcome: user => ({
     subject: `Welcome to Inexra, ${user.name}!`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -37,7 +37,7 @@ const templates: Record<string, (user: User) => EmailTemplate> = {
     text: `Welcome to Inexra, ${user.name}!\n\nThank you for joining Inexra! We're excited to have you on board.\n\nGet started by visiting your dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
   }),
 
-  onboarding: (user) => ({
+  onboarding: user => ({
     subject: 'Complete Your Inexra Onboarding',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -61,7 +61,7 @@ const templates: Record<string, (user: User) => EmailTemplate> = {
     text: `Complete Your Inexra Onboarding\n\nHi ${user.name},\n\nWe noticed you haven't completed your onboarding yet. Complete it now: ${process.env.NEXT_PUBLIC_APP_URL}/onboarding`,
   }),
 
-  featureUpdate: (user) => ({
+  featureUpdate: user => ({
     subject: 'New Features Available in Inexra',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -89,7 +89,7 @@ const templates: Record<string, (user: User) => EmailTemplate> = {
 export async function sendEmail(user: User, template: keyof typeof templates) {
   try {
     const { subject, html, text } = templates[template](user);
-    
+
     const msg = {
       to: user.email,
       from: process.env.SENDGRID_FROM_EMAIL!,
@@ -116,4 +116,4 @@ export async function sendOnboardingReminder(user: User) {
 
 export async function sendFeatureUpdate(user: User) {
   return sendEmail(user, 'featureUpdate');
-} 
+}

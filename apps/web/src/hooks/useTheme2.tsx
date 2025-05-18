@@ -33,8 +33,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
     const root = window.document.documentElement;
     const isDarkMode =
       theme === 'dark' ||
-      (theme === 'system' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
+      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     setIsDark(isDarkMode);
     root.classList.toggle('dark', isDarkMode);
@@ -146,4 +145,4 @@ export function ThemeToggle(): JSX.Element {
       </button>
     </div>
   );
-} 
+}

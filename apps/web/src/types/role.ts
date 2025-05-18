@@ -44,4 +44,4 @@ export interface RoleResponse {
   totalRoles: number;
   currentPage: number;
   totalPages: number;
-} 
+}

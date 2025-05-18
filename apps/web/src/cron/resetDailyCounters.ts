@@ -11,4 +11,4 @@ export async function resetDailyCounters() {
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

@@ -214,13 +214,13 @@ export function Dashboard({
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div className="flex flex-wrap items-center gap-4">
-            {filters?.map((filter) => (
+            {filters?.map(filter => (
               <Select
                 key={filter.label}
                 label={filter.label}
                 options={filter.options}
                 value={filter.value}
-                onChange={(e) => filter.onChange(e.target.value)}
+                onChange={e => filter.onChange(e.target.value)}
                 className="w-40"
               />
             ))}
@@ -260,8 +260,8 @@ export function Dashboard({
                       metric.trend === 'up'
                         ? 'text-green-600 dark:text-green-400'
                         : metric.trend === 'down'
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-gray-500 dark:text-gray-400'
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
                     {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'}
@@ -286,13 +286,7 @@ interface MetricCardProps {
   isLoading?: boolean;
 }
 
-export function MetricCard({
-  label,
-  value,
-  change,
-  trend,
-  isLoading = false,
-}: MetricCardProps) {
+export function MetricCard({ label, value, change, trend, isLoading = false }: MetricCardProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -315,8 +309,8 @@ export function MetricCard({
               trend === 'up'
                 ? 'text-green-600 dark:text-green-400'
                 : trend === 'down'
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-gray-500 dark:text-gray-400'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-gray-500 dark:text-gray-400'
             }`}
           >
             {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
@@ -335,12 +329,7 @@ interface ChartCardProps {
   error?: string;
 }
 
-export function ChartCard({
-  title,
-  children,
-  isLoading = false,
-  error,
-}: ChartCardProps) {
+export function ChartCard({ title, children, isLoading = false, error }: ChartCardProps) {
   return (
     <Card title={title}>
       {isLoading ? (
@@ -364,4 +353,4 @@ export function ChartCard({
       )}
     </Card>
   );
-} 
+}

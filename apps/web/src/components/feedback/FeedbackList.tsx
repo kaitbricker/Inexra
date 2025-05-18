@@ -24,9 +24,7 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
   const { isDark } = useTheme();
   const [filter, setFilter] = useState<string>('all');
 
-  const filteredFeedback = feedback.filter(
-    (item) => filter === 'all' || item.type === filter
-  );
+  const filteredFeedback = feedback.filter(item => filter === 'all' || item.type === filter);
 
   return (
     <div className="space-y-4">
@@ -34,7 +32,7 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
         <h2 className="text-xl font-semibold">User Feedback</h2>
         <select
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={e => setFilter(e.target.value)}
           className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
         >
           <option value="all">All Types</option>
@@ -46,7 +44,7 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
       </div>
 
       <AnimatePresence>
-        {filteredFeedback.map((item) => (
+        {filteredFeedback.map(item => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
@@ -59,9 +57,7 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
                 <div className="flex items-center space-x-2">
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${
-                      isDark
-                        ? 'bg-blue-900 text-blue-200'
-                        : 'bg-blue-100 text-blue-800'
+                      isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'
                     }`}
                   >
                     {item.type}
@@ -80,7 +76,7 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
               </div>
               {onStatusChange && (
                 <select
-                  onChange={(e) => onStatusChange(item.id, e.target.value)}
+                  onChange={e => onStatusChange(item.id, e.target.value)}
                   className="px-2 py-1 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                 >
                   <option value="new">New</option>
@@ -95,10 +91,8 @@ export function FeedbackList({ feedback, onStatusChange }: FeedbackListProps) {
       </AnimatePresence>
 
       {filteredFeedback.length === 0 && (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          No feedback found
-        </div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">No feedback found</div>
       )}
     </div>
   );
-} 
+}

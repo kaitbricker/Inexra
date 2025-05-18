@@ -8,9 +8,9 @@ interface ReferralReward {
 }
 
 export class ReferralService {
-  private static readonly BASE_REWARD = 10.00;
+  private static readonly BASE_REWARD = 10.0;
   private static readonly BONUS_THRESHOLD = 5;
-  private static readonly BONUS_AMOUNT = 5.00;
+  private static readonly BONUS_AMOUNT = 5.0;
 
   static async processReferral(referralId: string): Promise<void> {
     const referral = await prisma.referral.findUnique({
@@ -138,4 +138,4 @@ export class ReferralService {
       totalRewards: totalRewards._sum.reward || 0,
     };
   }
-} 
+}

@@ -69,12 +69,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         <Input
           placeholder="Search users..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
         <Select
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
+          onChange={e => setRoleFilter(e.target.value as UserRole | 'all')}
         >
           <option value="all">All Roles</option>
           <option value="admin">Admin</option>
@@ -83,7 +83,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </Select>
         <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as UserStatus | 'all')}
+          onChange={e => setStatusFilter(e.target.value as UserStatus | 'all')}
         >
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
@@ -104,40 +104,24 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {users.map(user => (
             <TableRow key={user.id}>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
               <TableCell>
-                <Badge className={getStatusColor(user.status)}>
-                  {user.status}
-                </Badge>
+                <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
               </TableCell>
-              <TableCell>
-                {format(new Date(user.createdAt), 'MMM d, yyyy')}
-              </TableCell>
+              <TableCell>{format(new Date(user.createdAt), 'MMM d, yyyy')}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditUser(user.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => onEditUser(user.id)}>
                     Edit
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onResetPassword(user.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => onResetPassword(user.id)}>
                     Reset Password
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onDeleteUser(user.id)}
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => onDeleteUser(user.id)}>
                     Delete
                   </Button>
                 </div>
@@ -154,14 +138,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((p) => p + 1)}
+            onClick={() => setCurrentPage(p => p + 1)}
             disabled={users.length < itemsPerPage}
           >
             Next
@@ -170,4 +154,4 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
       </div>
     </div>
   );
-}; 
+};

@@ -58,9 +58,10 @@ export const securityConfig = {
 
   // CORS Configuration
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.NEXT_PUBLIC_APP_URL]
-      : ['http://localhost:3000'],
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? [process.env.NEXT_PUBLIC_APP_URL]
+        : ['http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
     credentials: true,
@@ -83,7 +84,9 @@ export const securityConfig = {
       connect-src 'self' https://sentry.io;
       frame-ancestors 'none';
       form-action 'self';
-    `.replace(/\s+/g, ' ').trim(),
+    `
+      .replace(/\s+/g, ' ')
+      .trim(),
   },
 
   // Session Configuration
@@ -118,4 +121,4 @@ export const securityConfig = {
     sensitiveFields: ['password', 'token', 'secret'],
     excludedPaths: ['/health', '/metrics'],
   },
-}; 
+};

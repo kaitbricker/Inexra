@@ -26,14 +26,14 @@ class RedisManager {
       }
 
       this.client = new Redis(redisUrl, {
-        retryStrategy: (times) => {
+        retryStrategy: times => {
           const delay = Math.min(times * 50, 2000);
           return delay;
         },
         maxRetriesPerRequest: 3,
       });
 
-      this.client.on('error', (error) => {
+      this.client.on('error', error => {
         logger.error('Redis connection error:', error);
       });
 
@@ -106,11 +106,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
   return JSON.parse(data);
 }
 
-export async function setCache<T>(
-  key: string,
-  value: T,
-  expirySeconds = 3600
-): Promise<void> {
+export async function setCache<T>(key: string, value: T, expirySeconds = 3600): Promise<void> {
   await redis.set(key, JSON.stringify(value), 'EX', expirySeconds);
 }
 
@@ -150,4 +146,4 @@ export function withCache(handler: any, options = { expirySeconds: 3600 }) {
 
     return handler(req, res);
   };
-} 
+}

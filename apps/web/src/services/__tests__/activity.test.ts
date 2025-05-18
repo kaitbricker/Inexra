@@ -107,4 +107,4 @@ describe('ActivityService', () => {
       expect(result[1].points).toBe(50);
     });
   });
-}); 
+});

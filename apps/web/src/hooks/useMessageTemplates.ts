@@ -55,7 +55,7 @@ export function useMessageTemplates() {
         }
 
         const savedTemplate = await response.json();
-        setTemplates((prev) => [...prev, savedTemplate]);
+        setTemplates(prev => [...prev, savedTemplate]);
 
         // Notify other users about the new template
         socket?.emit('template:created', savedTemplate);
@@ -84,9 +84,7 @@ export function useMessageTemplates() {
         }
 
         const updatedTemplate = await response.json();
-        setTemplates((prev) =>
-          prev.map((t) => (t.id === template.id ? updatedTemplate : t))
-        );
+        setTemplates(prev => prev.map(t => (t.id === template.id ? updatedTemplate : t)));
 
         // Notify other users about the template update
         socket?.emit('template:updated', updatedTemplate);
@@ -110,7 +108,7 @@ export function useMessageTemplates() {
           throw new Error('Failed to delete template');
         }
 
-        setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+        setTemplates(prev => prev.filter(t => t.id !== templateId));
 
         // Notify other users about the template deletion
         socket?.emit('template:deleted', templateId);
@@ -141,9 +139,7 @@ export function useMessageTemplates() {
         const data = await response.json();
         setSuggestedTemplates(data.templates);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to get suggested templates'
-        );
+        setError(err instanceof Error ? err.message : 'Failed to get suggested templates');
       }
     },
     []
@@ -154,17 +150,15 @@ export function useMessageTemplates() {
     if (!socket) return;
 
     const handleTemplateCreated = (template: Template) => {
-      setTemplates((prev) => [...prev, template]);
+      setTemplates(prev => [...prev, template]);
     };
 
     const handleTemplateUpdated = (template: Template) => {
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === template.id ? template : t))
-      );
+      setTemplates(prev => prev.map(t => (t.id === template.id ? template : t)));
     };
 
     const handleTemplateDeleted = (templateId: string) => {
-      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      setTemplates(prev => prev.filter(t => t.id !== templateId));
     };
 
     socket.on('template:created', handleTemplateCreated);
@@ -188,4 +182,4 @@ export function useMessageTemplates() {
     deleteTemplate,
     getSuggestedTemplates,
   };
-} 
+}

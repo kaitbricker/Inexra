@@ -45,4 +45,4 @@ export const useWebSocket = () => {
     send,
     connected: wsService.listenerCount('connected') > 0,
   };
-}; 
+};

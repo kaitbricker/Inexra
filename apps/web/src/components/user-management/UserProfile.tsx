@@ -25,11 +25,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
     marketing: false,
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +68,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
                 variant="outline"
                 size="sm"
                 className="absolute bottom-0 right-0"
-                onClick={() => {/* Handle image upload */}}
+                onClick={() => {
+                  /* Handle image upload */
+                }}
               >
                 Change
               </Button>
@@ -79,15 +79,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
           <div>
             <h1 className="text-2xl font-bold">{user.name}</h1>
             <p className="text-gray-600">{user.email}</p>
-            <Badge className={getStatusColor(user.status)}>
-              {user.status}
-            </Badge>
+            <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
           </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setIsEditing(!isEditing)}
-        >
+        <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
           {isEditing ? 'Cancel' : 'Edit Profile'}
         </Button>
       </div>
@@ -132,9 +127,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
               <label className="text-sm font-medium">Email Notifications</label>
               <Switch
                 checked={notifications.email}
-                onCheckedChange={(checked) =>
-                  setNotifications((prev) => ({ ...prev, email: checked }))
-                }
+                onCheckedChange={checked => setNotifications(prev => ({ ...prev, email: checked }))}
                 disabled={!isEditing}
               />
             </div>
@@ -142,9 +135,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
               <label className="text-sm font-medium">Push Notifications</label>
               <Switch
                 checked={notifications.push}
-                onCheckedChange={(checked) =>
-                  setNotifications((prev) => ({ ...prev, push: checked }))
-                }
+                onCheckedChange={checked => setNotifications(prev => ({ ...prev, push: checked }))}
                 disabled={!isEditing}
               />
             </div>
@@ -152,8 +143,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
               <label className="text-sm font-medium">Marketing Emails</label>
               <Switch
                 checked={notifications.marketing}
-                onCheckedChange={(checked) =>
-                  setNotifications((prev) => ({ ...prev, marketing: checked }))
+                onCheckedChange={checked =>
+                  setNotifications(prev => ({ ...prev, marketing: checked }))
                 }
                 disabled={!isEditing}
               />
@@ -163,11 +154,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
 
         {isEditing && (
           <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsEditing(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
             <Button type="submit">Save Changes</Button>
@@ -176,4 +163,4 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave }) => {
       </form>
     </div>
   );
-}; 
+};

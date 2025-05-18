@@ -44,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1">
-            {navigation.map((item) => {
+            {navigation.map(item => {
               const isActive = router.pathname === item.href;
               return (
                 <Link
@@ -58,7 +58,9 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 ${
-                      isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
+                      isActive
+                        ? 'text-gray-900 dark:text-white'
+                        : 'text-gray-400 dark:text-gray-500'
                     }`}
                   />
                   {item.name}
@@ -108,11 +110,9 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         <main className="py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">{children}</div>
         </main>
       </div>
     </div>
   );
-} 
+}

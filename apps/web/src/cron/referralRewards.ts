@@ -98,4 +98,4 @@ async function sendReferralReminders() {
   } catch (error) {
     console.error('Error sending referral reminders:', error);
   }
-} 
+}

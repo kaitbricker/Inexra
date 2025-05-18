@@ -13,4 +13,4 @@ const RoleList: React.FC = () => {
   );
 };
 
-export default RoleList; 
+export default RoleList;

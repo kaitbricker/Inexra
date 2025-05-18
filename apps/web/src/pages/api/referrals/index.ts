@@ -3,10 +3,7 @@ import { getSession } from 'next-auth/react';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rateLimit';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -76,4 +73,4 @@ export default async function handler(
     console.error('Error handling referral request:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-} 
+}

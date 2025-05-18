@@ -55,7 +55,7 @@ export const referralTemplates = {
   }),
 
   referralReminder: (user: User) => ({
-    subject: '📢 Don\'t forget to claim your referral rewards!',
+    subject: "📢 Don't forget to claim your referral rewards!",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #4F46E5;">Claim Your Rewards</h1>
@@ -71,4 +71,4 @@ export const referralTemplates = {
       </div>
     `,
   }),
-}; 
+};

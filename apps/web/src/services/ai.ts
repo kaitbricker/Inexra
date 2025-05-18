@@ -119,10 +119,7 @@ export class AIService {
     }
   }
 
-  async calculateLeadScore(
-    conversationId: string,
-    messages: any[]
-  ): Promise<LeadScore> {
+  async calculateLeadScore(conversationId: string, messages: any[]): Promise<LeadScore> {
     const start = Date.now();
     try {
       // Calculate engagement score based on message frequency
@@ -139,18 +136,12 @@ export class AIService {
       const responseTimeScore = Math.max(1 - avgResponseTime / (24 * 60 * 60 * 1000), 0);
 
       // Calculate average sentiment
-      const sentiments = await Promise.all(
-        messages.map(msg => this.analyzeSentiment(msg.content))
-      );
+      const sentiments = await Promise.all(messages.map(msg => this.analyzeSentiment(msg.content)));
       const avgSentiment = sentiments.reduce((a, b) => a + b.score, 0) / sentiments.length;
       const sentimentScore = (avgSentiment + 1) / 2; // Normalize to 0-1
 
       // Calculate final lead score
-      const score = (
-        sentimentScore * 0.4 +
-        engagementScore * 0.3 +
-        responseTimeScore * 0.3
-      );
+      const score = sentimentScore * 0.4 + engagementScore * 0.3 + responseTimeScore * 0.3;
 
       const leadScore: LeadScore = {
         score,
@@ -224,4 +215,4 @@ export class AIService {
       throw error;
     }
   }
-} 
+}

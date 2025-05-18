@@ -32,4 +32,4 @@ export async function rateLimit(req: NextApiRequest, res: NextApiResponse) {
     }
     throw error;
   }
-} 
+}

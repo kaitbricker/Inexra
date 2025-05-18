@@ -9,4 +9,4 @@ const NotificationPreferences: React.FC = () => {
   );
 };
 
-export default NotificationPreferences; 
+export default NotificationPreferences;

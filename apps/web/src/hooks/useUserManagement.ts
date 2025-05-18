@@ -46,11 +46,9 @@ const useUserManagement = (): UseUserManagementReturn => {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    const unsubscribe = subscribe('user:update', (data) => {
-      setUsers((currentUsers) =>
-        currentUsers.map((user) =>
-          user.id === data.id ? { ...user, ...data } : user
-        )
+    const unsubscribe = subscribe('user:update', data => {
+      setUsers(currentUsers =>
+        currentUsers.map(user => (user.id === data.id ? { ...user, ...data } : user))
       );
     });
 
@@ -59,25 +57,28 @@ const useUserManagement = (): UseUserManagementReturn => {
     };
   }, [subscribe]);
 
-  const fetchUsers = useCallback(async (params?: { page?: number; limit?: number; search?: string }) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await userApi.getUsers(params);
-      setUsers(response.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchUsers = useCallback(
+    async (params?: { page?: number; limit?: number; search?: string }) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await userApi.getUsers(params);
+        setUsers(response.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch users');
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const createUser = useCallback(async (data: Partial<User>) => {
     try {
       setLoading(true);
       setError(null);
       const response = await userApi.createUser(data);
-      setUsers((currentUsers) => [...currentUsers, response.data]);
+      setUsers(currentUsers => [...currentUsers, response.data]);
       return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
@@ -92,8 +93,8 @@ const useUserManagement = (): UseUserManagementReturn => {
       setLoading(true);
       setError(null);
       const response = await userApi.updateUser(id, data);
-      setUsers((currentUsers) =>
-        currentUsers.map((user) => (user.id === id ? { ...user, ...response.data } : user))
+      setUsers(currentUsers =>
+        currentUsers.map(user => (user.id === id ? { ...user, ...response.data } : user))
       );
       return response.data;
     } catch (err) {
@@ -109,7 +110,7 @@ const useUserManagement = (): UseUserManagementReturn => {
       setLoading(true);
       setError(null);
       await userApi.deleteUser(id);
-      setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
+      setUsers(currentUsers => currentUsers.filter(user => user.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete user');
       throw err;
@@ -188,4 +189,4 @@ const useUserManagement = (): UseUserManagementReturn => {
   };
 };
 
-export default useUserManagement; 
+export default useUserManagement;

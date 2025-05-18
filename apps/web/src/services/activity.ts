@@ -162,4 +162,4 @@ export class ActivityService {
       throw error;
     }
   }
-} 
+}

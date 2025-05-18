@@ -16,18 +16,12 @@ interface TemplateEditorProps {
   onSave: (templateId: string, updates: Partial<Template>) => Promise<void>;
 }
 
-export const TemplateEditor: React.FC<TemplateEditorProps> = ({
-  template,
-  onClose,
-  onSave,
-}) => {
+export const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onClose, onSave }) => {
   const [name, setName] = useState(template?.name || '');
   const [content, setContent] = useState(template?.content || '');
   const [category, setCategory] = useState(template?.category || 'custom');
   const [tags, setTags] = useState<string[]>(template?.tags || []);
-  const [variables, setVariables] = useState<Record<string, any>>(
-    template?.variables || {}
-  );
+  const [variables, setVariables] = useState<Record<string, any>>(template?.variables || {});
   const [newTag, setNewTag] = useState('');
   const [newVariable, setNewVariable] = useState({
     name: '',
@@ -107,13 +101,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
         className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
       >
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            {template ? 'Edit Template' : 'New Template'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="btn btn-ghost btn-sm"
-          >
+          <h2 className="text-xl font-semibold">{template ? 'Edit Template' : 'New Template'}</h2>
+          <button onClick={onClose} className="btn btn-ghost btn-sm">
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -126,7 +115,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 className="input input-bordered w-full"
                 placeholder="Template name"
               />
@@ -136,7 +125,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <label className="label">Category</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={e => setCategory(e.target.value)}
                 className="select select-bordered w-full"
               >
                 <option value="sales">Sales</option>
@@ -150,16 +139,10 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
             <div>
               <label className="label">Tags</label>
               <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="badge badge-primary"
-                  >
+                {tags.map(tag => (
+                  <span key={tag} className="badge badge-primary">
                     {tag}
-                    <button
-                      onClick={() => setTags(tags.filter((t) => t !== tag))}
-                      className="ml-1"
-                    >
+                    <button onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-1">
                       ×
                     </button>
                   </span>
@@ -169,14 +152,11 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                 <input
                   type="text"
                   value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
+                  onChange={e => setNewTag(e.target.value)}
                   className="input input-bordered flex-1"
                   placeholder="Add tag"
                 />
-                <button
-                  onClick={handleAddTag}
-                  className="btn btn-primary"
-                >
+                <button onClick={handleAddTag} className="btn btn-primary">
                   <PlusIcon className="h-5 w-5" />
                 </button>
               </div>
@@ -187,16 +167,11 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <label className="label">Variables</label>
               <div className="space-y-2 mb-2">
                 {Object.entries(variables).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center space-x-2 p-2 bg-gray-50 rounded"
-                  >
+                  <div key={key} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
                     <VariableIcon className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">{key}</span>
                     <span className="text-sm text-gray-500">({value.type})</span>
-                    {value.required && (
-                      <span className="text-xs text-red-500">Required</span>
-                    )}
+                    {value.required && <span className="text-xs text-red-500">Required</span>}
                     <button
                       onClick={() => {
                         const { [key]: _, ...rest } = variables;
@@ -213,13 +188,13 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                 <input
                   type="text"
                   value={newVariable.name}
-                  onChange={(e) => setNewVariable({ ...newVariable, name: e.target.value })}
+                  onChange={e => setNewVariable({ ...newVariable, name: e.target.value })}
                   className="input input-bordered"
                   placeholder="Variable name"
                 />
                 <select
                   value={newVariable.type}
-                  onChange={(e) => setNewVariable({ ...newVariable, type: e.target.value })}
+                  onChange={e => setNewVariable({ ...newVariable, type: e.target.value })}
                   className="select select-bordered"
                 >
                   <option value="text">Text</option>
@@ -231,7 +206,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                   <input
                     type="checkbox"
                     checked={newVariable.required}
-                    onChange={(e) => setNewVariable({ ...newVariable, required: e.target.checked })}
+                    onChange={e => setNewVariable({ ...newVariable, required: e.target.checked })}
                     className="checkbox"
                   />
                   <span className="text-sm">Required</span>
@@ -239,14 +214,11 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                 <input
                   type="text"
                   value={newVariable.defaultValue}
-                  onChange={(e) => setNewVariable({ ...newVariable, defaultValue: e.target.value })}
+                  onChange={e => setNewVariable({ ...newVariable, defaultValue: e.target.value })}
                   className="input input-bordered"
                   placeholder="Default value"
                 />
-                <button
-                  onClick={handleAddVariable}
-                  className="btn btn-primary col-span-2"
-                >
+                <button onClick={handleAddVariable} className="btn btn-primary col-span-2">
                   <PlusIcon className="h-5 w-5 mr-2" />
                   Add Variable
                 </button>
@@ -258,16 +230,32 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <label className="label">Content</label>
               <Editor
                 value={content}
-                onEditorChange={(newContent) => setContent(newContent)}
+                onEditorChange={newContent => setContent(newContent)}
                 init={{
                   height: 300,
                   menubar: false,
                   plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                    'advlist',
+                    'autolink',
+                    'lists',
+                    'link',
+                    'image',
+                    'charmap',
+                    'preview',
+                    'anchor',
+                    'searchreplace',
+                    'visualblocks',
+                    'code',
+                    'fullscreen',
+                    'insertdatetime',
+                    'media',
+                    'table',
+                    'code',
+                    'help',
+                    'wordcount',
                   ],
-                  toolbar: 'undo redo | blocks | ' +
+                  toolbar:
+                    'undo redo | blocks | ' +
                     'bold italic forecolor | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
                     'removeformat | help',
@@ -286,20 +274,14 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
         </div>
 
         <div className="p-4 border-t flex justify-end space-x-2">
-          <button
-            onClick={onClose}
-            className="btn btn-ghost"
-          >
+          <button onClick={onClose} className="btn btn-ghost">
             Cancel
           </button>
-          <button
-            onClick={handleSave}
-            className="btn btn-primary"
-          >
+          <button onClick={handleSave} className="btn btn-primary">
             Save Template
           </button>
         </div>
       </motion.div>
     </motion.div>
   );
-}; 
+};

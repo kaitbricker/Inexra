@@ -10,9 +10,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeProvider>
-      <LogRocketProvider>
-        {children}
-      </LogRocketProvider>
+      <LogRocketProvider>{children}</LogRocketProvider>
     </ThemeProvider>
   );
-} 
+}

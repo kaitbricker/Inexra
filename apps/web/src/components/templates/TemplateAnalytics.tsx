@@ -60,22 +60,25 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
     .slice(0, 5);
 
   // Get category performance
-  const categoryPerformance = Object.entries(analytics).reduce((acc, [, data]) => {
-    const category = data.categoryStats?.category || 'uncategorized';
-    if (!acc[category]) {
-      acc[category] = {
-        usageCount: 0,
-        avgResponseTime: 0,
-        engagementRate: 0,
-        conversionRate: 0,
-      };
-    }
-    acc[category].usageCount += data.usageCount || 0;
-    acc[category].avgResponseTime += data.avgResponseTime || 0;
-    acc[category].engagementRate += data.engagementRate || 0;
-    acc[category].conversionRate += data.conversionRate || 0;
-    return acc;
-  }, {} as Record<string, any>);
+  const categoryPerformance = Object.entries(analytics).reduce(
+    (acc, [, data]) => {
+      const category = data.categoryStats?.category || 'uncategorized';
+      if (!acc[category]) {
+        acc[category] = {
+          usageCount: 0,
+          avgResponseTime: 0,
+          engagementRate: 0,
+          conversionRate: 0,
+        };
+      }
+      acc[category].usageCount += data.usageCount || 0;
+      acc[category].avgResponseTime += data.avgResponseTime || 0;
+      acc[category].engagementRate += data.engagementRate || 0;
+      acc[category].conversionRate += data.conversionRate || 0;
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 
   return (
     <motion.div
@@ -92,10 +95,7 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
       >
         <div className="p-4 border-b flex items-center justify-between">
           <h2 className="text-xl font-semibold">Template Analytics</h2>
-          <button
-            onClick={onClose}
-            className="btn btn-ghost btn-sm"
-          >
+          <button onClick={onClose} className="btn btn-ghost btn-sm">
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -105,7 +105,7 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
           <div className="flex space-x-4 mb-4">
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as 'day' | 'week' | 'month')}
+              onChange={e => setTimeRange(e.target.value as 'day' | 'week' | 'month')}
               className="select select-bordered"
             >
               <option value="day">Last 24 Hours</option>
@@ -114,7 +114,7 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
             </select>
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={e => setSelectedCategory(e.target.value)}
               className="select select-bordered"
             >
               <option value="all">All Categories</option>
@@ -137,12 +137,7 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#8884d8"
-                        name="Usage Count"
-                      />
+                      <Line type="monotone" dataKey="value" stroke="#8884d8" name="Usage Count" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -155,12 +150,14 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
                 <h3 className="card-title">Category Performance</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={Object.entries(categoryPerformance).map(([category, data]) => ({
-                      category,
-                      usageCount: data.usageCount,
-                      engagementRate: data.engagementRate,
-                      conversionRate: data.conversionRate,
-                    }))}>
+                    <BarChart
+                      data={Object.entries(categoryPerformance).map(([category, data]) => ({
+                        category,
+                        usageCount: data.usageCount,
+                        engagementRate: data.engagementRate,
+                        conversionRate: data.conversionRate,
+                      }))}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="category" />
                       <YAxis />
@@ -215,10 +212,12 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
                 <h3 className="card-title">Response Time Distribution</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={Object.entries(analytics).map(([id, data]) => ({
-                      template: data.template?.name,
-                      responseTime: data.avgResponseTime,
-                    }))}>
+                    <BarChart
+                      data={Object.entries(analytics).map(([id, data]) => ({
+                        template: data.template?.name,
+                        responseTime: data.avgResponseTime,
+                      }))}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="template" />
                       <YAxis />
@@ -235,4 +234,4 @@ export const TemplateAnalytics: React.FC<TemplateAnalyticsProps> = ({
       </motion.div>
     </motion.div>
   );
-}; 
+};

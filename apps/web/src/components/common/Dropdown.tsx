@@ -91,12 +91,7 @@ export function Dropdown({
             >
               {items.map((item, index) => {
                 if (item.divider) {
-                  return (
-                    <div
-                      key={`divider-${index}`}
-                      className="border-t border-gray-100 my-1"
-                    />
-                  );
+                  return <div key={`divider-${index}`} className="border-t border-gray-100 my-1" />;
                 }
 
                 return (
@@ -112,9 +107,7 @@ export function Dropdown({
                     disabled={item.disabled}
                   >
                     <div className="flex items-center">
-                      {item.icon && (
-                        <span className="mr-3 h-5 w-5">{item.icon}</span>
-                      )}
+                      {item.icon && <span className="mr-3 h-5 w-5">{item.icon}</span>}
                       {item.label}
                     </div>
                   </button>
@@ -166,12 +159,7 @@ export function DropdownMenu({ children, className = '' }: DropdownMenuProps) {
     <div
       className={`absolute z-50 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 ${className}`}
     >
-      <div
-        className="py-1"
-        role="menu"
-        aria-orientation="vertical"
-        aria-labelledby="options-menu"
-      >
+      <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
         {children}
       </div>
     </div>
@@ -196,13 +184,11 @@ export function DropdownMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={`w-full text-left px-4 py-2 text-sm ${
-        disabled
-          ? 'text-gray-400 cursor-not-allowed'
-          : 'text-gray-700 hover:bg-gray-100'
+        disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'
       } ${className}`}
       role="menuitem"
     >
       {children}
     </button>
   );
-} 
+}

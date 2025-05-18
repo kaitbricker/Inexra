@@ -22,8 +22,8 @@ const activeConnections = new Map<string, Set<string>>();
 const initWebSocket = (res: NextApiResponse) => {
   if (!io) {
     io = new Server(res.socket.server);
-    
-    io.on('connection', (socket) => {
+
+    io.on('connection', socket => {
       const userId = socket.handshake.auth.userId;
       if (!userId) {
         socket.disconnect();
@@ -48,17 +48,14 @@ const initWebSocket = (res: NextApiResponse) => {
   return io;
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Apply rate limiting
-    await new Promise((resolve) => rateLimit(req, res, resolve));
+    await new Promise(resolve => rateLimit(req, res, resolve));
 
     // Validate session and permissions
     const session = await getSession({ req });
@@ -68,7 +65,9 @@ export default async function handler(
 
     // Parse and validate query parameters
     const query = querySchema.parse(req.query);
-    const startDate = query.startDate ? new Date(query.startDate) : new Date(Date.now() - 24 * 60 * 60 * 1000); // Default to last 24 hours
+    const startDate = query.startDate
+      ? new Date(query.startDate)
+      : new Date(Date.now() - 24 * 60 * 60 * 1000); // Default to last 24 hours
     const endDate = query.endDate ? new Date(query.endDate) : new Date();
 
     // Build filter conditions
@@ -81,11 +80,7 @@ export default async function handler(
     };
 
     // Fetch real-time activity data
-    const [
-      onlineUsers,
-      recentLogins,
-      activeSessions,
-    ] = await Promise.all([
+    const [onlineUsers, recentLogins, activeSessions] = await Promise.all([
       // Online users (users with active WebSocket connections)
       prisma.user.findMany({
         where: {
@@ -178,4 +173,4 @@ export const config = {
   api: {
     bodyParser: false,
   },
-}; 
+};

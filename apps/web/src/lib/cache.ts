@@ -161,4 +161,4 @@ class CacheManager {
 export const cacheManager = CacheManager.getInstance();
 
 // Export middleware creator
-export const createCacheMiddleware = CacheManager.createCacheMiddleware; 
+export const createCacheMiddleware = CacheManager.createCacheMiddleware;

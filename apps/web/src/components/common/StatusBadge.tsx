@@ -83,7 +83,7 @@ export function StatusBadgeWithUpdate({ onStatusChange, ...props }: StatusBadgeW
     setIsUpdating(true);
     try {
       // Simulate status change animation
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500));
       onStatusChange(props.status);
     } finally {
       setIsUpdating(false);
@@ -100,4 +100,4 @@ export function StatusBadgeWithUpdate({ onStatusChange, ...props }: StatusBadgeW
       <StatusBadge {...props} />
     </motion.div>
   );
-} 
+}

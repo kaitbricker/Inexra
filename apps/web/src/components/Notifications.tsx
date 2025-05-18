@@ -12,7 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 export default function Notifications() {
   const { notifications, markAsRead, clearAll } = useNotifications();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -54,10 +54,7 @@ export default function Notifications() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium text-gray-900">Notifications</h3>
               {notifications.length > 0 && (
-                <button
-                  onClick={clearAll}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
+                <button onClick={clearAll} className="text-sm text-gray-500 hover:text-gray-700">
                   Clear all
                 </button>
               )}
@@ -66,11 +63,9 @@ export default function Notifications() {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No notifications
-              </div>
+              <div className="p-4 text-center text-gray-500">No notifications</div>
             ) : (
-              notifications.map((notification) => {
+              notifications.map(notification => {
                 const Icon = getIcon(notification.type);
                 return (
                   <Menu.Item key={notification.id}>
@@ -83,19 +78,13 @@ export default function Notifications() {
                         <div className="flex-shrink-0">
                           <Icon
                             className={`h-6 w-6 ${
-                              notification.type === 'error'
-                                ? 'text-red-400'
-                                : 'text-gray-400'
+                              notification.type === 'error' ? 'text-red-400' : 'text-gray-400'
                             }`}
                           />
                         </div>
                         <div className="ml-3 flex-1">
-                          <p className="text-sm font-medium text-gray-900">
-                            {notification.title}
-                          </p>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {notification.message}
-                          </p>
+                          <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                          <p className="mt-1 text-sm text-gray-500">{notification.message}</p>
                           <p className="mt-1 text-xs text-gray-400">
                             {formatDistanceToNow(notification.timestamp, {
                               addSuffix: true,
@@ -121,4 +110,4 @@ export default function Notifications() {
       </Transition>
     </Menu>
   );
-} 
+}

@@ -71,4 +71,4 @@ export interface TemplateApproval {
   metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
-} 
+}

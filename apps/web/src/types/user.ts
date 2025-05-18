@@ -26,4 +26,4 @@ export interface UserResponse {
   totalUsers: number;
   currentPage: number;
   totalPages: number;
-} 
+}

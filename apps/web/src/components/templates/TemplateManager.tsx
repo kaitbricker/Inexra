@@ -56,12 +56,13 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
   useHotkeys('ctrl+shift+a', () => setShowApproval(true));
 
   // Filter templates based on search, category, and tags
-  const filteredTemplates = templates.filter((template) => {
-    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredTemplates = templates.filter(template => {
+    const matchesSearch =
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.content.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
-    const matchesTags = selectedTags.length === 0 ||
-      selectedTags.every((tag) => template.tags.includes(tag));
+    const matchesTags =
+      selectedTags.length === 0 || selectedTags.every(tag => template.tags.includes(tag));
     return matchesSearch && matchesCategory && matchesTags;
   });
 
@@ -105,7 +106,10 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
   };
 
   // Handle analytics update
-  const handleAnalyticsUpdate = async (templateId: string, updates: Partial<TemplateAnalyticsType>) => {
+  const handleAnalyticsUpdate = async (
+    templateId: string,
+    updates: Partial<TemplateAnalyticsType>
+  ) => {
     try {
       await updateAnalytics(templateId, updates);
     } catch (error) {
@@ -123,9 +127,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
 
   if (error) {
     return (
-      <div className="text-red-500 text-center p-4">
-        Error loading templates: {error.message}
-      </div>
+      <div className="text-red-500 text-center p-4">Error loading templates: {error.message}</div>
     );
   }
 
@@ -136,10 +138,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Template Manager</h1>
           <div className="flex space-x-2">
-            <button
-              onClick={() => setShowAnalytics(true)}
-              className="btn btn-primary"
-            >
+            <button onClick={() => setShowAnalytics(true)} className="btn btn-primary">
               <ChartBarIcon className="h-5 w-5 mr-2" />
               Analytics
             </button>
@@ -158,12 +157,12 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
             type="text"
             placeholder="Search templates..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="input input-bordered flex-1"
           />
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={e => setSelectedCategory(e.target.value)}
             className="select select-bordered"
           >
             <option value="all">All Categories</option>
@@ -173,17 +172,17 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
             <option value="custom">Custom</option>
           </select>
           <div className="flex space-x-2">
-            {['urgent', 'follow-up', 'welcome'].map((tag) => (
+            {['urgent', 'follow-up', 'welcome'].map(tag => (
               <button
                 key={tag}
-                onClick={() => setSelectedTags(
-                  selectedTags.includes(tag)
-                    ? selectedTags.filter((t) => t !== tag)
-                    : [...selectedTags, tag]
-                )}
-                className={`btn btn-sm ${
-                  selectedTags.includes(tag) ? 'btn-primary' : 'btn-ghost'
-                }`}
+                onClick={() =>
+                  setSelectedTags(
+                    selectedTags.includes(tag)
+                      ? selectedTags.filter(t => t !== tag)
+                      : [...selectedTags, tag]
+                  )
+                }
+                className={`btn btn-sm ${selectedTags.includes(tag) ? 'btn-primary' : 'btn-ghost'}`}
               >
                 <TagIcon className="h-4 w-4 mr-1" />
                 {tag}
@@ -195,11 +194,13 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-4">
-        <div className={`grid ${
-          view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
-        } gap-4`}>
+        <div
+          className={`grid ${
+            view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+          } gap-4`}
+        >
           <AnimatePresence>
-            {filteredTemplates.map((template) => (
+            {filteredTemplates.map(template => (
               <motion.div
                 key={template.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -231,11 +232,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
                   <p className="text-sm text-gray-600 line-clamp-2">{template.content}</p>
 
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {template.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="badge badge-sm"
-                      >
+                    {template.tags.map(tag => (
+                      <span key={tag} className="badge badge-sm">
                         {tag}
                       </span>
                     ))}
@@ -308,7 +306,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
         <div className="bg-white rounded-lg shadow-lg p-4 w-80">
           <h3 className="text-lg font-semibold mb-2">Suggested Templates</h3>
           <div className="space-y-2">
-            {suggestedTemplates.map((template) => (
+            {suggestedTemplates.map(template => (
               <button
                 key={template.id}
                 onClick={() => handleTemplateSelect(template)}
@@ -323,4 +321,4 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onTemplateSele
       </div>
     </div>
   );
-}; 
+};

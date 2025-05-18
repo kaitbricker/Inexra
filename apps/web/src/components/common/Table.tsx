@@ -32,14 +32,15 @@ export function Table<T>({
   onSelectionChange,
   pagination,
 }: TableProps<T>) {
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(
+    null
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const handleSort = (key: string) => {
-    setSortConfig((current) => ({
+    setSortConfig(current => ({
       key,
-      direction:
-        current?.key === key && current.direction === 'asc' ? 'desc' : 'asc',
+      direction: current?.key === key && current.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
@@ -52,7 +53,7 @@ export function Table<T>({
   const handleSelectRow = (id: string, checked: boolean) => {
     const newSelectedIds = checked
       ? [...selectedIds, id]
-      : selectedIds.filter((selectedId) => selectedId !== id);
+      : selectedIds.filter(selectedId => selectedId !== id);
     setSelectedIds(newSelectedIds);
     onSelectionChange?.(newSelectedIds);
   };
@@ -84,11 +85,11 @@ export function Table<T>({
                   type="checkbox"
                   className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 sm:left-6"
                   checked={selectedIds.length === data.length}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  onChange={e => handleSelectAll(e.target.checked)}
                 />
               </th>
             )}
-            {columns.map((column) => (
+            {columns.map(column => (
               <th
                 key={column.key}
                 scope="col"
@@ -108,7 +109,7 @@ export function Table<T>({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((item) => (
+          {sortedData.map(item => (
             <motion.tr
               key={keyExtractor(item)}
               initial={{ opacity: 0 }}
@@ -123,16 +124,13 @@ export function Table<T>({
                     type="checkbox"
                     className="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 sm:left-6"
                     checked={selectedIds.includes(keyExtractor(item))}
-                    onChange={(e) => handleSelectRow(keyExtractor(item), e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => handleSelectRow(keyExtractor(item), e.target.checked)}
+                    onClick={e => e.stopPropagation()}
                   />
                 </td>
               )}
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                >
+              {columns.map(column => (
+                <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {column.render
                     ? column.render(item)
                     : (item[column.key as keyof T] as React.ReactNode)}
@@ -155,9 +153,7 @@ export function Table<T>({
             </button>
             <button
               onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-              disabled={
-                pagination.currentPage * pagination.pageSize >= pagination.totalItems
-              }
+              disabled={pagination.currentPage * pagination.pageSize >= pagination.totalItems}
               className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Next
@@ -172,10 +168,7 @@ export function Table<T>({
                 </span>{' '}
                 to{' '}
                 <span className="font-medium">
-                  {Math.min(
-                    pagination.currentPage * pagination.pageSize,
-                    pagination.totalItems
-                  )}
+                  {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)}
                 </span>{' '}
                 of <span className="font-medium">{pagination.totalItems}</span> results
               </p>
@@ -207,9 +200,7 @@ export function Table<T>({
                 </button>
                 <button
                   onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-                  disabled={
-                    pagination.currentPage * pagination.pageSize >= pagination.totalItems
-                  }
+                  disabled={pagination.currentPage * pagination.pageSize >= pagination.totalItems}
                   className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >
                   <span className="sr-only">Next</span>
@@ -234,4 +225,4 @@ export function Table<T>({
       )}
     </div>
   );
-} 
+}

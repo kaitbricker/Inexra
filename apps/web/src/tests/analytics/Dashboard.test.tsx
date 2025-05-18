@@ -72,10 +72,10 @@ describe('Dashboard Component', () => {
   it('toggles real-time updates', async () => {
     renderDashboard();
     const toggleButton = screen.getByRole('button', { name: /real-time/i });
-    
+
     expect(toggleButton).toHaveTextContent('Enable Real-time');
     fireEvent.click(toggleButton);
-    
+
     await waitFor(() => {
       expect(toggleButton).toHaveTextContent('Disable Real-time');
     });
@@ -152,11 +152,11 @@ describe('Dashboard Component', () => {
   it('applies dark mode styles', () => {
     renderDashboard();
     const dashboard = screen.getByTestId('dashboard');
-    
+
     // Toggle dark mode
     const themeToggle = screen.getByRole('button', { name: /theme/i });
     fireEvent.click(themeToggle);
 
     expect(dashboard).toHaveClass('dark');
   });
-}); 
+});

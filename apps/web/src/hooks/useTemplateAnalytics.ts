@@ -24,7 +24,7 @@ export const useTemplateAnalytics = ({ initialData = {} }: UseTemplateAnalyticsP
       if (!response.ok) {
         throw new Error('Failed to fetch template analytics');
       }
-      const data = await response.json() as Record<string, TemplateAnalytics>;
+      const data = (await response.json()) as Record<string, TemplateAnalytics>;
       setAnalytics(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An error occurred'));
@@ -48,8 +48,8 @@ export const useTemplateAnalytics = ({ initialData = {} }: UseTemplateAnalyticsP
         throw new Error('Failed to update template analytics');
       }
 
-      const updatedAnalytics = await response.json() as TemplateAnalytics;
-      setAnalytics((prev) => {
+      const updatedAnalytics = (await response.json()) as TemplateAnalytics;
+      setAnalytics(prev => {
         const currentAnalytics = prev[templateId];
         if (!currentAnalytics) {
           return {
@@ -74,29 +74,35 @@ export const useTemplateAnalytics = ({ initialData = {} }: UseTemplateAnalyticsP
 
   const getTopTemplates = (limit = 5): Array<TemplateAnalytics & { id: string }> => {
     return Object.entries(analytics)
-      .sort(([, a], [, b]) => ((b as TemplateAnalytics).usageCount || 0) - ((a as TemplateAnalytics).usageCount || 0))
+      .sort(
+        ([, a], [, b]) =>
+          ((b as TemplateAnalytics).usageCount || 0) - ((a as TemplateAnalytics).usageCount || 0)
+      )
       .slice(0, limit)
       .map(([id, data]) => ({ id, ...data }));
   };
 
   const getCategoryPerformance = (): Record<string, CategoryPerformance> => {
-    return Object.entries(analytics).reduce((acc, [, data]) => {
-      const templateData = data as TemplateAnalytics;
-      const category = templateData.categoryStats?.category || 'uncategorized';
-      if (!acc[category]) {
-        acc[category] = {
-          usageCount: 0,
-          avgResponseTime: 0,
-          engagementRate: 0,
-          conversionRate: 0,
-        };
-      }
-      acc[category].usageCount += templateData.usageCount || 0;
-      acc[category].avgResponseTime += templateData.avgResponseTime || 0;
-      acc[category].engagementRate += templateData.engagementRate || 0;
-      acc[category].conversionRate += templateData.conversionRate || 0;
-      return acc;
-    }, {} as Record<string, CategoryPerformance>);
+    return Object.entries(analytics).reduce(
+      (acc, [, data]) => {
+        const templateData = data as TemplateAnalytics;
+        const category = templateData.categoryStats?.category || 'uncategorized';
+        if (!acc[category]) {
+          acc[category] = {
+            usageCount: 0,
+            avgResponseTime: 0,
+            engagementRate: 0,
+            conversionRate: 0,
+          };
+        }
+        acc[category].usageCount += templateData.usageCount || 0;
+        acc[category].avgResponseTime += templateData.avgResponseTime || 0;
+        acc[category].engagementRate += templateData.engagementRate || 0;
+        acc[category].conversionRate += templateData.conversionRate || 0;
+        return acc;
+      },
+      {} as Record<string, CategoryPerformance>
+    );
   };
 
   interface TimeDataPoint {
@@ -160,4 +166,4 @@ export const useTemplateAnalytics = ({ initialData = {} }: UseTemplateAnalyticsP
     getCategoryPerformance,
     getTimeStats,
   };
-}; 
+};

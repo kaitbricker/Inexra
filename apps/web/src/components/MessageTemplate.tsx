@@ -58,7 +58,7 @@ export default function MessageTemplate({
   const addKeyword = useCallback(
     (keyword: string) => {
       if (!newTemplate.keywords.includes(keyword)) {
-        setNewTemplate((prev) => ({
+        setNewTemplate(prev => ({
           ...prev,
           keywords: [...prev.keywords, keyword],
         }));
@@ -67,15 +67,12 @@ export default function MessageTemplate({
     [newTemplate.keywords]
   );
 
-  const removeKeyword = useCallback(
-    (keyword: string) => {
-      setNewTemplate((prev) => ({
-        ...prev,
-        keywords: prev.keywords.filter((k) => k !== keyword),
-      }));
-    },
-    []
-  );
+  const removeKeyword = useCallback((keyword: string) => {
+    setNewTemplate(prev => ({
+      ...prev,
+      keywords: prev.keywords.filter(k => k !== keyword),
+    }));
+  }, []);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -92,11 +89,9 @@ export default function MessageTemplate({
 
       {suggestedTemplates.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
-            Suggested Templates
-          </h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Suggested Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {suggestedTemplates.map((template) => (
+            {suggestedTemplates.map(template => (
               <motion.div
                 key={template.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -107,7 +102,7 @@ export default function MessageTemplate({
                 <h4 className="font-medium text-gray-900">{template.name}</h4>
                 <p className="text-sm text-gray-500 mt-1">{template.content}</p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {template.keywords.map((keyword) => (
+                  {template.keywords.map(keyword => (
                     <span
                       key={keyword}
                       className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
@@ -131,27 +126,21 @@ export default function MessageTemplate({
         >
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Template Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Template Name</label>
               <input
                 type="text"
                 value={newTemplate.name}
-                onChange={(e) =>
-                  setNewTemplate((prev) => ({ ...prev, name: e.target.value }))
-                }
+                onChange={e => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Content
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Content</label>
               <textarea
                 value={newTemplate.content}
-                onChange={(e) =>
-                  setNewTemplate((prev) => ({
+                onChange={e =>
+                  setNewTemplate(prev => ({
                     ...prev,
                     content: e.target.value,
                   }))
@@ -162,13 +151,11 @@ export default function MessageTemplate({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Category
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Category</label>
               <select
                 value={newTemplate.category}
-                onChange={(e) =>
-                  setNewTemplate((prev) => ({
+                onChange={e =>
+                  setNewTemplate(prev => ({
                     ...prev,
                     category: e.target.value as Template['category'],
                   }))
@@ -183,11 +170,9 @@ export default function MessageTemplate({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Keywords
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Keywords</label>
               <div className="flex flex-wrap gap-2 mt-1">
-                {newTemplate.keywords.map((keyword) => (
+                {newTemplate.keywords.map(keyword => (
                   <span
                     key={keyword}
                     className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
@@ -204,7 +189,7 @@ export default function MessageTemplate({
                 <input
                   type="text"
                   placeholder="Add keyword..."
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter' && e.currentTarget.value) {
                       addKeyword(e.currentTarget.value);
                       e.currentTarget.value = '';
@@ -235,7 +220,7 @@ export default function MessageTemplate({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {templates.map((template) => (
+        {templates.map(template => (
           <motion.div
             key={template.id}
             initial={{ opacity: 0, y: 20 }}
@@ -247,16 +232,12 @@ export default function MessageTemplate({
                 <input
                   type="text"
                   value={template.name}
-                  onChange={(e) =>
-                    handleUpdate({ ...template, name: e.target.value })
-                  }
+                  onChange={e => handleUpdate({ ...template, name: e.target.value })}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
                 <textarea
                   value={template.content}
-                  onChange={(e) =>
-                    handleUpdate({ ...template, content: e.target.value })
-                  }
+                  onChange={e => handleUpdate({ ...template, content: e.target.value })}
                   rows={3}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -296,7 +277,7 @@ export default function MessageTemplate({
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{template.content}</p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {template.keywords.map((keyword) => (
+                  {template.keywords.map(keyword => (
                     <span
                       key={keyword}
                       className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
@@ -318,4 +299,4 @@ export default function MessageTemplate({
       </div>
     </div>
   );
-} 
+}

@@ -116,11 +116,7 @@ interface TooltipGroupProps {
 }
 
 export function TooltipGroup({ children, className = '' }: TooltipGroupProps) {
-  return (
-    <div className={`inline-flex items-center space-x-2 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`inline-flex items-center space-x-2 ${className}`}>{children}</div>;
 }
 
 interface TooltipTriggerProps {
@@ -129,11 +125,7 @@ interface TooltipTriggerProps {
 }
 
 export function TooltipTrigger({ children, className = '' }: TooltipTriggerProps) {
-  return (
-    <div className={`inline-block ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`inline-block ${className}`}>{children}</div>;
 }
 
 interface TooltipContentProps {
@@ -142,9 +134,5 @@ interface TooltipContentProps {
 }
 
 export function TooltipContent({ children, className = '' }: TooltipContentProps) {
-  return (
-    <div className={`inline-block ${className}`}>
-      {children}
-    </div>
-  );
-} 
+  return <div className={`inline-block ${className}`}>{children}</div>;
+}

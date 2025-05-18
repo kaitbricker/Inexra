@@ -42,10 +42,7 @@ export const roleUpdateSchema = roleSchema.partial();
 // Profile settings validation schemas
 export const profileSettingsSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
+  email: z.string().min(1, 'Email is required').email('Invalid email format'),
   settings: z.object({
     notifications: z.object({
       email: z.boolean(),
@@ -82,4 +79,4 @@ export const formErrors = {
     role: 'Role name already exists',
     apiKey: 'API key name already exists',
   },
-} as const; 
+} as const;

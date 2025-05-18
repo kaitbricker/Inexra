@@ -54,4 +54,4 @@ export const useAuditLogs = (filters: AuditLogFilters = {}) => {
     totalLogs,
     exportLogs,
   };
-}; 
+};

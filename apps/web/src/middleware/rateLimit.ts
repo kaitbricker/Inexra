@@ -24,11 +24,7 @@ interface RateLimitInfo {
   total: number;
 }
 
-export async function rateLimit(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  next: () => void
-) {
+export async function rateLimit(req: NextApiRequest, res: NextApiResponse, next: () => void) {
   try {
     const session = await getSession({ req });
     const userRole = session?.user?.role || 'guest';
@@ -75,10 +71,7 @@ export async function rateLimit(
   }
 }
 
-export async function getRateLimitInfo(
-  userId: string,
-  role: string
-): Promise<RateLimitInfo> {
+export async function getRateLimitInfo(userId: string, role: string): Promise<RateLimitInfo> {
   const key = `rate-limit:${userId}`;
   const config = {
     window: RATE_LIMIT_WINDOW,
@@ -132,10 +125,7 @@ export async function checkRateLimitAlert(
 }
 
 // Rate limit middleware for specific endpoints
-export function createRateLimitMiddleware(
-  endpoint: string,
-  config: Partial<RateLimitConfig> = {}
-) {
+export function createRateLimitMiddleware(endpoint: string, config: Partial<RateLimitConfig> = {}) {
   return async (req: NextApiRequest, res: NextApiResponse, next: () => void) => {
     const session = await getSession({ req });
     const userRole = session?.user?.role || 'guest';
@@ -144,7 +134,9 @@ export function createRateLimitMiddleware(
     const endpointKey = `rate-limit:${endpoint}:${userId}`;
     const endpointConfig: RateLimitConfig = {
       window: config.window || RATE_LIMIT_WINDOW,
-      maxRequests: config.maxRequests || RATE_LIMIT_MAX_REQUESTS[userRole as keyof typeof RATE_LIMIT_MAX_REQUESTS],
+      maxRequests:
+        config.maxRequests ||
+        RATE_LIMIT_MAX_REQUESTS[userRole as keyof typeof RATE_LIMIT_MAX_REQUESTS],
     };
 
     const now = Date.now();
@@ -175,4 +167,4 @@ export function createRateLimitMiddleware(
 
     next();
   };
-} 
+}

@@ -23,11 +23,13 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200';
-  
+  const baseClasses =
+    'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200';
+
   const variantClasses = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500',
-    secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-indigo-500',
+    secondary:
+      'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-indigo-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
     success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
     warning: 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
@@ -41,7 +43,7 @@ export function Button({
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
-  const disabledClass = (disabled || isLoading) ? 'opacity-50 cursor-not-allowed' : '';
+  const disabledClass = disabled || isLoading ? 'opacity-50 cursor-not-allowed' : '';
 
   const buttonClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${disabledClass} ${className}`;
 
@@ -96,14 +98,8 @@ export function ButtonGroup({ children, className = '' }: ButtonGroupProps) {
         const isLast = index === React.Children.count(children) - 1;
 
         return React.cloneElement(child, {
-          className: `${child.props.className} ${
-            !isFirst ? '-ml-px' : ''
-          } ${
-            !isFirst && !isLast
-              ? 'rounded-none'
-              : isFirst
-              ? 'rounded-r-none'
-              : 'rounded-l-none'
+          className: `${child.props.className} ${!isFirst ? '-ml-px' : ''} ${
+            !isFirst && !isLast ? 'rounded-none' : isFirst ? 'rounded-r-none' : 'rounded-l-none'
           }`,
         });
       })}
@@ -139,4 +135,4 @@ export function IconButton({
       {icon}
     </Button>
   );
-} 
+}

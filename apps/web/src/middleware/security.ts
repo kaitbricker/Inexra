@@ -56,4 +56,4 @@ export async function withSecurity(
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-} 
+}

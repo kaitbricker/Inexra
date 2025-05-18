@@ -1,3 +1,3 @@
 import { metricsHandler } from '@/lib/monitoring';
 
-export default metricsHandler; 
+export default metricsHandler;

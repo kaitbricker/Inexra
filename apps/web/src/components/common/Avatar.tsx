@@ -49,20 +49,14 @@ export function Avatar({
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map((n) => n[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase();
   };
 
   const renderContent = () => {
     if (src) {
-      return (
-        <img
-          src={src}
-          alt={alt}
-          className="h-full w-full rounded-full object-cover"
-        />
-      );
+      return <img src={src} alt={alt} className="h-full w-full rounded-full object-cover" />;
     }
 
     if (alt) {
@@ -75,11 +69,7 @@ export function Avatar({
 
     return (
       <div className="flex h-full w-full items-center justify-center rounded-full bg-gray-100">
-        <svg
-          className="h-6 w-6 text-gray-400"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
           <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       </div>
@@ -111,11 +101,7 @@ interface AvatarGroupProps {
   className?: string;
 }
 
-export function AvatarGroup({
-  children,
-  max = 5,
-  className = '',
-}: AvatarGroupProps) {
+export function AvatarGroup({ children, max = 5, className = '' }: AvatarGroupProps) {
   const childrenArray = React.Children.toArray(children);
   const visibleAvatars = childrenArray.slice(0, max);
   const remainingCount = childrenArray.length - max;
@@ -123,11 +109,7 @@ export function AvatarGroup({
   return (
     <div className={`flex -space-x-2 ${className}`}>
       {visibleAvatars.map((child, index) => (
-        <div
-          key={index}
-          className="inline-block"
-          style={{ zIndex: visibleAvatars.length - index }}
-        >
+        <div key={index} className="inline-block" style={{ zIndex: visibleAvatars.length - index }}>
           {child}
         </div>
       ))}
@@ -159,4 +141,4 @@ export function AvatarStack({ children, className = '' }: AvatarStackProps) {
       ))}
     </div>
   );
-} 
+}

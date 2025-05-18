@@ -23,7 +23,7 @@ class WebSocketService extends EventEmitter {
         this.emit('connected');
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
           this.emit('message', data);
@@ -42,7 +42,7 @@ class WebSocketService extends EventEmitter {
         this.reconnect();
       };
 
-      this.ws.onerror = (error) => {
+      this.ws.onerror = error => {
         console.error('WebSocket error:', error);
         this.emit('error', error);
       };
@@ -55,7 +55,9 @@ class WebSocketService extends EventEmitter {
   private reconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      console.log(
+        `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
+      );
       setTimeout(() => this.connect(), this.reconnectTimeout * this.reconnectAttempts);
     } else {
       console.error('Max reconnection attempts reached');
@@ -80,9 +82,10 @@ class WebSocketService extends EventEmitter {
 }
 
 // Create a singleton instance
-const wsUrl = process.env.NODE_ENV === 'production' 
-  ? `wss://${window.location.host}/api/ws`
-  : 'ws://localhost:3000/api/ws';
+const wsUrl =
+  process.env.NODE_ENV === 'production'
+    ? `wss://${window.location.host}/api/ws`
+    : 'ws://localhost:3000/api/ws';
 const wsService = new WebSocketService(wsUrl);
 
-export default wsService; 
+export default wsService;

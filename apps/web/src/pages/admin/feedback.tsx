@@ -62,11 +62,7 @@ export default function FeedbackPage() {
 
       if (!response.ok) throw new Error('Failed to update status');
 
-      setFeedback((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, status } : item
-        )
-      );
+      setFeedback(prev => prev.map(item => (item.id === id ? { ...item, status } : item)));
 
       showToast('Status updated successfully', 'success');
     } catch (error) {
@@ -86,10 +82,7 @@ export default function FeedbackPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-8">User Feedback Management</h1>
-      <FeedbackList
-        feedback={feedback}
-        onStatusChange={handleStatusChange}
-      />
+      <FeedbackList feedback={feedback} onStatusChange={handleStatusChange} />
     </div>
   );
-} 
+}

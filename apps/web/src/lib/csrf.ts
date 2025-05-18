@@ -22,13 +22,19 @@ export async function csrf(req: NextApiRequest, res: NextApiResponse) {
 
   // Generate new token for next request
   const newToken = randomBytes(32).toString('hex');
-  res.setHeader('Set-Cookie', `${CSRF_TOKEN_COOKIE}=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  res.setHeader(
+    'Set-Cookie',
+    `${CSRF_TOKEN_COOKIE}=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict`
+  );
   res.setHeader(CSRF_TOKEN_HEADER, newToken);
 }
 
 export function generateCSRFToken(res: NextApiResponse) {
   const token = randomBytes(32).toString('hex');
-  res.setHeader('Set-Cookie', `${CSRF_TOKEN_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  res.setHeader(
+    'Set-Cookie',
+    `${CSRF_TOKEN_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`
+  );
   res.setHeader(CSRF_TOKEN_HEADER, token);
   return token;
-} 
+}

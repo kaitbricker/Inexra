@@ -42,4 +42,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withMetrics(handler); 
+export default withMetrics(handler);

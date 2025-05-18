@@ -8,7 +8,7 @@ describe('WebSocket Server', () => {
   let clientSocket: any;
   let serverAddress: AddressInfo;
 
-  beforeAll((done) => {
+  beforeAll(done => {
     httpServer = createServer();
     socketService.initialize(httpServer);
     httpServer.listen(() => {
@@ -21,7 +21,7 @@ describe('WebSocket Server', () => {
     httpServer.close();
   });
 
-  beforeEach((done) => {
+  beforeEach(done => {
     clientSocket = Client(`http://localhost:${serverAddress.port}`, {
       auth: {
         userId: 'test-user',
@@ -36,12 +36,12 @@ describe('WebSocket Server', () => {
     }
   });
 
-  it('should connect with valid authentication', (done) => {
+  it('should connect with valid authentication', done => {
     expect(clientSocket.connected).toBe(true);
     done();
   });
 
-  it('should disconnect with invalid authentication', (done) => {
+  it('should disconnect with invalid authentication', done => {
     const invalidSocket = Client(`http://localhost:${serverAddress.port}`);
     invalidSocket.on('disconnect', () => {
       expect(invalidSocket.connected).toBe(false);
@@ -49,7 +49,7 @@ describe('WebSocket Server', () => {
     });
   });
 
-  it('should handle message events', (done) => {
+  it('should handle message events', done => {
     const messageData = {
       content: 'Test message',
       senderId: 'test-user',
@@ -70,7 +70,7 @@ describe('WebSocket Server', () => {
     });
   });
 
-  it('should handle conversation events', (done) => {
+  it('should handle conversation events', done => {
     const conversationId = 'test-conversation';
 
     clientSocket.emit('conversation:join', conversationId);
@@ -103,7 +103,7 @@ describe('WebSocket Server', () => {
     });
   });
 
-  it('should handle lead score updates', (done) => {
+  it('should handle lead score updates', done => {
     const leadData = {
       conversationId: 'test-conversation',
       score: 0.8,
@@ -121,7 +121,7 @@ describe('WebSocket Server', () => {
     });
   });
 
-  it('should enforce connection limits', (done) => {
+  it('should enforce connection limits', done => {
     const clients = [];
     const maxConnections = 3;
 
@@ -138,12 +138,12 @@ describe('WebSocket Server', () => {
     // The last client should be disconnected
     clients[maxConnections].on('error', (error: any) => {
       expect(error.message).toBe('Connection limit exceeded');
-      clients.forEach((client) => client.disconnect());
+      clients.forEach(client => client.disconnect());
       done();
     });
   });
 
-  it('should handle disconnection cleanup', (done) => {
+  it('should handle disconnection cleanup', done => {
     const userId = 'test-user';
     const conversationId = 'test-conversation';
 
@@ -166,4 +166,4 @@ describe('WebSocket Server', () => {
 
     clientSocket.disconnect();
   });
-}); 
+});

@@ -37,4 +37,4 @@ export const captureException = (error: Error, context?: Record<string, any>) =>
       tags: context,
     });
   }
-}; 
+};

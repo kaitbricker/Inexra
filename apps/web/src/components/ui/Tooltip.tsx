@@ -99,10 +99,10 @@ export function Tooltip({
                 position === 'top'
                   ? 'bottom-[-4px] left-1/2 -translate-x-1/2'
                   : position === 'right'
-                  ? 'left-[-4px] top-1/2 -translate-y-1/2'
-                  : position === 'bottom'
-                  ? 'top-[-4px] left-1/2 -translate-x-1/2'
-                  : 'right-[-4px] top-1/2 -translate-y-1/2'
+                    ? 'left-[-4px] top-1/2 -translate-y-1/2'
+                    : position === 'bottom'
+                      ? 'top-[-4px] left-1/2 -translate-x-1/2'
+                      : 'right-[-4px] top-1/2 -translate-y-1/2'
               }`}
             />
           </motion.div>
@@ -110,4 +110,4 @@ export function Tooltip({
       </AnimatePresence>
     </div>
   );
-} 
+}

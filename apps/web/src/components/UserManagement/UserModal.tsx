@@ -9,4 +9,4 @@ const UserModal: React.FC = () => {
   );
 };
 
-export default UserModal; 
+export default UserModal;

@@ -26,8 +26,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const baseClasses = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
-    const errorClasses = error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500' : '';
+    const baseClasses =
+      'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
+    const errorClasses = error
+      ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
+      : '';
     const disabledClasses = disabled ? 'bg-gray-100 cursor-not-allowed' : '';
     const widthClass = fullWidth ? 'w-full' : '';
 
@@ -36,10 +39,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label
-            htmlFor={props.id}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor={props.id} className="block text-sm font-medium text-gray-700 mb-1">
             {label}
           </label>
         )}
@@ -66,9 +66,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
         {(error || helperText) && (
           <p
-            className={`mt-2 text-sm ${
-              error ? 'text-red-600' : 'text-gray-500'
-            }`}
+            className={`mt-2 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}
             id={error ? `${props.id}-error` : undefined}
           >
             {error || helperText}
@@ -88,20 +86,12 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  (
-    {
-      label,
-      error,
-      helperText,
-      fullWidth = false,
-      className = '',
-      disabled,
-      ...props
-    },
-    ref
-  ) => {
-    const baseClasses = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
-    const errorClasses = error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500' : '';
+  ({ label, error, helperText, fullWidth = false, className = '', disabled, ...props }, ref) => {
+    const baseClasses =
+      'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
+    const errorClasses = error
+      ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
+      : '';
     const disabledClasses = disabled ? 'bg-gray-100 cursor-not-allowed' : '';
     const widthClass = fullWidth ? 'w-full' : '';
 
@@ -110,10 +100,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label
-            htmlFor={props.id}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor={props.id} className="block text-sm font-medium text-gray-700 mb-1">
             {label}
           </label>
         )}
@@ -128,9 +115,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         />
         {(error || helperText) && (
           <p
-            className={`mt-2 text-sm ${
-              error ? 'text-red-600' : 'text-gray-500'
-            }`}
+            className={`mt-2 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}
             id={error ? `${props.id}-error` : undefined}
           >
             {error || helperText}
@@ -152,20 +137,14 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   (
-    {
-      label,
-      error,
-      helperText,
-      options,
-      fullWidth = false,
-      className = '',
-      disabled,
-      ...props
-    },
+    { label, error, helperText, options, fullWidth = false, className = '', disabled, ...props },
     ref
   ) => {
-    const baseClasses = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
-    const errorClasses = error ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500' : '';
+    const baseClasses =
+      'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
+    const errorClasses = error
+      ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
+      : '';
     const disabledClasses = disabled ? 'bg-gray-100 cursor-not-allowed' : '';
     const widthClass = fullWidth ? 'w-full' : '';
 
@@ -174,10 +153,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label
-            htmlFor={props.id}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor={props.id} className="block text-sm font-medium text-gray-700 mb-1">
             {label}
           </label>
         )}
@@ -190,7 +166,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           aria-describedby={error ? `${props.id}-error` : undefined}
           {...props}
         >
-          {options.map((option) => (
+          {options.map(option => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -198,9 +174,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </motion.select>
         {(error || helperText) && (
           <p
-            className={`mt-2 text-sm ${
-              error ? 'text-red-600' : 'text-gray-500'
-            }`}
+            className={`mt-2 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}
             id={error ? `${props.id}-error` : undefined}
           >
             {error || helperText}
@@ -209,4 +183,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       </div>
     );
   }
-); 
+);

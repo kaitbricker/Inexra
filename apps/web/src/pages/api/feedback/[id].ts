@@ -37,4 +37,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withSecurity(handler); 
+export default withSecurity(handler);

@@ -79,4 +79,4 @@ describe('API Endpoints', () => {
       expect(response.data).toHaveProperty('logs');
     });
   });
-}); 
+});

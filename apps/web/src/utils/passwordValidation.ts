@@ -54,14 +54,8 @@ export function validatePassword(password: string): PasswordValidationResult {
   }
 
   // Check for keyboard patterns
-  const keyboardPatterns = [
-    'qwerty',
-    'asdfgh',
-    'zxcvbn',
-    '123456',
-    'password',
-  ];
-  
+  const keyboardPatterns = ['qwerty', 'asdfgh', 'zxcvbn', '123456', 'password'];
+
   const lowerPassword = password.toLowerCase();
   if (keyboardPatterns.some(pattern => lowerPassword.includes(pattern))) {
     errors.push('Password contains common keyboard patterns');
@@ -81,4 +75,4 @@ export function hashPassword(password: string): Promise<string> {
 export function comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
   // This is a placeholder. In a real implementation, you would use bcrypt or Argon2
   return Promise.resolve(plainPassword === hashedPassword);
-} 
+}

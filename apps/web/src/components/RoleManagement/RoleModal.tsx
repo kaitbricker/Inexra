@@ -9,4 +9,4 @@ const RoleModal: React.FC = () => {
   );
 };
 
-export default RoleModal; 
+export default RoleModal;

@@ -84,9 +84,7 @@ export function ReferralProgram() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`p-4 rounded-lg ${
-            isDark ? 'bg-gray-800' : 'bg-white'
-          } shadow-lg`}
+          className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}
         >
           <h3 className="text-lg font-semibold mb-2">Total Referrals</h3>
           <p className="text-2xl font-bold text-blue-500">{stats.totalReferrals}</p>
@@ -96,9 +94,7 @@ export function ReferralProgram() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className={`p-4 rounded-lg ${
-            isDark ? 'bg-gray-800' : 'bg-white'
-          } shadow-lg`}
+          className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}
         >
           <h3 className="text-lg font-semibold mb-2">Active Referrals</h3>
           <p className="text-2xl font-bold text-green-500">{stats.activeReferrals}</p>
@@ -108,9 +104,7 @@ export function ReferralProgram() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className={`p-4 rounded-lg ${
-            isDark ? 'bg-gray-800' : 'bg-white'
-          } shadow-lg`}
+          className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}
         >
           <h3 className="text-lg font-semibold mb-2">Pending Rewards</h3>
           <p className="text-2xl font-bold text-yellow-500">${stats.pendingRewards}</p>
@@ -120,9 +114,7 @@ export function ReferralProgram() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className={`p-4 rounded-lg ${
-            isDark ? 'bg-gray-800' : 'bg-white'
-          } shadow-lg`}
+          className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}
         >
           <h3 className="text-lg font-semibold mb-2">Earned Rewards</h3>
           <p className="text-2xl font-bold text-purple-500">${stats.earnedRewards}</p>
@@ -149,15 +141,15 @@ export function ReferralProgram() {
       <div className={`p-6 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
         <h2 className="text-xl font-bold mb-4">Reward Tiers</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {['Starter', 'Bronze', 'Silver', 'Gold'].map((tier) => (
+          {['Starter', 'Bronze', 'Silver', 'Gold'].map(tier => (
             <div
               key={tier}
               className={`p-4 rounded-lg ${
                 getRewardTier(stats.totalReferrals) === tier
                   ? 'border-2 border-blue-500'
                   : isDark
-                  ? 'bg-gray-700'
-                  : 'bg-gray-50'
+                    ? 'bg-gray-700'
+                    : 'bg-gray-50'
               }`}
             >
               <h3 className="font-semibold mb-2">{tier}</h3>
@@ -185,12 +177,10 @@ export function ReferralProgram() {
               </tr>
             </thead>
             <tbody>
-              {referrals.map((referral) => (
+              {referrals.map(referral => (
                 <tr
                   key={referral.id}
-                  className={`border-t ${
-                    isDark ? 'border-gray-700' : 'border-gray-200'
-                  }`}
+                  className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
                 >
                   <td className="p-2">{referral.email}</td>
                   <td className="p-2">
@@ -199,16 +189,14 @@ export function ReferralProgram() {
                         referral.status === 'active'
                           ? 'bg-green-100 text-green-800'
                           : referral.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       {referral.status}
                     </span>
                   </td>
-                  <td className="p-2">
-                    {new Date(referral.createdAt).toLocaleDateString()}
-                  </td>
+                  <td className="p-2">{new Date(referral.createdAt).toLocaleDateString()}</td>
                   <td className="p-2">${referral.reward}</td>
                 </tr>
               ))}
@@ -218,4 +206,4 @@ export function ReferralProgram() {
       </div>
     </div>
   );
-} 
+}
