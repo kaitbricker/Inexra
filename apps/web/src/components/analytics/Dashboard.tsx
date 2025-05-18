@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import {
   LineChart,
   Line,
@@ -18,6 +18,12 @@ import { Button } from '../common/Button';
 import { useTheme } from '@/hooks/useTheme';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { formatNumber } from '@/utils/format';
+
+// Dynamically import motion components with SSR disabled
+const MotionDiv = dynamic(
+  () => import('framer-motion').then((mod) => mod.motion.div),
+  { ssr: false }
+);
 
 interface ChartData {
   name: string;
@@ -99,13 +105,13 @@ export function Dashboard({
 
     if (error) {
       return (
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-center h-[400px] text-red-500"
         >
           {error}
-        </motion.div>
+        </MotionDiv>
       );
     }
 
@@ -163,7 +169,7 @@ export function Dashboard({
     };
 
     return (
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -172,7 +178,7 @@ export function Dashboard({
         <ResponsiveContainer width="100%" height="100%">
           {chartComponents[type]}
         </ResponsiveContainer>
-      </motion.div>
+      </MotionDiv>
     );
   };
 
@@ -182,7 +188,7 @@ export function Dashboard({
       subtitle={subtitle}
       className={`${className} transition-colors duration-200`}
       footer={
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -209,12 +215,12 @@ export function Dashboard({
               {isRealTime ? 'Stop Real-Time' : 'Start Real-Time'}
             </Button>
           </div>
-        </motion.div>
+        </MotionDiv>
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {metrics.map((metric, index) => (
-          <motion.div
+          <MotionDiv
             key={metric.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,7 +248,7 @@ export function Dashboard({
                 </div>
               )}
             </div>
-          </motion.div>
+          </MotionDiv>
         ))}
       </div>
       {renderChart()}
