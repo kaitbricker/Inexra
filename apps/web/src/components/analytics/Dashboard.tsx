@@ -87,7 +87,7 @@ export function Dashboard({
 }: DashboardProps) {
   const [isRealTime, setIsRealTime] = useState(false);
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = typeof window !== 'undefined' ? theme === 'dark' : false;
 
   const chartTheme = {
     text: isDark ? '#e2e8f0' : '#1a202c',
