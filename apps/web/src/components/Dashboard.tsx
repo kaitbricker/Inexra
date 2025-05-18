@@ -195,7 +195,7 @@ export default function Dashboard() {
       filtered = filtered.filter(
         (msg) =>
           now.getTime() - new Date(msg.createdAt).getTime() <=
-          timeRanges[searchFilters.dateRange]
+          timeRanges[searchFilters.dateRange as '1h' | '24h' | '7d']
       );
     }
 
