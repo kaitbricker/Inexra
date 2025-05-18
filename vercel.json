@@ -37,7 +37,7 @@
   ],
   "env": {
     "NEXTAUTH_URL": "https://your-production-domain.com",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "NEXTAUTH_SECRET": "NEXTAUTH_SECRET",
     "JWT_SECRET": "@jwt-secret",
     "JWT_REFRESH_SECRET": "@jwt-refresh-secret",
     "SESSION_SECRET": "@session-secret",
