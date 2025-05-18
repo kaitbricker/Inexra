@@ -74,7 +74,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         />
         <Select
           value={roleFilter}
-          onValueChange={(value) => setRoleFilter(value as UserRole | 'all')}
+          onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
         >
           <option value="all">All Roles</option>
           <option value="admin">Admin</option>
@@ -83,7 +83,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         </Select>
         <Select
           value={statusFilter}
-          onValueChange={(value) => setStatusFilter(value as UserStatus | 'all')}
+          onChange={(e) => setStatusFilter(e.target.value as UserStatus | 'all')}
         >
           <option value="all">All Statuses</option>
           <option value="active">Active</option>

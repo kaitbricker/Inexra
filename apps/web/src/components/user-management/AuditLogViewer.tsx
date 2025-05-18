@@ -75,7 +75,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ onExport }) => {
         />
         <Select
           value={actionFilter}
-          onValueChange={(value) => setActionFilter(value as AuditAction | 'all')}
+          onChange={(e) => setActionFilter(e.target.value as AuditAction | 'all')}
         >
           <option value="all">All Actions</option>
           <option value="create">Create</option>

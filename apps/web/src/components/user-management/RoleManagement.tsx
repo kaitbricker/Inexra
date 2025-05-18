@@ -87,11 +87,11 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                     <div key={permission} className="flex items-center space-x-2">
                       <Checkbox
                         checked={role.permissions.includes(permission)}
-                        onCheckedChange={(checked) =>
+                        onChange={(e) =>
                           handlePermissionChange(
                             role.id,
                             permission,
-                            checked as boolean
+                            e.target.checked
                           )
                         }
                       />
