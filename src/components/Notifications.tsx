@@ -1,0 +1,9 @@
+import React from 'react';
+// ... existing code ...
+// Remove BellIcon, ChatBubbleLeftRightIcon, ExclamationCircleIcon from imports
+// ... existing code ...
+// Replace usages:
+// <BellIcon ... /> => <span className="h-6 w-6">🛎️</span>
+// <ChatBubbleLeftRightIcon ... /> => <span className="h-6 w-6">💬</span>
+// <ExclamationCircleIcon ... /> => <span className="h-6 w-6">⚠️</span>
+// ... existing code ... 
