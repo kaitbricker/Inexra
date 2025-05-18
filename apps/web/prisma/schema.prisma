@@ -58,7 +58,7 @@ model Feedback {
 model Referral {
   id          String   @id @default(cuid())
   referrerId  String
-  referredId  String?
+  referredId  String?  @unique
   email       String
   status      String   @default("pending") // pending, active, completed
   reward      Float    @default(0)
@@ -89,6 +89,8 @@ model User {
   activity      UserActivity?
   referrals     Referral[] @relation("Referrer")
   referredBy    Referral?  @relation("Referred")
+  feedbacks     Feedback[]
+  socialAccounts SocialAccount[]
 }
 
 model Achievement {
