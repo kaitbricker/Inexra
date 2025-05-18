@@ -255,6 +255,9 @@ export default function DashboardPage() {
   const { data, loading, error } = useAnalytics();
   const [timeRange, setTimeRange] = useState('7d');
 
+  // Default to light theme during SSR
+  const isDark = typeof window !== 'undefined' ? theme === 'dark' : false;
+
   return (
     <Dashboard
       title="Analytics Dashboard"
