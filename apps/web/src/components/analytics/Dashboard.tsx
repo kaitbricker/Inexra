@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   LineChart,
   Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,11 +15,9 @@ import {
 import { Card } from '../common/Card';
 import { Select } from '../common/Select';
 import { Button } from '../common/Button';
-import { Badge } from '../common/Badge';
-import { Skeleton } from '../common/Skeleton';
 import { useTheme } from '@/hooks/useTheme';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { formatNumber, formatDate } from '@/utils/format';
+import { formatNumber } from '@/utils/format';
 
 interface ChartData {
   name: string;
@@ -33,7 +29,7 @@ interface DashboardProps {
   title: string;
   subtitle?: string;
   data: ChartData[];
-  type: 'line' | 'bar' | 'area';
+  type: 'line' | 'bar';
   metrics: {
     label: string;
     value: number | string;
@@ -98,7 +94,7 @@ export function Dashboard({
 
   const renderChart = () => {
     if (isLoading) {
-      return <Skeleton variant="rectangular" height={400} />;
+      return <div className="h-[400px] w-full bg-gray-100 dark:bg-gray-800 animate-pulse" />;
     }
 
     if (error) {
@@ -164,30 +160,6 @@ export function Dashboard({
           />
         </BarChart>
       ),
-      area: (
-        <AreaChart {...commonProps}>
-          <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-          <XAxis dataKey="name" stroke={chartTheme.text} />
-          <YAxis stroke={chartTheme.text} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: chartTheme.tooltip.background,
-              border: `1px solid ${chartTheme.tooltip.border}`,
-              color: chartTheme.text,
-            }}
-          />
-          <Legend />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke={isDark ? chartColors.primary.dark : chartColors.primary.light}
-            fill={isDark ? chartColors.primary.dark : chartColors.primary.light}
-            fillOpacity={0.3}
-            strokeWidth={2}
-            animationDuration={1000}
-          />
-        </AreaChart>
-      ),
     };
 
     return (
@@ -222,7 +194,7 @@ export function Dashboard({
                 label={filter.label}
                 options={filter.options}
                 value={filter.value}
-                onChange={e => filter.onChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => filter.onChange(e.target.value)}
                 className="w-40"
               />
             ))}
@@ -241,118 +213,39 @@ export function Dashboard({
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <AnimatePresence>
-          {metrics.map((metric, index) => (
-            <motion.div
-              key={metric.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
-            >
-              <div className="text-sm text-gray-500 dark:text-gray-400">{metric.label}</div>
-              <div className="mt-1 flex items-baseline">
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {metric.value}
-                </div>
-                {metric.change && (
-                  <div
-                    className={`ml-2 flex items-baseline text-sm font-semibold ${
-                      metric.trend === 'up'
-                        ? 'text-green-600 dark:text-green-400'
-                        : metric.trend === 'down'
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'}
-                    {metric.change}%
-                  </div>
-                )}
+        {metrics.map((metric, index) => (
+          <motion.div
+            key={metric.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
+          >
+            <div className="text-sm text-gray-500 dark:text-gray-400">{metric.label}</div>
+            <div className="mt-1 flex items-baseline">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                {metric.value}
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              {metric.change && (
+                <div
+                  className={`ml-2 flex items-baseline text-sm font-semibold ${
+                    metric.trend === 'up'
+                      ? 'text-green-600 dark:text-green-400'
+                      : metric.trend === 'down'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'}
+                  {metric.change}%
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ))}
       </div>
       {renderChart()}
-    </Card>
-  );
-}
-
-interface MetricCardProps {
-  label: string;
-  value: number | string;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  isLoading?: boolean;
-}
-
-export function MetricCard({ label, value, change, trend, isLoading = false }: MetricCardProps) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
-  if (isLoading) {
-    return <Skeleton variant="rectangular" height={100} />;
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
-    >
-      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
-      <div className="mt-1 flex items-baseline">
-        <div className="text-2xl font-semibold text-gray-900 dark:text-white">{value}</div>
-        {change && (
-          <div
-            className={`ml-2 flex items-baseline text-sm font-semibold ${
-              trend === 'up'
-                ? 'text-green-600 dark:text-green-400'
-                : trend === 'down'
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-gray-500 dark:text-gray-400'
-            }`}
-          >
-            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
-            {change}%
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-interface ChartCardProps {
-  title: string;
-  children: React.ReactNode;
-  isLoading?: boolean;
-  error?: string;
-}
-
-export function ChartCard({ title, children, isLoading = false, error }: ChartCardProps) {
-  return (
-    <Card title={title}>
-      {isLoading ? (
-        <Skeleton variant="rectangular" height={400} />
-      ) : error ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center h-[400px] text-red-500 dark:text-red-400"
-        >
-          {error}
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {children}
-        </motion.div>
-      )}
     </Card>
   );
 }
@@ -365,8 +258,8 @@ export default function DashboardPage() {
   return (
     <Dashboard
       title="Analytics Dashboard"
-      data={data || []}
-      type="area"
+      data={data?.timeSeriesData || []}
+      type="bar"
       metrics={[
         {
           label: "Total Users",
