@@ -1,10 +1,7 @@
-'use client';
-
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { LogRocketProvider } from '@/components/LogRocketProvider';
-import { ThemeProvider } from '@/hooks/useTheme2';
+import { Providers } from '@/components/Providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,13 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider>
-          <LogRocketProvider>
-            <main className="min-h-screen bg-background">
-              {children}
-            </main>
-          </LogRocketProvider>
-        </ThemeProvider>
+        <Providers>
+          <main className="min-h-screen bg-background">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
