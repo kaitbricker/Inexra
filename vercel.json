@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "NEXTAUTH_URL": "https://your-production-domain.com",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "JWT_SECRET": "@jwt-secret",
+    "JWT_REFRESH_SECRET": "@jwt-refresh-secret",
+    "SESSION_SECRET": "@session-secret",
+    "DATABASE_URL": "@database-url",
+    "REDIS_URL": "@redis-url",
+    "SENDGRID_API_KEY": "@sendgrid-api-key",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "SENTRY_DSN": "@sentry-dsn",
+    "LOGROCKET_ID": "@logrocket-id",
+    "RATE_LIMIT_MAX": "100",
+    "RATE_LIMIT_WINDOW": "900",
+    "CORS_ORIGIN": "https://your-production-domain.com",
+    "MFA_ISSUER": "YourApp",
+    "CACHE_TTL": "3600",
+    "ENABLE_COMPRESSION": "true",
+    "ENABLE_METRICS": "true",
+    "METRICS_PORT": "9090",
+    "LOG_LEVEL": "info",
+    "ENABLE_REQUEST_LOGGING": "true"
+  }
+} 
