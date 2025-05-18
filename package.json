@@ -18,6 +18,8 @@
     "setup-java": "./scripts/setup-java.sh"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.3",
+    "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@prisma/client": "^5.10.2",
     "@sentry/nextjs": "^7.91.0",
