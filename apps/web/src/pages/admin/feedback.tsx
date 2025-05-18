@@ -1,14 +1,11 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
 import { useToast } from '@/hooks/useToast';
-
-// Dynamically import the FeedbackList component with SSR disabled
-const FeedbackList = dynamic(
-  () => import('@/components/feedback/FeedbackList').then(mod => mod.FeedbackList),
-  { ssr: false }
-);
+import dynamic from 'next/dynamic';
+import { Spinner } from '@/components/ui/Spinner';
 
 interface Feedback {
   id: string;
@@ -22,25 +19,33 @@ interface Feedback {
   };
 }
 
+// Dynamically import the FeedbackList component with SSR disabled
+const FeedbackList = dynamic(
+  () => import('@/components/feedback/FeedbackList').then(mod => mod.FeedbackList),
+  {
+    ssr: false,
+    loading: () => <Spinner />
+  }
+);
+
 export default function FeedbackPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { showToast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (status === 'loading') return;
+
+    if (!session) {
       router.push('/auth/signin');
       return;
     }
 
-    if (status === 'loading') {
-      return;
-    }
-
-    if (session?.user?.role !== 'admin') {
+    if (session.user.role !== 'ADMIN') {
       router.push('/');
+      showToast('You do not have permission to access this page', 'error');
       return;
     }
 
@@ -54,7 +59,7 @@ export default function FeedbackPage() {
         console.error('Error fetching feedback:', error);
         showToast('Error loading feedback', 'error');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -72,7 +77,6 @@ export default function FeedbackPage() {
       if (!response.ok) throw new Error('Failed to update status');
 
       setFeedback(prev => prev.map(item => (item.id === id ? { ...item, status } : item)));
-
       showToast('Status updated successfully', 'success');
     } catch (error) {
       console.error('Error updating status:', error);
@@ -80,23 +84,21 @@ export default function FeedbackPage() {
     }
   };
 
-  // Show loading state while session is being determined
-  if (status === 'loading' || loading) {
+  if (status === 'loading' || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+        <Spinner />
       </div>
     );
   }
 
-  // Don't render anything if not authenticated or not admin
-  if (status === 'unauthenticated' || session?.user?.role !== 'admin') {
+  if (!session || session.user.role !== 'ADMIN') {
     return null;
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">User Feedback Management</h1>
+      <h1 className="text-3xl font-bold mb-8">Feedback Management</h1>
       <FeedbackList feedback={feedback} onStatusChange={handleStatusChange} />
     </div>
   );
