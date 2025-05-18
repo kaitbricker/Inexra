@@ -105,13 +105,9 @@ export function Dashboard({
 
     if (error) {
       return (
-        <MotionDiv
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center h-[400px] text-red-500"
-        >
+        <div className="flex items-center justify-center h-[400px] text-red-500">
           {error}
-        </MotionDiv>
+        </div>
       );
     }
 
@@ -169,16 +165,11 @@ export function Dashboard({
     };
 
     return (
-      <MotionDiv
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="h-[400px] w-full"
-      >
+      <div className="h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           {chartComponents[type]}
         </ResponsiveContainer>
-      </MotionDiv>
+      </div>
     );
   };
 
@@ -188,11 +179,7 @@ export function Dashboard({
       subtitle={subtitle}
       className={`${className} transition-colors duration-200`}
       footer={
-        <MotionDiv
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             {filters?.map(filter => (
               <Select
@@ -215,17 +202,13 @@ export function Dashboard({
               {isRealTime ? 'Stop Real-Time' : 'Start Real-Time'}
             </Button>
           </div>
-        </MotionDiv>
+        </div>
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {metrics.map((metric, index) => (
-          <MotionDiv
+          <div
             key={metric.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
             className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
           >
             <div className="text-sm text-gray-500 dark:text-gray-400">{metric.label}</div>
@@ -248,7 +231,7 @@ export function Dashboard({
                 </div>
               )}
             </div>
-          </MotionDiv>
+          </div>
         ))}
       </div>
       {renderChart()}
@@ -260,9 +243,6 @@ export default function DashboardPage() {
   const { theme } = useTheme();
   const { data, loading, error } = useAnalytics();
   const [timeRange, setTimeRange] = useState('7d');
-
-  // Default to light theme during SSR
-  const isDark = typeof window !== 'undefined' ? theme === 'dark' : false;
 
   return (
     <Dashboard
