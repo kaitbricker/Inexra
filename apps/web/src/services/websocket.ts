@@ -80,7 +80,9 @@ class WebSocketService extends EventEmitter {
 }
 
 // Create a singleton instance
-const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
+const wsUrl = process.env.NODE_ENV === 'production' 
+  ? `wss://${window.location.host}/api/ws`
+  : 'ws://localhost:3000/api/ws';
 const wsService = new WebSocketService(wsUrl);
 
 export default wsService; 

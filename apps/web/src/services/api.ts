@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +23,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   }
@@ -32,32 +32,32 @@ api.interceptors.response.use(
 // User Management API
 export const userApi = {
   getUsers: (params?: { page?: number; limit?: number; search?: string }) =>
-    api.get('/api/users', { params }),
-  getUser: (id: string) => api.get(`/api/users/${id}`),
-  createUser: (data: any) => api.post('/api/users', data),
-  updateUser: (id: string, data: any) => api.patch(`/api/users/${id}`, data),
-  deleteUser: (id: string) => api.delete(`/api/users/${id}`),
-  getUserSettings: (id: string) => api.get(`/api/users/${id}/settings`),
-  updateUserSettings: (id: string, data: any) => api.patch(`/api/users/${id}/settings`, data),
-  createApiKey: (id: string) => api.post(`/api/users/${id}/api-keys`),
-  deleteApiKey: (id: string, keyId: string) => api.delete(`/api/users/${id}/api-keys/${keyId}`),
+    api.get('/users', { params }),
+  getUser: (id: string) => api.get(`/users/${id}`),
+  createUser: (data: any) => api.post('/users', data),
+  updateUser: (id: string, data: any) => api.patch(`/users/${id}`, data),
+  deleteUser: (id: string) => api.delete(`/users/${id}`),
+  getUserSettings: (id: string) => api.get(`/users/${id}/settings`),
+  updateUserSettings: (id: string, data: any) => api.patch(`/users/${id}/settings`, data),
+  createApiKey: (id: string) => api.post(`/users/${id}/api-keys`),
+  deleteApiKey: (id: string, keyId: string) => api.delete(`/users/${id}/api-keys/${keyId}`),
 };
 
 // Role Management API
 export const roleApi = {
   getRoles: (params?: { page?: number; limit?: number; search?: string }) =>
-    api.get('/api/roles', { params }),
-  createRole: (data: any) => api.post('/api/roles', data),
-  updateRole: (id: string, data: any) => api.patch(`/api/roles/${id}`, data),
-  deleteRole: (id: string) => api.delete(`/api/roles/${id}`),
+    api.get('/roles', { params }),
+  createRole: (data: any) => api.post('/roles', data),
+  updateRole: (id: string, data: any) => api.patch(`/roles/${id}`, data),
+  deleteRole: (id: string) => api.delete(`/roles/${id}`),
 };
 
 // Audit Logs API
 export const auditLogApi = {
   getAuditLogs: (params?: { page?: number; limit?: number; userId?: string }) =>
-    api.get('/api/audit-logs', { params }),
+    api.get('/audit-logs', { params }),
   getUserAuditLogs: (userId: string, params?: { page?: number; limit?: number }) =>
-    api.get(`/api/audit-logs/${userId}`, { params }),
+    api.get(`/audit-logs/${userId}`, { params }),
 };
 
 export default api; 

@@ -1,3 +1,12 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model Feedback {
   id        String   @id @default(cuid())
   type      String   // bug, feature, improvement, other
@@ -14,4 +23,119 @@ model Feedback {
   @@index([type])
   @@index([status])
   @@index([createdAt])
+}
+
+model Referral {
+  id          String   @id @default(cuid())
+  referrerId  String
+  referredId  String?
+  email       String
+  status      String   @default("pending") // pending, active, completed
+  reward      Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
+  referred    User?    @relation("Referred", fields: [referredId], references: [id])
+
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([email])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("user")
+  points        Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  achievements  Achievement[]
+  activity      UserActivity?
+  referrals     Referral[] @relation("Referrer")
+  referredBy    Referral?  @relation("Referred")
+}
+
+model Achievement {
+  id           String   @id @default(cuid())
+  userId       String
+  achievementId String
+  completedAt  DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model UserActivity {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referralCount   Int      @default(0)
+  dailyTaskCount  Int      @default(0)
+  connectionCount Int      @default(0)
+  totalTaskCount  Int      @default(0)
+  isEarlyAdopter  Boolean  @default(false)
+  lastActiveAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SocialAccount {
+  id           String   @id @default(cuid())
+  platform     String   // 'twitter', 'instagram', 'linkedin'
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  messages     Message[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, platform])
+  @@index([userId])
+  @@index([platform])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  platform       String
+  senderId       String
+  recipientId    String
+  content        String
+  timestamp      DateTime
+  metadata       Json?    // Stores sentiment, keywords, etc.
+  socialAccountId String
+  socialAccount  SocialAccount @relation(fields: [socialAccountId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([socialAccountId])
+  @@index([conversationId])
+  @@index([timestamp])
+  @@index([senderId, recipientId])
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  platform    String
+  messages    Message[]
+  leadScore   Float?
+  priority    String?   // 'high', 'medium', 'low'
+  status      String    @default("active") // 'active', 'archived', 'closed'
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([platform])
+  @@index([leadScore])
+  @@index([priority])
+  @@index([status])
 } 

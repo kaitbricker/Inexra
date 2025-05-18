@@ -1,0 +1,5 @@
+import { Feedback, Replay } from '@sentry-internal/integration-shims';
+import { BrowserTracing, Span, addExtensionMethods } from '@sentry-internal/tracing';
+export { Feedback, Replay, BrowserTracing, Span, addExtensionMethods };
+export * from './index.bundle.base';
+//# sourceMappingURL=index.bundle.tracing.d.ts.map

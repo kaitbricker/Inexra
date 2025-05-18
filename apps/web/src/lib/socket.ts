@@ -1,164 +1,197 @@
-import { io, Socket } from 'socket.io-client';
-import { useEffect, useRef, useState } from 'react';
+import { Server as SocketIOServer } from 'socket.io';
+import { Server as HTTPServer } from 'http';
+import { redis } from './redis';
+import { prisma } from './prisma';
+import { trackDbOperation } from './monitoring';
 
-interface SocketOptions {
-  autoConnect?: boolean;
-  reconnection?: boolean;
-  reconnectionAttempts?: number;
-  reconnectionDelay?: number;
-  timeout?: number;
+interface SocketUser {
+  userId: string;
+  socketId: string;
+  rooms: Set<string>;
 }
 
-interface Message {
-  type: string;
-  payload: any;
-}
-
-class SocketManager {
-  private static instance: SocketManager;
-  private socket: Socket | null = null;
-  private messageQueue: Message[] = [];
-  private batchTimeout: NodeJS.Timeout | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
-  private batchInterval = 100; // ms
+class SocketService {
+  private static instance: SocketService;
+  private io: SocketIOServer | null = null;
+  private users: Map<string, SocketUser> = new Map();
+  private readonly MAX_CONNECTIONS_PER_USER = 3;
 
   private constructor() {}
 
-  static getInstance(): SocketManager {
-    if (!SocketManager.instance) {
-      SocketManager.instance = new SocketManager();
+  static getInstance(): SocketService {
+    if (!SocketService.instance) {
+      SocketService.instance = new SocketService();
     }
-    return SocketManager.instance;
+    return SocketService.instance;
   }
 
-  connect(options: SocketOptions = {}) {
-    if (this.socket?.connected) return;
-
-    const {
-      autoConnect = true,
-      reconnection = true,
-      reconnectionAttempts = 5,
-      reconnectionDelay = 1000,
-      timeout = 20000,
-    } = options;
-
-    this.maxReconnectAttempts = reconnectionAttempts;
-    this.reconnectDelay = reconnectionDelay;
-
-    this.socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://localhost:3000', {
-      autoConnect,
-      reconnection,
-      timeout,
-      auth: {
-        token: localStorage.getItem('token'),
+  initialize(httpServer: HTTPServer) {
+    this.io = new SocketIOServer(httpServer, {
+      cors: {
+        origin: process.env.NEXT_PUBLIC_APP_URL,
+        methods: ['GET', 'POST'],
+        credentials: true,
       },
+      transports: ['websocket', 'polling'],
+      pingTimeout: 60000,
+      pingInterval: 25000,
+      maxHttpBufferSize: 1e8,
     });
 
     this.setupEventHandlers();
+    this.setupRedisAdapter();
+  }
+
+  private setupRedisAdapter() {
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    const pubClient = redis.duplicate();
+    const subClient = redis.duplicate();
+
+    Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+      if (this.io) {
+        this.io.adapter(createAdapter(pubClient, subClient));
+      }
+    });
   }
 
   private setupEventHandlers() {
-    if (!this.socket) return;
+    if (!this.io) return;
 
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
-      this.reconnectAttempts = 0;
-      this.processMessageQueue();
-    });
-
-    this.socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
-      if (reason === 'io server disconnect') {
-        // Server initiated disconnect, try to reconnect
-        this.socket?.connect();
+    this.io.on('connection', async (socket) => {
+      const userId = socket.handshake.auth.userId;
+      if (!userId) {
+        socket.disconnect();
+        return;
       }
+
+      // Check connection limit
+      const userConnections = Array.from(this.users.values()).filter(
+        (u) => u.userId === userId
+      ).length;
+
+      if (userConnections >= this.MAX_CONNECTIONS_PER_USER) {
+        socket.emit('error', { message: 'Connection limit exceeded' });
+        socket.disconnect();
+        return;
+      }
+
+      // Store user connection
+      const user: SocketUser = {
+        userId,
+        socketId: socket.id,
+        rooms: new Set(),
+      };
+      this.users.set(socket.id, user);
+
+      // Join user's personal room
+      socket.join(`user:${userId}`);
+
+      // Handle message events
+      socket.on('message:new', async (data) => {
+        try {
+          const message = await prisma.message.create({
+            data: {
+              ...data,
+              timestamp: new Date(),
+            },
+            include: {
+              conversation: true,
+            },
+          });
+
+          // Broadcast to conversation room
+          this.io?.to(`conversation:${message.conversationId}`).emit(
+            'message:created',
+            message
+          );
+
+          // Notify other users in the conversation
+          const conversation = await prisma.conversation.findUnique({
+            where: { id: message.conversationId },
+            include: { messages: true },
+          });
+
+          if (conversation) {
+            const participants = new Set([
+              ...conversation.messages.map((m) => m.senderId),
+              ...conversation.messages.map((m) => m.recipientId),
+            ]);
+
+            participants.forEach((participantId) => {
+              if (participantId !== userId) {
+                this.io?.to(`user:${participantId}`).emit('notification:new_message', {
+                  conversationId: message.conversationId,
+                  message,
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error handling new message:', error);
+          socket.emit('error', { message: 'Failed to send message' });
+        }
+      });
+
+      // Handle conversation events
+      socket.on('conversation:join', (conversationId) => {
+        socket.join(`conversation:${conversationId}`);
+        user.rooms.add(`conversation:${conversationId}`);
+      });
+
+      socket.on('conversation:leave', (conversationId) => {
+        socket.leave(`conversation:${conversationId}`);
+        user.rooms.delete(`conversation:${conversationId}`);
+      });
+
+      // Handle lead score updates
+      socket.on('lead:update', async (data) => {
+        try {
+          const { conversationId, score } = data;
+          const conversation = await prisma.conversation.update({
+            where: { id: conversationId },
+            data: {
+              leadScore: score,
+              priority: score > 0.7 ? 'high' : score > 0.4 ? 'medium' : 'low',
+            },
+          });
+
+          this.io?.to(`conversation:${conversationId}`).emit(
+            'lead:updated',
+            conversation
+          );
+
+          // Notify high-priority leads
+          if (conversation.priority === 'high') {
+            this.io?.to(`user:${userId}`).emit('notification:high_priority_lead', {
+              conversationId,
+              score,
+            });
+          }
+        } catch (error) {
+          console.error('Error updating lead score:', error);
+          socket.emit('error', { message: 'Failed to update lead score' });
+        }
+      });
+
+      // Handle disconnection
+      socket.on('disconnect', () => {
+        this.users.delete(socket.id);
+      });
     });
-
-    this.socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      this.handleReconnect();
-    });
-
-    this.socket.on('error', (error) => {
-      console.error('Socket error:', error);
-    });
   }
 
-  private handleReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      setTimeout(() => {
-        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-        this.socket?.connect();
-      }, this.reconnectDelay * this.reconnectAttempts);
-    } else {
-      console.error('Max reconnection attempts reached');
-    }
+  // Utility methods for emitting events
+  emitToUser(userId: string, event: string, data: any) {
+    this.io?.to(`user:${userId}`).emit(event, data);
   }
 
-  private processMessageQueue() {
-    if (!this.socket?.connected || this.messageQueue.length === 0) return;
-
-    const batch = this.messageQueue.splice(0, 10); // Process up to 10 messages at a time
-    batch.forEach((message) => {
-      this.socket?.emit(message.type, message.payload);
-    });
-
-    if (this.messageQueue.length > 0) {
-      this.batchTimeout = setTimeout(() => this.processMessageQueue(), this.batchInterval);
-    }
+  emitToConversation(conversationId: string, event: string, data: any) {
+    this.io?.to(`conversation:${conversationId}`).emit(event, data);
   }
 
-  emit(type: string, payload: any) {
-    if (!this.socket?.connected) {
-      this.messageQueue.push({ type, payload });
-      return;
-    }
-
-    this.socket.emit(type, payload);
-  }
-
-  on(type: string, callback: (payload: any) => void) {
-    this.socket?.on(type, callback);
-  }
-
-  off(type: string, callback: (payload: any) => void) {
-    this.socket?.off(type, callback);
-  }
-
-  disconnect() {
-    if (this.batchTimeout) {
-      clearTimeout(this.batchTimeout);
-    }
-    this.socket?.disconnect();
+  emitToAll(event: string, data: any) {
+    this.io?.emit(event, data);
   }
 }
 
-// React hook for using the socket
-export function useSocket(options: SocketOptions = {}) {
-  const [isConnected, setIsConnected] = useState(false);
-  const socketManager = useRef(SocketManager.getInstance());
-
-  useEffect(() => {
-    const socket = socketManager.current;
-
-    socket.connect(options);
-
-    socket.on('connect', () => setIsConnected(true));
-    socket.on('disconnect', () => setIsConnected(false));
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [options]);
-
-  return {
-    socket: socketManager.current,
-    isConnected,
-  };
-}
-
-// Export singleton instance
-export const socketManager = SocketManager.getInstance(); 
+export const socketService = SocketService.getInstance(); 
