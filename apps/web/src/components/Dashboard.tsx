@@ -330,7 +330,7 @@ export default function Dashboard() {
                 />
                 <YAxis domain={[0, 1]} />
                 <Tooltip
-                  labelFormatter={(date) =>
+                  labelFormatter={(date: string) =>
                     new Date(date).toLocaleString()
                   }
                 />
