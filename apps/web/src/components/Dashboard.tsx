@@ -11,9 +11,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Cell,
 } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import SearchBar from './SearchBar';
 import { useMessageTemplates } from '../hooks/useMessageTemplates';
@@ -27,6 +26,7 @@ interface Message {
   leadScore: number;
   keywords: string[];
   createdAt: string;
+  conversationId: string;
 }
 
 interface Conversation {
@@ -36,6 +36,8 @@ interface Conversation {
   engagementScore: number;
   leadScore: number;
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  createdAt: string;
+  keywords: string[];
 }
 
 interface KeywordFrequency {
@@ -50,12 +52,20 @@ interface SearchFilters {
   keywords: string[];
 }
 
+type TimeRange = '1h' | '24h' | '7d';
+
+const timeRangeMap: Record<TimeRange, number> = {
+  '1h': 3600000,
+  '24h': 86400000,
+  '7d': 604800000,
+};
+
 export default function Dashboard() {
-  const { onMessage, onConversation, onError } = useWebSocket();
+  const { send, connected } = useWebSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [keywordFrequencies, setKeywordFrequencies] = useState<KeywordFrequency[]>([]);
-  const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d'>('24h');
+  const [timeRange, setTimeRange] = useState<TimeRange>('24h');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     sentiment: 'all',
@@ -88,37 +98,38 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const unsubscribeMessage = onMessage((message) => {
-      setMessages((prev) => [...prev, message]);
-      updateKeywordFrequencies([...messages, message]);
-    });
+    if (!connected) return;
 
-    const unsubscribeConversation = onConversation((conversation) => {
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === conversation.id ? { ...c, ...conversation } : c
-        )
-      );
-    });
-
-    const unsubscribeError = onError((error) => {
-      console.error('WebSocket error:', error);
-    });
+    const handleMessage = (data: any) => {
+      if (data.type === 'message') {
+        setMessages((prev) => [...prev, data]);
+        updateKeywordFrequencies([...messages, data]);
+      } else if (data.type === 'conversation') {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === data.id ? { ...c, ...data } : c
+          )
+        );
+      }
+    };
 
     return () => {
-      unsubscribeMessage();
-      unsubscribeConversation();
-      unsubscribeError();
+      // Cleanup is handled by the useWebSocket hook
     };
-  }, [onMessage, onConversation, onError]);
+  }, [connected, messages]);
 
   const updateKeywordFrequencies = (msgs: Message[]) => {
-    const frequencies = msgs.reduce((acc, msg) => {
+    const now = Date.now();
+    const filteredMessages = msgs.filter(
+      (msg) => now - new Date(msg.createdAt).getTime() <= timeRangeMap[timeRange]
+    );
+
+    const frequencies: Record<string, number> = {};
+    filteredMessages.forEach((msg) => {
       msg.keywords.forEach((keyword) => {
-        acc[keyword] = (acc[keyword] || 0) + 1;
+        frequencies[keyword] = (frequencies[keyword] || 0) + 1;
       });
-      return acc;
-    }, {} as Record<string, number>);
+    });
 
     setKeywordFrequencies(
       Object.entries(frequencies)
@@ -201,48 +212,33 @@ export default function Dashboard() {
   }, [messages, conversations, searchQuery, searchFilters]);
 
   const getFilteredConversations = useCallback(() => {
-    let filtered = conversations;
+    const now = Date.now();
+    return conversations.filter((conv) => {
+      let matchesTimeRange = true;
+      if (searchFilters.dateRange !== 'all') {
+        matchesTimeRange =
+          now - new Date(conv.createdAt).getTime() <= timeRangeMap[searchFilters.dateRange as TimeRange];
+      }
 
-    // Apply search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (conv) =>
-          conv.id.toLowerCase().includes(query) ||
-          messages
-            .filter((msg) => msg.conversationId === conv.id)
-            .some((msg) => msg.content.toLowerCase().includes(query))
-      );
-    }
+      const matchesPriority =
+        searchFilters.priority === 'all' ||
+        conv.priority.toLowerCase() === searchFilters.priority;
 
-    // Apply priority filter
-    if (searchFilters.priority !== 'all') {
-      filtered = filtered.filter(
-        (conv) => conv.priority === searchFilters.priority.toUpperCase()
-      );
-    }
+      const matchesSentiment =
+        searchFilters.sentiment === 'all' ||
+        (searchFilters.sentiment === 'positive' && conv.sentimentSummary > 0) ||
+        (searchFilters.sentiment === 'negative' && conv.sentimentSummary < 0) ||
+        (searchFilters.sentiment === 'neutral' && conv.sentimentSummary === 0);
 
-    // Apply date range filter
-    if (searchFilters.dateRange !== 'all') {
-      const now = new Date();
-      const timeRanges = {
-        '1h': 60 * 60 * 1000,
-        '24h': 24 * 60 * 60 * 1000,
-        '7d': 7 * 24 * 60 * 60 * 1000,
-      };
-      filtered = filtered.filter((conv) =>
-        messages
-          .filter((msg) => msg.conversationId === conv.id)
-          .some(
-            (msg) =>
-              now.getTime() - new Date(msg.createdAt).getTime() <=
-              timeRanges[searchFilters.dateRange]
-          )
-      );
-    }
+      const matchesKeywords =
+        searchFilters.keywords.length === 0 ||
+        searchFilters.keywords.some((keyword) =>
+          conv.keywords.includes(keyword)
+        );
 
-    return filtered;
-  }, [conversations, messages, searchQuery, searchFilters]);
+      return matchesTimeRange && matchesPriority && matchesSentiment && matchesKeywords;
+    });
+  }, [conversations, searchFilters]);
 
   const getSentimentColor = (score: number) => {
     if (score >= 0.7) return '#10B981'; // green
@@ -282,6 +278,16 @@ export default function Dashboard() {
     }
   };
 
+  const formatDate = (date: Date | string): string => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return formatDistanceToNow(dateObj, { addSuffix: true });
+  };
+
+  const handleTimeRangeChange = (range: TimeRange) => {
+    setTimeRange(range);
+    updateKeywordFrequencies(messages);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -290,7 +296,7 @@ export default function Dashboard() {
           {(['1h', '24h', '7d'] as const).map((range) => (
             <button
               key={range}
-              onClick={() => setTimeRange(range)}
+              onClick={() => handleTimeRangeChange(range as TimeRange)}
               className={`px-3 py-1 rounded-md text-sm font-medium ${
                 timeRange === range
                   ? 'bg-blue-100 text-blue-700'
@@ -358,9 +364,12 @@ export default function Dashboard() {
                 <Tooltip />
                 <Bar dataKey="count" fill="#3B82F6">
                   {keywordFrequencies.map((entry, index) => (
-                    <Cell
+                    <motion.div
                       key={`cell-${index}`}
-                      fill={`hsl(${(index * 360) / keywordFrequencies.length}, 70%, 50%)`}
+                      className="h-6 w-6 rounded-full"
+                      style={{
+                        backgroundColor: `hsl(${(index * 360) / keywordFrequencies.length}, 70%, 50%)`,
+                      }}
                     />
                   ))}
                 </Bar>
@@ -379,37 +388,35 @@ export default function Dashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Recent Messages</h2>
           <div className="space-y-4">
-            <AnimatePresence>
-              {getFilteredMessages().slice(-5).map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="border-b pb-4 last:border-b-0"
-                >
-                  <p className="text-sm text-gray-600">{message.content}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: getSentimentColor(message.sentimentScore),
-                        }}
-                      />
-                      <span className="text-xs text-gray-500">
-                        {message.sentimentScore.toFixed(2)}
-                      </span>
-                    </div>
+            {getFilteredMessages().slice(-5).map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="border-b pb-4 last:border-b-0"
+              >
+                <p className="text-sm text-gray-600">{message.content}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{
+                        backgroundColor: getSentimentColor(message.sentimentScore),
+                      }}
+                    />
                     <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(message.createdAt), {
-                        addSuffix: true,
-                      })}
+                      {message.sentimentScore.toFixed(2)}
                     </span>
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                  <span className="text-xs text-gray-500">
+                    {formatDistanceToNow(new Date(message.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
@@ -421,41 +428,39 @@ export default function Dashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Active Conversations</h2>
           <div className="space-y-4">
-            <AnimatePresence>
-              {getFilteredConversations()
-                .filter((c) => c.status === 'OPEN')
-                .slice(-5)
-                .map((conversation) => (
-                  <motion.div
-                    key={conversation.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="border-b pb-4 last:border-b-0"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">
-                        Conversation {conversation.id}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          conversation.priority === 'HIGH'
-                            ? 'bg-red-100 text-red-800'
-                            : conversation.priority === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {conversation.priority}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>Engagement: {conversation.engagementScore.toFixed(2)}</span>
-                      <span>Lead: {conversation.leadScore.toFixed(2)}</span>
-                    </div>
-                  </motion.div>
-                ))}
-            </AnimatePresence>
+            {getFilteredConversations()
+              .filter((c) => c.status === 'OPEN')
+              .slice(-5)
+              .map((conversation) => (
+                <motion.div
+                  key={conversation.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="border-b pb-4 last:border-b-0"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">
+                      Conversation {conversation.id}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        conversation.priority === 'HIGH'
+                          ? 'bg-red-100 text-red-800'
+                          : conversation.priority === 'MEDIUM'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {conversation.priority}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>Engagement: {conversation.engagementScore.toFixed(2)}</span>
+                    <span>Lead: {conversation.leadScore.toFixed(2)}</span>
+                  </div>
+                </motion.div>
+              ))}
           </div>
         </motion.div>
 
@@ -475,15 +480,17 @@ export default function Dashboard() {
                 <Tooltip />
                 <Bar dataKey="leadScore" fill="#3B82F6">
                   {getFilteredConversations().map((entry, index) => (
-                    <Cell
+                    <motion.div
                       key={`cell-${index}`}
-                      fill={
-                        entry.priority === 'HIGH'
-                          ? '#EF4444'
-                          : entry.priority === 'MEDIUM'
-                          ? '#F59E0B'
-                          : '#10B981'
-                      }
+                      className="h-6 w-6 rounded-full"
+                      style={{
+                        backgroundColor:
+                          entry.priority === 'HIGH'
+                            ? '#EF4444'
+                            : entry.priority === 'MEDIUM'
+                            ? '#F59E0B'
+                            : '#10B981',
+                      }}
                     />
                   ))}
                 </Bar>
