@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useState, useEffect } from 'react';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -21,6 +22,12 @@ const defaultData: AnalyticsData = {
 };
 
 export function useAnalytics() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { data, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ['analytics'],
     queryFn: async () => {
@@ -28,7 +35,7 @@ export function useAnalytics() {
       return response.data;
     },
     // Disable the query during SSR
-    enabled: typeof window !== 'undefined',
+    enabled: mounted,
     // Provide default data during SSR
     initialData: defaultData
   });
