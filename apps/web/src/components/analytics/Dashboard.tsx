@@ -20,6 +20,8 @@ import { Button } from '../common/Button';
 import { Badge } from '../common/Badge';
 import { Skeleton } from '../common/Skeleton';
 import { useTheme } from '@/hooks/useTheme';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { formatNumber, formatDate } from '@/utils/format';
 
 interface ChartData {
   name: string;
@@ -352,5 +354,47 @@ export function ChartCard({ title, children, isLoading = false, error }: ChartCa
         </motion.div>
       )}
     </Card>
+  );
+}
+
+export default function DashboardPage() {
+  const { theme } = useTheme();
+  const { data, loading, error } = useAnalytics();
+  const [timeRange, setTimeRange] = useState('7d');
+
+  return (
+    <Dashboard
+      title="Analytics Dashboard"
+      data={data || []}
+      type="area"
+      metrics={[
+        {
+          label: "Total Users",
+          value: formatNumber(data?.totalUsers || 0),
+          change: data?.userGrowth || 0,
+          trend: data?.userGrowth > 0 ? 'up' : 'down'
+        },
+        {
+          label: "Active Users",
+          value: formatNumber(data?.activeUsers || 0),
+          change: data?.activeUserGrowth || 0,
+          trend: data?.activeUserGrowth > 0 ? 'up' : 'down'
+        }
+      ]}
+      filters={[
+        {
+          label: "Time Range",
+          options: [
+            { value: '7d', label: 'Last 7 Days' },
+            { value: '30d', label: 'Last 30 Days' },
+            { value: '90d', label: 'Last 90 Days' }
+          ],
+          value: timeRange,
+          onChange: setTimeRange
+        }
+      ]}
+      isLoading={loading}
+      error={error?.message}
+    />
   );
 }
