@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { FeedbackList } from '@/components/feedback/FeedbackList';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/hooks/useToast';
+
+// Dynamically import the FeedbackList component with SSR disabled
+const FeedbackList = dynamic(
+  () => import('@/components/feedback/FeedbackList').then(mod => mod.FeedbackList),
+  { ssr: false }
+);
 
 interface Feedback {
   id: string;
@@ -26,10 +32,13 @@ export default function FeedbackPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
+      return;
     }
-  }, [status, router]);
 
-  useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+
     if (session?.user?.role !== 'admin') {
       router.push('/');
       return;
@@ -50,7 +59,7 @@ export default function FeedbackPage() {
     };
 
     fetchFeedback();
-  }, [session, router, showToast]);
+  }, [session, status, router, showToast]);
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
@@ -71,12 +80,18 @@ export default function FeedbackPage() {
     }
   };
 
-  if (loading) {
+  // Show loading state while session is being determined
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
       </div>
     );
+  }
+
+  // Don't render anything if not authenticated or not admin
+  if (status === 'unauthenticated' || session?.user?.role !== 'admin') {
+    return null;
   }
 
   return (

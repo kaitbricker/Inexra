@@ -2,6 +2,7 @@
 
 import { LogRocketProvider } from '@/components/LogRocketProvider';
 import { ThemeProvider } from '@/hooks/useTheme2';
+import { Toast } from '@/components/ui/Toast';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -10,7 +11,10 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeProvider>
-      <LogRocketProvider>{children}</LogRocketProvider>
+      <LogRocketProvider>
+        {children}
+        <Toast />
+      </LogRocketProvider>
     </ThemeProvider>
   );
 }
