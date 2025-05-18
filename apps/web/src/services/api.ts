@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
@@ -58,6 +58,4 @@ export const auditLogApi = {
     api.get('/audit-logs', { params }),
   getUserAuditLogs: (userId: string, params?: { page?: number; limit?: number }) =>
     api.get(`/audit-logs/${userId}`, { params }),
-};
-
-export default api; 
+}; 
