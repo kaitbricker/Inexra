@@ -55,12 +55,8 @@ class WebSocketService extends EventEmitter {
   private reconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(
-        `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
-      );
       setTimeout(() => this.connect(), this.reconnectTimeout * this.reconnectAttempts);
     } else {
-      console.error('Max reconnection attempts reached');
       this.emit('reconnect_failed');
     }
   }
@@ -81,11 +77,15 @@ class WebSocketService extends EventEmitter {
   }
 }
 
-// Create a singleton instance
-const wsUrl =
-  process.env.NODE_ENV === 'production'
-    ? `wss://${window.location.host}/api/ws`
-    : 'ws://localhost:3000/api/ws';
-const wsService = new WebSocketService(wsUrl);
+// Create a singleton instance that's only initialized on the client side
+let wsService: WebSocketService | null = null;
+
+if (typeof window !== 'undefined') {
+  const wsUrl =
+    process.env.NODE_ENV === 'production'
+      ? `wss://${window.location.host}/api/ws`
+      : 'ws://localhost:3000/api/ws';
+  wsService = new WebSocketService(wsUrl);
+}
 
 export default wsService;

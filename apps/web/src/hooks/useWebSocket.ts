@@ -1,14 +1,20 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import wsService from '@/services/websocket';
 
 export const useWebSocket = () => {
+  const [isConnected, setIsConnected] = useState(false);
+
   const send = useCallback((data: any) => {
-    wsService.send(data);
+    if (wsService) {
+      wsService.send(data);
+    }
   }, []);
 
   useEffect(() => {
+    if (!wsService) return;
+
     const handleMessage = (data: any) => {
       // Handle incoming messages
       console.log('Received message:', data);
@@ -20,6 +26,12 @@ export const useWebSocket = () => {
 
     const handleDisconnect = () => {
       console.log('WebSocket disconnected');
+      setIsConnected(false);
+    };
+
+    const handleConnect = () => {
+      console.log('WebSocket connected');
+      setIsConnected(true);
     };
 
     const handleReconnectFailed = () => {
@@ -27,22 +39,30 @@ export const useWebSocket = () => {
     };
 
     // Subscribe to events
-    wsService.on('message', handleMessage);
-    wsService.on('error', handleError);
-    wsService.on('disconnected', handleDisconnect);
-    wsService.on('reconnect_failed', handleReconnectFailed);
+    if (wsService) {
+      const service = wsService;
+      service.on('message', handleMessage);
+      service.on('error', handleError);
+      service.on('disconnected', handleDisconnect);
+      service.on('connected', handleConnect);
+      service.on('reconnect_failed', handleReconnectFailed);
 
-    // Cleanup
-    return () => {
-      wsService.removeListener('message', handleMessage);
-      wsService.removeListener('error', handleError);
-      wsService.removeListener('disconnected', handleDisconnect);
-      wsService.removeListener('reconnect_failed', handleReconnectFailed);
-    };
+      // Set initial connection state
+      setIsConnected(service.listenerCount('connected') > 0);
+
+      // Cleanup
+      return () => {
+        service.removeListener('message', handleMessage);
+        service.removeListener('error', handleError);
+        service.removeListener('disconnected', handleDisconnect);
+        service.removeListener('connected', handleConnect);
+        service.removeListener('reconnect_failed', handleReconnectFailed);
+      };
+    }
   }, []);
 
   return {
     send,
-    connected: wsService.listenerCount('connected') > 0,
+    connected: isConnected,
   };
 };
