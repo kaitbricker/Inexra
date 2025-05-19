@@ -23,7 +23,10 @@ const enhancedAuthOptions = {
       },
       async authorize(credentials) {
         try {
+          console.log('Authorize called with credentials:', { email: credentials?.email });
+          
           if (!credentials?.email || !credentials?.password) {
+            console.error('Missing credentials');
             throw new Error('Email and password are required');
           }
 
@@ -38,13 +41,18 @@ const enhancedAuthOptions = {
             },
           });
 
+          console.log('User found:', user ? 'Yes' : 'No');
+
           if (!user || !user.passwordHash) {
+            console.error('Invalid credentials - user not found or no password hash');
             throw new Error('Invalid email or password');
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          console.log('Password valid:', isPasswordValid);
 
           if (!isPasswordValid) {
+            console.error('Invalid credentials - password mismatch');
             throw new Error('Invalid email or password');
           }
 
@@ -80,11 +88,12 @@ const enhancedAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      if (url.startsWith('/')) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      console.log('Redirect called with:', { url, baseUrl });
+      // Always redirect to the dashboard after login
+      return `${baseUrl}/dashboard`;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+      console.log('Session callback called with token:', token);
       if (session.user) {
         session.user.id = token.sub as string;
         session.user.role = token.role as string;
@@ -92,6 +101,7 @@ const enhancedAuthOptions = {
       return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
+      console.log('JWT callback called with:', { token, user });
       if (user) {
         token.role = user.role;
       }
@@ -107,7 +117,7 @@ const enhancedAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug mode in production temporarily
 };
 
 const handler = NextAuth(enhancedAuthOptions);
