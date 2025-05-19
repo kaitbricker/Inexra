@@ -1,8 +1,7 @@
 'use client';
 
-import { LogRocketProvider } from '@/components/LogRocketProvider';
-import { ThemeProvider } from '@/hooks/useTheme2';
-import { Toast } from '@/components/ui/Toast';
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/toaster';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -10,11 +9,9 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider>
-      <LogRocketProvider>
-        {children}
-        <Toast />
-      </LogRocketProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+      <Toaster />
     </ThemeProvider>
   );
 }

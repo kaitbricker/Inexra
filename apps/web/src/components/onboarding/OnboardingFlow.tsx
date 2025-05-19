@@ -17,6 +17,8 @@ import { PlatformConnection } from './PlatformConnection';
 import { UserPreferences, type UserPreferences as UserPreferencesType } from './UserPreferences';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import { platformConfigs } from '@/config/platforms';
 
 interface Step {
   id: string;
@@ -50,13 +52,13 @@ const STEPS: Step[] = [
   },
   {
     id: 'connect',
-    title: 'Connect your accounts',
-    description: 'Link your social media and messaging platforms.',
+    title: 'Connect Your Accounts',
+    description: 'Connect your social media accounts to get started.',
   },
   {
     id: 'preferences',
-    title: 'Set your preferences',
-    description: 'Customize your notification and automation settings.',
+    title: 'Set Your Preferences',
+    description: 'Customize your experience with Inexra.',
   },
 ];
 
@@ -172,6 +174,7 @@ const OnboardingFlow: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { toast } = useToast();
 
   const getOptimizedConfig = useCallback(
     (baseConfig: typeof ANIMATION_VARIANTS) => {
@@ -202,15 +205,17 @@ const OnboardingFlow: React.FC = () => {
     }
   }, [router]);
 
-  const handleNext = useCallback(() => {
-    if (validateStep(STEPS[currentStep].id, data)) {
-      if (currentStep === STEPS.length - 1) {
-        handleSubmit();
-      } else {
-        setCurrentStep((prev) => prev + 1);
-      }
+  const handleNext = useCallback(async () => {
+    const step = STEPS[currentStep];
+    if (!validateStep(step.id, data)) {
+      setError('Please complete this step before continuing');
+      return;
+    }
+
+    if (currentStep === STEPS.length - 1) {
+      handleSubmit();
     } else {
-      setError('Please complete all required fields');
+      setCurrentStep((prev) => prev + 1);
     }
   }, [currentStep, data, handleSubmit]);
 
@@ -236,15 +241,42 @@ const OnboardingFlow: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      // TODO: Implement platform connection logic
-      const updatedPlatforms = [...(data.platforms || []), platformId];
-      setData((prev) => ({ ...prev, platforms: updatedPlatforms }));
+
+      const config = platformConfigs[platformId];
+      if (!config.isConfigured) {
+        throw new Error(`${platformId} integration is not configured`);
+      }
+
+      // Generate state parameter for OAuth
+      const state = Math.random().toString(36).substring(7);
+
+      // Store state in session storage
+      sessionStorage.setItem('oauth_state', state);
+
+      // Construct OAuth URL
+      const params = new URLSearchParams({
+        client_id: config.appId!,
+        redirect_uri: config.redirectUri!,
+        response_type: config.responseType!,
+        scope: config.scope!,
+        state,
+      });
+
+      const authUrl = `${config.authUrl}?${params.toString()}`;
+
+      // Redirect to OAuth provider
+      window.location.href = authUrl;
     } catch (err) {
-      setError('Failed to connect platform');
+      console.error(`Failed to connect ${platformId}:`, err);
+      toast({
+        title: 'Connection Failed',
+        description: err instanceof Error ? err.message : 'Failed to connect platform',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [data]);
+  }, [toast]);
 
   const handleSavePreferences = useCallback(async (preferences: UserPreferencesType) => {
     try {
