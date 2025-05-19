@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import { AuthOptions } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { identifyUser } from '@/utils/logrocket';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';

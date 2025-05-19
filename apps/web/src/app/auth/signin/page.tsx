@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [error, setError] = useState("");
@@ -10,6 +11,7 @@ export default function SignInPage() {
   const [registerError, setRegisterError] = useState("");
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const router = useRouter();
 
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,7 +37,16 @@ export default function SignInPage() {
       setRegisterSuccess(true);
       setRegisterLoading(false);
       // Auto sign in after registration
-      await signIn("credentials", { email, password, callbackUrl: "/" });
+      const result = await signIn("credentials", { 
+        email, 
+        password, 
+        redirect: false 
+      });
+      if (result?.error) {
+        setRegisterError("Registration successful but sign in failed. Please try signing in manually.");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setRegisterError("Registration failed. Please try again.");
       setRegisterLoading(false);
@@ -56,17 +67,21 @@ export default function SignInPage() {
               const form = e.target as HTMLFormElement;
               const email = (form.elements.namedItem("email") as HTMLInputElement).value;
               const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-              const res = await signIn("credentials", {
-                email,
-                password,
-                callbackUrl: "/dashboard",
-                redirect: false,
-              });
-              setLoading(false);
-              if (res?.error) {
-                setError("Invalid email or password.");
-              } else if (res?.ok) {
-                window.location.href = "/dashboard";
+              try {
+                const result = await signIn("credentials", {
+                  email,
+                  password,
+                  redirect: false,
+                });
+                setLoading(false);
+                if (result?.error) {
+                  setError("Invalid email or password.");
+                } else if (result?.ok) {
+                  router.push("/dashboard");
+                }
+              } catch (err) {
+                setError("An error occurred. Please try again.");
+                setLoading(false);
               }
             }}
           >
@@ -127,28 +142,13 @@ export default function SignInPage() {
             </button>
           </form>
         )}
-        <div className="mt-6 text-center">
-          {!showRegister ? (
-            <span>
-              Don&apos;t have an account?{' '}
-              <button
-                className="text-indigo-600 hover:underline font-semibold"
-                onClick={() => setShowRegister(true)}
-              >
-                Create one
-              </button>
-            </span>
-          ) : (
-            <span>
-              Already have an account?{' '}
-              <button
-                className="text-indigo-600 hover:underline font-semibold"
-                onClick={() => setShowRegister(false)}
-              >
-                Sign in
-              </button>
-            </span>
-          )}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setShowRegister(!showRegister)}
+            className="text-indigo-600 hover:text-indigo-700"
+          >
+            {showRegister ? "Already have an account? Sign In" : "Don't have an account? Register"}
+          </button>
         </div>
       </div>
     </div>
