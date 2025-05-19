@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         name,
         email,
         passwordHash: hashedPassword,
-        role: 'user',
+        role: 'BASIC_USER',
       },
       select: {
         id: true,
@@ -49,4 +49,11 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: 'Registration failed.' }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+    status: 405,
+    headers: { 'Content-Type': 'application/json' },
+  });
 } 
