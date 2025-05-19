@@ -11,9 +11,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/hooks/useTheme';
