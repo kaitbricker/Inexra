@@ -27,11 +27,6 @@ export default function Layout({ children }: LayoutProps) {
   const { data: session } = useSession();
   const router = useRouter();
 
-  if (!session) {
-    router.push('/auth/signin');
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
@@ -75,15 +70,15 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex-shrink-0">
                 <img
                   className="h-8 w-8 rounded-full"
-                  src={session.user?.image || '/default-avatar.png'}
+                  src={session?.user?.image || '/default-avatar.png'}
                   alt=""
                 />
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {session.user?.name}
+                  {session?.user?.name || 'User'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{session.user?.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{session?.user?.email || ''}</p>
               </div>
             </div>
             <button
