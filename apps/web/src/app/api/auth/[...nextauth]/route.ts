@@ -10,6 +10,8 @@ import bcrypt from 'bcryptjs';
 
 console.log("NextAuth API route loaded");
 
+export const dynamic = 'force-dynamic';
+
 const enhancedAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -21,10 +23,8 @@ const enhancedAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          console.log('Authorize called with:', credentials);
           if (!credentials?.email || !credentials?.password) {
-            console.error('Missing email or password');
-            throw new Error('Invalid credentials');
+            throw new Error('Email and password are required');
           }
 
           const user = await prisma.user.findUnique({
@@ -38,20 +38,14 @@ const enhancedAuthOptions = {
             },
           });
 
-          console.log('User found:', user);
-
           if (!user || !user.passwordHash) {
-            console.error('User not found or missing passwordHash');
-            throw new Error('Invalid credentials');
+            throw new Error('Invalid email or password');
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
 
-          console.log('Password valid:', isPasswordValid);
-
           if (!isPasswordValid) {
-            console.error('Password is not valid');
-            throw new Error('Invalid credentials');
+            throw new Error('Invalid email or password');
           }
 
           return {
@@ -61,7 +55,7 @@ const enhancedAuthOptions = {
             role: user.role,
           };
         } catch (error) {
-          console.error('Error in authorize:', error);
+          console.error('Auth error:', error);
           throw error;
         }
       },
@@ -81,13 +75,14 @@ const enhancedAuthOptions = {
         }
         return true;
       } catch (error) {
-        console.error('Error in signIn callback:', error);
+        console.error('Sign in error:', error);
         return false;
       }
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      // Always redirect to dashboard after login
-      return baseUrl + '/dashboard';
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
@@ -112,6 +107,7 @@ const enhancedAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
 
 const handler = NextAuth(enhancedAuthOptions);
