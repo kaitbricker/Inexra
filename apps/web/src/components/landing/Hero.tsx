@@ -1,4 +1,4 @@
-import { motion as Motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export function Hero() {
 
       {/* Content */}
       <div className="container relative z-10 mx-auto px-4 py-20 text-center">
-        <Motion.div
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -41,7 +41,7 @@ export function Hero() {
               Learn More
             </Button>
           </div>
-        </Motion.div>
+        </motion.div>
       </div>
 
       {/* Decorative Elements */}

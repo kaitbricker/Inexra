@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 
 const marketingPhrases = [
   'Turn Conversations into Clarity.',

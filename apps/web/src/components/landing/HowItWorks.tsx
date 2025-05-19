@@ -1,4 +1,4 @@
-import { motion as Motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Link2, Activity, Lightbulb } from 'lucide-react';
 
 const steps = [

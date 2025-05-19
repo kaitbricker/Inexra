@@ -1,30 +1,29 @@
-import { motion as Motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 
 const testimonials = [
   {
-    content:
-      'Inexra has transformed how we handle customer conversations. The insights are invaluable!',
-    author: 'Sarah Johnson',
+    name: 'Sarah Johnson',
+    role: 'Content Creator',
+    avatar: '/testimonials/avatar1.jpg',
+    rating: 5,
+    content: "Inexra has transformed how I manage my social media presence. The analytics are incredibly detailed and the automation features save me hours every week.",
+  },
+  {
+    name: 'Michael Chen',
     role: 'Marketing Director',
-    company: 'TechCorp',
-    avatar: '/avatars/sarah.jpg',
+    avatar: '/testimonials/avatar2.jpg',
+    rating: 5,
+    content: "The platform's ability to analyze engagement patterns and suggest optimal posting times has significantly improved our social media performance.",
   },
   {
-    content: 'The automated tagging and sentiment analysis save us hours every week. Game changer!',
-    author: 'Michael Chen',
-    role: 'Customer Success Lead',
-    company: 'GrowthLabs',
-    avatar: '/avatars/michael.jpg',
-  },
-  {
-    content:
-      'Finally, a tool that helps us understand our audience better. The heatmaps are incredible.',
-    author: 'Emma Rodriguez',
+    name: 'Emma Rodriguez',
     role: 'Social Media Manager',
-    company: 'BrandBoost',
-    avatar: '/avatars/emma.jpg',
+    avatar: '/testimonials/avatar3.jpg',
+    rating: 5,
+    content: "The customer support team is exceptional, and the platform's features are exactly what we needed to scale our social media operations.",
   },
 ];
 
@@ -40,58 +39,63 @@ export function Testimonials() {
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4">
-        <Motion.div
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center"
         >
-          <h2 className="text-4xl font-bold mb-4">Trusted by Creators & Teams</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            See what our users have to say about their experience with Inexra
+          <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+            Trusted by Industry Leaders
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+            See what our customers have to say about their experience with Inexra
           </p>
-        </Motion.div>
+        </motion.div>
 
         {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => (
-            <Motion.div
-              key={testimonial.author}
+            <motion.div
+              key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-card rounded-2xl p-6 shadow-lg"
+              className="relative rounded-lg bg-white/5 p-6 backdrop-blur-sm"
             >
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <p className="text-lg mb-6">{testimonial.content}</p>
-              <div className="flex items-center gap-4">
-                <div className="relative h-12 w-12 rounded-full overflow-hidden">
+              <div className="mb-4 flex items-center gap-4">
+                <div className="relative h-12 w-12 overflow-hidden rounded-full">
                   <Image
                     src={testimonial.avatar}
-                    alt={testimonial.author}
+                    alt={testimonial.name}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold">{testimonial.author}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {testimonial.role} at {testimonial.company}
-                  </p>
+                  <h4 className="font-semibold text-white">{testimonial.name}</h4>
+                  <p className="text-sm text-gray-400">{testimonial.role}</p>
                 </div>
               </div>
-            </Motion.div>
+              <div className="mb-4 flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-5 w-5 ${
+                      i < testimonial.rating ? 'text-yellow-400' : 'text-gray-600'
+                    }`}
+                    fill={i < testimonial.rating ? 'currentColor' : 'none'}
+                  />
+                ))}
+              </div>
+              <p className="text-gray-300">{testimonial.content}</p>
+            </motion.div>
           ))}
         </div>
 
         {/* Logo Cloud */}
-        <Motion.div
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -106,8 +110,20 @@ export function Testimonials() {
               <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
             </div>
           ))}
-        </Motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 text-center"
+        >
+          <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
+            Join Our Success Stories
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
 }
+

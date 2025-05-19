@@ -1,4 +1,4 @@
-import { motion as Motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { BarChart3, Tag, Heart, Map } from 'lucide-react';
 
 const features = [
