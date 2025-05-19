@@ -1,3 +1,5 @@
+console.log("=== /api/auth/[...nextauth] function loaded ===");
+
 import NextAuth from 'next-auth';
 import type { User, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
@@ -63,8 +65,9 @@ const enhancedAuthOptions = {
             role: user.role,
           };
         } catch (error) {
-          console.error('Auth error:', error);
-          throw error;
+          console.error('Auth error in authorize:', error);
+          // Return null to indicate failed login instead of throwing
+          return null;
         }
       },
     }),
@@ -93,19 +96,29 @@ const enhancedAuthOptions = {
       return `${baseUrl}/dashboard`;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.log('Session callback called with token:', token);
-      if (session.user) {
-        session.user.id = token.sub as string;
-        session.user.role = token.role as string;
+      try {
+        console.log('Session callback called with token:', token);
+        if (session.user) {
+          session.user.id = token.sub as string;
+          session.user.role = token.role as string;
+        }
+        return session;
+      } catch (error) {
+        console.error('Session callback error:', error);
+        return session;
       }
-      return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
-      console.log('JWT callback called with:', { token, user });
-      if (user) {
-        token.role = user.role;
+      try {
+        console.log('JWT callback called with:', { token, user });
+        if (user) {
+          token.role = user.role;
+        }
+        return token;
+      } catch (error) {
+        console.error('JWT callback error:', error);
+        return token;
       }
-      return token;
     },
   },
   pages: {
@@ -120,5 +133,11 @@ const enhancedAuthOptions = {
   debug: true, // Enable debug mode in production temporarily
 };
 
-const handler = NextAuth(enhancedAuthOptions);
+let handler;
+try {
+  handler = NextAuth(enhancedAuthOptions);
+} catch (e) {
+  console.error('Top-level NextAuth error:', e);
+  throw e;
+}
 export { handler as GET, handler as POST };
