@@ -20,10 +20,9 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { formatNumber } from '@/utils/format';
 
 // Dynamically import motion components with SSR disabled
-const MotionDiv = dynamic(
-  () => import('framer-motion').then((mod) => mod.motion.div),
-  { ssr: false }
-);
+const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), {
+  ssr: false,
+});
 
 interface ChartData {
   name: string;
@@ -88,7 +87,7 @@ export function Dashboard({
   const [isRealTime, setIsRealTime] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -111,11 +110,7 @@ export function Dashboard({
     }
 
     if (error) {
-      return (
-        <div className="flex items-center justify-center h-[400px] text-red-500">
-          {error}
-        </div>
-      );
+      return <div className="flex items-center justify-center h-[400px] text-red-500">{error}</div>;
     }
 
     const commonProps = {
@@ -194,7 +189,9 @@ export function Dashboard({
                 label={filter.label}
                 options={filter.options}
                 value={filter.value}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => filter.onChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  filter.onChange(e.target.value)
+                }
                 className="w-40"
               />
             ))}
@@ -258,29 +255,29 @@ export default function DashboardPage() {
       type="bar"
       metrics={[
         {
-          label: "Total Users",
+          label: 'Total Users',
           value: formatNumber(data?.totalUsers || 0),
           change: data?.userGrowth || 0,
-          trend: data?.userGrowth > 0 ? 'up' : 'down'
+          trend: data?.userGrowth > 0 ? 'up' : 'down',
         },
         {
-          label: "Active Users",
+          label: 'Active Users',
           value: formatNumber(data?.activeUsers || 0),
           change: data?.activeUserGrowth || 0,
-          trend: data?.activeUserGrowth > 0 ? 'up' : 'down'
-        }
+          trend: data?.activeUserGrowth > 0 ? 'up' : 'down',
+        },
       ]}
       filters={[
         {
-          label: "Time Range",
+          label: 'Time Range',
           options: [
             { value: '7d', label: 'Last 7 Days' },
             { value: '30d', label: 'Last 30 Days' },
-            { value: '90d', label: 'Last 90 Days' }
+            { value: '90d', label: 'Last 90 Days' },
           ],
           value: timeRange,
-          onChange: setTimeRange
-        }
+          onChange: setTimeRange,
+        },
       ]}
       isLoading={loading}
       error={error?.message}

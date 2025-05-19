@@ -39,4 +39,4 @@ export function formatDateTime(date: Date | string): string {
     minute: 'numeric',
     hour12: true,
   }).format(new Date(date));
-} 
+}

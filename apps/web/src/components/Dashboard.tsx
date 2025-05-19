@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import {
   LineChart,
@@ -54,13 +54,25 @@ interface SearchFilters {
 
 type TimeRange = '1h' | '24h' | '7d';
 
-const timeRangeMap: Record<TimeRange, number> = {
+const TIME_RANGE_MAP: Record<TimeRange, number> = {
   '1h': 3600000,
   '24h': 86400000,
   '7d': 604800000,
 };
 
-export default function Dashboard() {
+const SENTIMENT_COLORS = {
+  positive: '#10B981',
+  neutral: '#F59E0B',
+  negative: '#EF4444',
+} as const;
+
+const PRIORITY_COLORS = {
+  HIGH: 'bg-red-100 text-red-800',
+  MEDIUM: 'bg-yellow-100 text-yellow-800',
+  LOW: 'bg-green-100 text-green-800',
+} as const;
+
+const Dashboard: React.FC = () => {
   const { send, connected } = useWebSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -73,53 +85,53 @@ export default function Dashboard() {
     dateRange: 'all',
     keywords: [],
   });
+
   const {
     templates,
     suggestedTemplates,
-    isLoading: templatesLoading,
     saveTemplate,
     updateTemplate,
     deleteTemplate,
-    getSuggestedTemplates,
   } = useMessageTemplates();
 
   const { insertTemplate, getSuggestedTemplates: getContextualTemplates } = useTemplateSelection({
-    onTemplateInserted: template => {
-      // Show success notification
-      console.log('Template inserted:', template);
+    onTemplateInserted: (template) => {
+      // TODO: Add toast notification
     },
-    onError: error => {
-      // Show error notification
-      console.error('Error inserting template:', error);
+    onError: (error) => {
+      // TODO: Add error notification
     },
   });
 
   useEffect(() => {
     if (!connected) return;
 
-    const handleMessage = (data: any) => {
-      if (data.type === 'message') {
-        setMessages(prev => [...prev, data]);
-        updateKeywordFrequencies([...messages, data]);
-      } else if (data.type === 'conversation') {
-        setConversations(prev => prev.map(c => (c.id === data.id ? { ...c, ...data } : c)));
+    const handleMessage = (data: Message | Conversation) => {
+      if ('content' in data) {
+        setMessages((prev) => [...prev, data as Message]);
+        updateKeywordFrequencies([...messages, data as Message]);
+      } else {
+        setConversations((prev) =>
+          prev.map((c) => (c.id === data.id ? { ...c, ...data } : c))
+        );
       }
     };
 
+    // WebSocket event listeners would be set up here
     return () => {
-      // Cleanup is handled by the useWebSocket hook
+      // Cleanup would be handled by useWebSocket hook
     };
   }, [connected, messages]);
 
-  const updateKeywordFrequencies = (msgs: Message[]) => {
+  const updateKeywordFrequencies = useCallback((msgs: Message[]) => {
     const now = Date.now();
     const filteredMessages = msgs.filter(
-      msg => now - new Date(msg.createdAt).getTime() <= timeRangeMap[timeRange]
+      (msg) => now - new Date(msg.createdAt).getTime() <= TIME_RANGE_MAP[timeRange]
     );
 
     const frequencies: Record<string, number> = {};
-    filteredMessages.forEach(msg => {
-      msg.keywords.forEach(keyword => {
+    filteredMessages.forEach((msg) => {
+      msg.keywords.forEach((keyword) => {
         frequencies[keyword] = (frequencies[keyword] || 0) + 1;
       });
     });
@@ -130,29 +142,27 @@ export default function Dashboard() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
     );
-  };
+  }, [timeRange]);
 
   const handleSearch = useCallback((query: string, filters: SearchFilters) => {
     setSearchQuery(query);
     setSearchFilters(filters);
   }, []);
 
-  const getFilteredMessages = useCallback(() => {
+  const getFilteredMessages = useMemo(() => {
     let filtered = messages;
 
-    // Apply search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        msg =>
+        (msg) =>
           msg.content.toLowerCase().includes(query) ||
-          msg.keywords.some(k => k.toLowerCase().includes(query))
+          msg.keywords.some((k) => k.toLowerCase().includes(query))
       );
     }
 
-    // Apply sentiment filter
     if (searchFilters.sentiment !== 'all') {
-      filtered = filtered.filter(msg => {
+      filtered = filtered.filter((msg) => {
         const score = msg.sentimentScore;
         switch (searchFilters.sentiment) {
           case 'positive':
@@ -167,15 +177,13 @@ export default function Dashboard() {
       });
     }
 
-    // Apply priority filter
     if (searchFilters.priority !== 'all') {
       const conversationIds = conversations
-        .filter(c => c.priority === searchFilters.priority.toUpperCase())
-        .map(c => c.id);
-      filtered = filtered.filter(msg => conversationIds.includes(msg.conversationId));
+        .filter((c) => c.priority === searchFilters.priority.toUpperCase())
+        .map((c) => c.id);
+      filtered = filtered.filter((msg) => conversationIds.includes(msg.conversationId));
     }
 
-    // Apply date range filter
     if (searchFilters.dateRange !== 'all') {
       const now = new Date();
       const timeRanges = {
@@ -184,30 +192,29 @@ export default function Dashboard() {
         '7d': 7 * 24 * 60 * 60 * 1000,
       };
       filtered = filtered.filter(
-        msg =>
+        (msg) =>
           now.getTime() - new Date(msg.createdAt).getTime() <=
           timeRanges[searchFilters.dateRange as '1h' | '24h' | '7d']
       );
     }
 
-    // Apply keyword filter
     if (searchFilters.keywords.length > 0) {
-      filtered = filtered.filter(msg =>
-        searchFilters.keywords.some(keyword => msg.keywords.includes(keyword.toLowerCase()))
+      filtered = filtered.filter((msg) =>
+        searchFilters.keywords.some((keyword) => msg.keywords.includes(keyword.toLowerCase()))
       );
     }
 
     return filtered;
   }, [messages, conversations, searchQuery, searchFilters]);
 
-  const getFilteredConversations = useCallback(() => {
+  const getFilteredConversations = useMemo(() => {
     const now = Date.now();
-    return conversations.filter(conv => {
+    return conversations.filter((conv) => {
       let matchesTimeRange = true;
       if (searchFilters.dateRange !== 'all') {
         matchesTimeRange =
           now - new Date(conv.createdAt).getTime() <=
-          timeRangeMap[searchFilters.dateRange as TimeRange];
+          TIME_RANGE_MAP[searchFilters.dateRange as TimeRange];
       }
 
       const matchesPriority =
@@ -221,69 +228,47 @@ export default function Dashboard() {
 
       const matchesKeywords =
         searchFilters.keywords.length === 0 ||
-        searchFilters.keywords.some(keyword => conv.keywords.includes(keyword));
+        searchFilters.keywords.some((keyword) => conv.keywords.includes(keyword));
 
       return matchesTimeRange && matchesPriority && matchesSentiment && matchesKeywords;
     });
   }, [conversations, searchFilters]);
 
-  const getSentimentColor = (score: number) => {
-    if (score >= 0.7) return '#10B981'; // green
-    if (score >= 0.4) return '#F59E0B'; // yellow
-    return '#EF4444'; // red
-  };
+  const getSentimentColor = useCallback((score: number): string => {
+    if (score >= 0.7) return SENTIMENT_COLORS.positive;
+    if (score >= 0.4) return SENTIMENT_COLORS.neutral;
+    return SENTIMENT_COLORS.negative;
+  }, []);
 
-  // Handle template selection
-  const handleTemplateSelect = async (template: any) => {
+  const handleTemplateSelect = useCallback(async (template: any) => {
     try {
-      // Get the current conversation context
-      const activeConversation = getFilteredConversations()[0];
+      const activeConversation = getFilteredConversations[0];
       if (!activeConversation) {
         throw new Error('No active conversation found');
       }
 
-      // Insert the template into the conversation
       await insertTemplate(template, {
         conversationId: activeConversation.id,
       });
     } catch (error) {
-      console.error('Error selecting template:', error);
+      // TODO: Add error handling
     }
-  };
+  }, [getFilteredConversations, insertTemplate]);
 
-  // Get suggested templates based on current message context
-  const handleGetSuggestedTemplates = async (message: string) => {
-    try {
-      const templates = await getContextualTemplates({
-        message,
-        category: 'support', // TODO: Determine category based on context
-      });
-      // Update suggested templates in the MessageTemplate component
-      // This will be handled by the useMessageTemplates hook
-    } catch (error) {
-      console.error('Error getting suggested templates:', error);
-    }
-  };
-
-  const formatDate = (date: Date | string): string => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return formatDistanceToNow(dateObj, { addSuffix: true });
-  };
-
-  const handleTimeRangeChange = (range: TimeRange) => {
+  const handleTimeRangeChange = useCallback((range: TimeRange) => {
     setTimeRange(range);
     updateKeywordFrequencies(messages);
-  };
+  }, [messages, updateKeywordFrequencies]);
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex space-x-2">
-          {(['1h', '24h', '7d'] as const).map(range => (
+          {(['1h', '24h', '7d'] as const).map((range) => (
             <button
               key={range}
-              onClick={() => handleTimeRangeChange(range as TimeRange)}
+              onClick={() => handleTimeRangeChange(range)}
               className={`px-3 py-1 rounded-md text-sm font-medium ${
                 timeRange === range
                   ? 'bg-blue-100 text-blue-700'
@@ -307,7 +292,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold mb-4">Sentiment Trend</h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={getFilteredMessages()}>
+              <LineChart data={getFilteredMessages}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="createdAt"
@@ -371,37 +356,35 @@ export default function Dashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Recent Messages</h2>
           <div className="space-y-4">
-            {getFilteredMessages()
-              .slice(-5)
-              .map(message => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="border-b pb-4 last:border-b-0"
-                >
-                  <p className="text-sm text-gray-600">{message.content}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: getSentimentColor(message.sentimentScore),
-                        }}
-                      />
-                      <span className="text-xs text-gray-500">
-                        {message.sentimentScore.toFixed(2)}
-                      </span>
-                    </div>
+            {getFilteredMessages.slice(-5).map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="border-b pb-4 last:border-b-0"
+              >
+                <p className="text-sm text-gray-600">{message.content}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{
+                        backgroundColor: getSentimentColor(message.sentimentScore),
+                      }}
+                    />
                     <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(message.createdAt), {
-                        addSuffix: true,
-                      })}
+                      {message.sentimentScore.toFixed(2)}
                     </span>
                   </div>
-                </motion.div>
-              ))}
+                  <span className="text-xs text-gray-500">
+                    {formatDistanceToNow(new Date(message.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
@@ -413,10 +396,10 @@ export default function Dashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Active Conversations</h2>
           <div className="space-y-4">
-            {getFilteredConversations()
-              .filter(c => c.status === 'OPEN')
+            {getFilteredConversations
+              .filter((c) => c.status === 'OPEN')
               .slice(-5)
-              .map(conversation => (
+              .map((conversation) => (
                 <motion.div
                   key={conversation.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -428,11 +411,7 @@ export default function Dashboard() {
                     <span className="text-sm font-medium">Conversation {conversation.id}</span>
                     <span
                       className={`px-2 py-1 rounded text-xs ${
-                        conversation.priority === 'HIGH'
-                          ? 'bg-red-100 text-red-800'
-                          : conversation.priority === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
+                        PRIORITY_COLORS[conversation.priority]
                       }`}
                     >
                       {conversation.priority}
@@ -456,23 +435,23 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold mb-4">Lead Score Distribution</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={getFilteredConversations()}>
+              <BarChart data={getFilteredConversations}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="priority" />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="leadScore" fill="#3B82F6">
-                  {getFilteredConversations().map((entry, index) => (
+                  {getFilteredConversations.map((entry, index) => (
                     <motion.div
                       key={`cell-${index}`}
                       className="h-6 w-6 rounded-full"
                       style={{
                         backgroundColor:
                           entry.priority === 'HIGH'
-                            ? '#EF4444'
+                            ? SENTIMENT_COLORS.negative
                             : entry.priority === 'MEDIUM'
-                              ? '#F59E0B'
-                              : '#10B981',
+                            ? SENTIMENT_COLORS.neutral
+                            : SENTIMENT_COLORS.positive,
                       }}
                     />
                   ))}
@@ -503,4 +482,8 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
+};
+
+Dashboard.displayName = 'Dashboard';
+
+export default Dashboard;

@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}";
+self.__REACT_LOADABLE_MANIFEST='{"pages/admin/feedback.tsx -> @/components/feedback/FeedbackList":{"id":88502,"files":["static/chunks/83-34e31950338e75e9.js","static/chunks/502.c8e5d00503a570da.js"]}}';

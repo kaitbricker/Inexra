@@ -12,7 +12,7 @@ export function useTheme() {
     // Only run on client-side
     const savedTheme = localStorage.getItem('theme') as Theme;
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (savedTheme) {
       setTheme(savedTheme);
     } else if (systemPrefersDark) {
@@ -32,4 +32,4 @@ export function useTheme() {
   }
 
   return { theme, toggleTheme };
-} 
+}

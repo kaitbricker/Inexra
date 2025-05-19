@@ -18,7 +18,7 @@ const defaultData: AnalyticsData = {
   activeUsers: 0,
   userGrowth: 0,
   activeUserGrowth: 0,
-  timeSeriesData: []
+  timeSeriesData: [],
 };
 
 export function useAnalytics() {
@@ -37,7 +37,7 @@ export function useAnalytics() {
     // Disable the query during SSR
     enabled: mounted,
     // Provide default data during SSR
-    initialData: defaultData
+    initialData: defaultData,
   });
 
   return {
@@ -45,4 +45,4 @@ export function useAnalytics() {
     loading: isLoading,
     error,
   };
-} 
+}

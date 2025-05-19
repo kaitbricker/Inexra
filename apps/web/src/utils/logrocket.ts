@@ -16,13 +16,6 @@ export const identifyUser = (user: {
   }
 };
 
-// Clear user identification
-export const clearUser = () => {
-  if (typeof window !== 'undefined') {
-    LogRocket.identify('', {});
-  }
-};
-
 // Track custom events
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
   if (typeof window !== 'undefined') {

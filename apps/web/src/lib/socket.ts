@@ -3,6 +3,8 @@ import { Server as HTTPServer } from 'http';
 import { redis } from './redis';
 import { prisma } from './prisma';
 import { trackDbOperation } from './monitoring';
+import { Server as NetServer } from 'http';
+import { NextApiResponse } from 'next';
 
 interface SocketUser {
   userId: string;
@@ -189,3 +191,44 @@ class SocketService {
 }
 
 export const socketService = SocketService.getInstance();
+
+export type NextApiResponseWithSocket = NextApiResponse & {
+  socket: {
+    server: NetServer & {
+      io?: SocketIOServer;
+    };
+  };
+};
+
+export const initSocket = (res: NextApiResponseWithSocket) => {
+  if (!res.socket.server.io) {
+    const io = new SocketIOServer(res.socket.server, {
+      path: '/api/socket',
+      addTrailingSlash: false,
+      cors: {
+        origin: process.env.NEXT_PUBLIC_APP_URL,
+        methods: ['GET', 'POST'],
+      },
+    });
+
+    io.on('connection', socket => {
+      console.log('Client connected:', socket.id);
+
+      socket.on('join-conversation', (conversationId: string) => {
+        socket.join(`conversation:${conversationId}`);
+      });
+
+      socket.on('leave-conversation', (conversationId: string) => {
+        socket.leave(`conversation:${conversationId}`);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+      });
+    });
+
+    res.socket.server.io = io;
+  }
+
+  return res.socket.server.io;
+};

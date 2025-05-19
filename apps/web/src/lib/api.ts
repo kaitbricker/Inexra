@@ -2,7 +2,10 @@ import axios from 'axios';
 
 // Create axios instance with default config
 export const api = axios.create({
-  baseURL: typeof window === 'undefined' ? '/api' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseURL:
+    typeof window === 'undefined'
+      ? '/api'
+      : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +13,7 @@ export const api = axios.create({
 
 // Add request interceptor for authentication
 api.interceptors.request.use(
-  (config) => {
+  config => {
     // Only add auth header on client-side
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
@@ -20,15 +23,15 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       // Handle unauthorized error on client-side
       localStorage.removeItem('token');
@@ -36,4 +39,4 @@ api.interceptors.response.use(
     }
     return Promise.reject(error);
   }
-); 
+);

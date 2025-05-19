@@ -74,23 +74,25 @@ model Referral {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          String    @default("user")
-  points        Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  achievements  Achievement[]
-  activity      UserActivity?
-  referrals     Referral[] @relation("Referrer")
-  referredBy    Referral?  @relation("Referred")
-  feedbacks     Feedback[]
-  socialAccounts SocialAccount[]
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  image                 String?
+  role                  String    @default("user")
+  points                Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  achievements          Achievement[]
+  activity              UserActivity?
+  referrals             Referral[] @relation("Referrer")
+  referredBy            Referral?  @relation("Referred")
+  feedbacks             Feedback[]
+  socialAccounts        SocialAccount[]
+  notificationPreferences Json?    @default("{\"email\": true, \"push\": true, \"inApp\": true}")
+  conversations         Conversation[]
 }
 
 model Achievement {
@@ -125,6 +127,7 @@ model SocialAccount {
   refreshToken String
   expiresAt    DateTime
   userId       String
+  username     String?
   user         User     @relation(fields: [userId], references: [id])
   messages     Message[]
   createdAt    DateTime @default(now())
@@ -157,17 +160,27 @@ model Message {
 }
 
 model Conversation {
-  id          String    @id @default(cuid())
-  platform    String
-  messages    Message[]
-  leadScore   Float?
-  priority    String?   // 'high', 'medium', 'low'
-  status      String    @default("active") // 'active', 'archived', 'closed'
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  platform  String
+  userId    String
+  leadScore Float?
+  priority  String?
+  status    String    @default("active")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+  user      User      @relation(fields: [userId], references: [id])
 
   @@index([platform])
   @@index([leadScore])
   @@index([priority])
   @@index([status])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 } 

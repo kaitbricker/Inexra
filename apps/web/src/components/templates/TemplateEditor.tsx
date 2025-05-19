@@ -1,287 +1,194 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Editor } from '@tinymce/tinymce-react';
+'use client';
+
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  XMarkIcon,
-  PlusIcon,
-  VariableIcon,
-  TagIcon,
-  DocumentDuplicateIcon,
-} from '@heroicons/react/24/outline';
-import { Template } from '../../types';
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+interface Template {
+  id: string;
+  name: string;
+  description: string;
+  content: string;
+  variables: string[];
+}
 
 interface TemplateEditorProps {
   template?: Template;
-  onClose: () => void;
-  onSave: (templateId: string, updates: Partial<Template>) => Promise<void>;
+  onSave: (template: Omit<Template, 'id'>) => Promise<void>;
 }
 
-export const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onClose, onSave }) => {
+const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave }) => {
   const [name, setName] = useState(template?.name || '');
+  const [description, setDescription] = useState(template?.description || '');
   const [content, setContent] = useState(template?.content || '');
-  const [category, setCategory] = useState(template?.category || 'custom');
-  const [tags, setTags] = useState<string[]>(template?.tags || []);
-  const [variables, setVariables] = useState<Record<string, any>>(template?.variables || {});
-  const [newTag, setNewTag] = useState('');
-  const [newVariable, setNewVariable] = useState({
-    name: '',
-    type: 'text',
-    required: false,
-    defaultValue: '',
-  });
-  const [preview, setPreview] = useState('');
+  const [variables, setVariables] = useState<string[]>(template?.variables || []);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Update preview when content or variables change
-  useEffect(() => {
-    let previewContent = content;
-    Object.entries(variables).forEach(([key, value]) => {
-      const placeholder = new RegExp(`{${key}}`, 'g');
-      previewContent = previewContent.replace(placeholder, value.defaultValue || `[${key}]`);
-    });
-    setPreview(previewContent);
-  }, [content, variables]);
-
-  // Handle template save
-  const handleSave = async () => {
-    if (!template?.id) return;
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !content.trim()) {
+      setError('Name and content are required');
+      return;
+    }
 
     try {
-      await onSave(template.id, {
-        name,
-        content,
-        category,
-        tags,
+      setIsLoading(true);
+      setError(null);
+      await onSave({
+        name: name.trim(),
+        description: description.trim(),
+        content: content.trim(),
         variables,
       });
-      onClose();
-    } catch (error) {
-      console.error('Error saving template:', error);
+    } catch (err) {
+      setError('Failed to save template');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [name, description, content, variables, onSave]);
 
-  // Handle tag addition
-  const handleAddTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag]);
-      setNewTag('');
-    }
-  };
+  const handleAddVariable = useCallback(() => {
+    setVariables((prev) => [...prev, '']);
+  }, []);
 
-  // Handle variable addition
-  const handleAddVariable = () => {
-    if (newVariable.name && !variables[newVariable.name]) {
-      setVariables({
-        ...variables,
-        [newVariable.name]: {
-          type: newVariable.type,
-          required: newVariable.required,
-          defaultValue: newVariable.defaultValue,
-        },
-      });
-      setNewVariable({
-        name: '',
-        type: 'text',
-        required: false,
-        defaultValue: '',
-      });
-    }
-  };
+  const handleVariableChange = useCallback((index: number, value: string) => {
+    setVariables((prev) => prev.map((v, i) => (i === index ? value : v)));
+  }, []);
+
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setContent(newContent);
+    // Extract variables from content
+    const matches = newContent.match(/\{\{([^}]+)\}\}/g) || [];
+    const extractedVars = matches.map((match) => match.slice(2, -2).trim());
+    setVariables((prev) => {
+      const newVars = Array.from(new Set([...prev, ...extractedVars]));
+      return newVars.filter((v) => v);
+    });
+  }, []);
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
     >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
-      >
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{template ? 'Edit Template' : 'New Template'}</h2>
-          <button onClick={onClose} className="btn btn-ghost btn-sm">
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="p-4 overflow-auto max-h-[calc(90vh-8rem)]">
-          <div className="space-y-4">
-            {/* Basic Info */}
-            <div>
-              <label className="label">Name</label>
-              <input
-                type="text"
+      <Card>
+        <CardHeader>
+          <CardTitle>{template ? 'Edit Template' : 'Create Template'}</CardTitle>
+          <CardDescription>
+            {template
+              ? 'Modify your existing message template'
+              : 'Create a new message template for your campaigns'}
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Template Name</Label>
+              <Input
+                id="name"
                 value={name}
-                onChange={e => setName(e.target.value)}
-                className="input input-bordered w-full"
-                placeholder="Template name"
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter template name"
+                disabled={isLoading}
+                required
               />
             </div>
-
-            <div>
-              <label className="label">Category</label>
-              <select
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                className="select select-bordered w-full"
-              >
-                <option value="sales">Sales</option>
-                <option value="support">Support</option>
-                <option value="collaboration">Collaboration</option>
-                <option value="custom">Custom</option>
-              </select>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter template description"
+                disabled={isLoading}
+              />
             </div>
-
-            {/* Tags */}
-            <div>
-              <label className="label">Tags</label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map(tag => (
-                  <span key={tag} className="badge badge-primary">
-                    {tag}
-                    <button onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-1">
-                      ×
-                    </button>
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <Textarea
+                id="content"
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Enter template content. Use {{variable}} for dynamic content."
+                className="min-h-[200px]"
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Variables</Label>
+              <div className="flex flex-wrap gap-2">
+                {variables.map((variable, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-sm"
+                  >
+                    <Input
+                      value={variable}
+                      onChange={(e) => handleVariableChange(index, e.target.value)}
+                      placeholder="Enter variable"
+                      disabled={isLoading}
+                    />
                   </span>
                 ))}
               </div>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={e => setNewTag(e.target.value)}
-                  className="input input-bordered flex-1"
-                  placeholder="Add tag"
-                />
-                <button onClick={handleAddTag} className="btn btn-primary">
-                  <PlusIcon className="h-5 w-5" />
-                </button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddVariable}
+                disabled={isLoading}
+              >
+                Add Variable
+              </Button>
             </div>
-
-            {/* Variables */}
-            <div>
-              <label className="label">Variables</label>
-              <div className="space-y-2 mb-2">
-                {Object.entries(variables).map(([key, value]) => (
-                  <div key={key} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
-                    <VariableIcon className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">{key}</span>
-                    <span className="text-sm text-gray-500">({value.type})</span>
-                    {value.required && <span className="text-xs text-red-500">Required</span>}
-                    <button
-                      onClick={() => {
-                        const { [key]: _, ...rest } = variables;
-                        setVariables(rest);
-                      }}
-                      className="ml-auto text-gray-500 hover:text-red-500"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={newVariable.name}
-                  onChange={e => setNewVariable({ ...newVariable, name: e.target.value })}
-                  className="input input-bordered"
-                  placeholder="Variable name"
-                />
-                <select
-                  value={newVariable.type}
-                  onChange={e => setNewVariable({ ...newVariable, type: e.target.value })}
-                  className="select select-bordered"
-                >
-                  <option value="text">Text</option>
-                  <option value="number">Number</option>
-                  <option value="date">Date</option>
-                  <option value="select">Select</option>
-                </select>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={newVariable.required}
-                    onChange={e => setNewVariable({ ...newVariable, required: e.target.checked })}
-                    className="checkbox"
-                  />
-                  <span className="text-sm">Required</span>
-                </div>
-                <input
-                  type="text"
-                  value={newVariable.defaultValue}
-                  onChange={e => setNewVariable({ ...newVariable, defaultValue: e.target.value })}
-                  className="input input-bordered"
-                  placeholder="Default value"
-                />
-                <button onClick={handleAddVariable} className="btn btn-primary col-span-2">
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  Add Variable
-                </button>
-              </div>
-            </div>
-
-            {/* Content Editor */}
-            <div>
-              <label className="label">Content</label>
-              <Editor
-                value={content}
-                onEditorChange={newContent => setContent(newContent)}
-                init={{
-                  height: 300,
-                  menubar: false,
-                  plugins: [
-                    'advlist',
-                    'autolink',
-                    'lists',
-                    'link',
-                    'image',
-                    'charmap',
-                    'preview',
-                    'anchor',
-                    'searchreplace',
-                    'visualblocks',
-                    'code',
-                    'fullscreen',
-                    'insertdatetime',
-                    'media',
-                    'table',
-                    'code',
-                    'help',
-                    'wordcount',
-                  ],
-                  toolbar:
-                    'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                }}
-              />
-            </div>
-
-            {/* Preview */}
-            <div>
-              <label className="label">Preview</label>
-              <div className="p-4 bg-gray-50 rounded min-h-[100px] whitespace-pre-wrap">
-                {preview}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 border-t flex justify-end space-x-2">
-          <button onClick={onClose} className="btn btn-ghost">
-            Cancel
-          </button>
-          <button onClick={handleSave} className="btn btn-primary">
-            Save Template
-          </button>
-        </div>
-      </motion.div>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-500 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button type="button" variant="outline" disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Template'
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </motion.div>
   );
 };
+
+TemplateEditor.displayName = 'TemplateEditor';
+
+export default TemplateEditor;

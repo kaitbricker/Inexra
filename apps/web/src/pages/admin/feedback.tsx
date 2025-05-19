@@ -25,13 +25,13 @@ const FeedbackList = dynamic(
   () => import('@/components/feedback/FeedbackList').then(mod => mod.FeedbackList),
   {
     ssr: false,
-    loading: () => <Spinner />
+    loading: () => <Spinner />,
   }
 );
 
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
-    props: {}
+    props: {},
   };
 };
 

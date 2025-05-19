@@ -1,171 +1,411 @@
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import Joyride, { CallBackProps, STATUS } from 'react-joyride';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/hooks/useTheme';
-import { Button } from '../common/Button';
-import { useToast } from '@/hooks/useToast';
+'use client';
 
-interface OnboardingStep {
-  target: string;
-  content: string;
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PlatformConnection } from './PlatformConnection';
+import { UserPreferences, type UserPreferences as UserPreferencesType } from './UserPreferences';
+import { Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+interface Step {
+  id: string;
   title: string;
-  placement: 'top' | 'bottom' | 'left' | 'right';
+  description: string;
 }
 
-interface OnboardingFlowProps {
-  role: 'admin' | 'creator' | 'user';
+interface Role {
+  id: string;
+  title: string;
+  description: string;
 }
 
-const steps: Record<string, OnboardingStep[]> = {
-  admin: [
-    {
-      target: '.dashboard-overview',
-      content:
-        'Welcome to your admin dashboard! Here you can manage users, roles, and monitor system performance.',
-      title: 'Dashboard Overview',
-      placement: 'bottom',
-    },
-    {
-      target: '.user-management',
-      content: 'Manage your team members, assign roles, and track user activity.',
-      title: 'User Management',
-      placement: 'right',
-    },
-    {
-      target: '.analytics',
-      content: "View detailed analytics and insights about your team's performance.",
-      title: 'Analytics',
-      placement: 'left',
-    },
-  ],
-  creator: [
-    {
-      target: '.template-editor',
-      content: 'Create and manage your message templates here.',
-      title: 'Template Editor',
-      placement: 'bottom',
-    },
-    {
-      target: '.analytics',
-      content: 'Track the performance of your templates and messages.',
-      title: 'Analytics',
-      placement: 'left',
-    },
-  ],
-  user: [
-    {
-      target: '.dashboard',
-      content: 'Welcome to your dashboard! Here you can view your messages and templates.',
-      title: 'Dashboard',
-      placement: 'bottom',
-    },
-    {
-      target: '.templates',
-      content: 'Browse and use pre-made templates for your messages.',
-      title: 'Templates',
-      placement: 'right',
-    },
-  ],
-};
+interface OnboardingData {
+  role?: string;
+  email?: string;
+  platforms?: string[];
+  preferences?: UserPreferencesType;
+}
 
-export function OnboardingFlow({ role }: OnboardingFlowProps) {
-  const [run, setRun] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
-  const { data: session } = useSession();
-  const router = useRouter();
-  const { showToast } = useToast();
-  const { isDark } = useTheme();
+const STEPS: Step[] = [
+  {
+    id: 'welcome',
+    title: 'Welcome to Inexra',
+    description: "Let's get you set up with your account.",
+  },
+  {
+    id: 'role',
+    title: "What's your role?",
+    description: 'This helps us personalize your experience.',
+  },
+  {
+    id: 'connect',
+    title: 'Connect your accounts',
+    description: 'Link your social media and messaging platforms.',
+  },
+  {
+    id: 'preferences',
+    title: 'Set your preferences',
+    description: 'Customize your notification and automation settings.',
+  },
+];
+
+const ROLES: Role[] = [
+  {
+    id: 'marketing',
+    title: 'Marketing Manager',
+    description: 'Manage campaigns and customer engagement',
+  },
+  {
+    id: 'sales',
+    title: 'Sales Representative',
+    description: 'Handle leads and customer relationships',
+  },
+  {
+    id: 'support',
+    title: 'Customer Support',
+    description: 'Provide assistance and resolve issues',
+  },
+];
+
+const ANIMATION_VARIANTS = {
+  container: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: {
+        duration: 0.2,
+      },
+    },
+  },
+  error: {
+    shake: {
+      x: [0, -10, 10, -10, 10, 0],
+      transition: {
+        duration: 0.5,
+        ease: 'easeInOut',
+      },
+    },
+  },
+} as const;
+
+const useReducedMotion = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const hasCompletedOnboarding = session?.user?.onboardingCompleted;
-    if (!hasCompletedOnboarding) {
-      setRun(true);
-    }
-  }, [session]);
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, index } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
 
-    if (finishedStatuses.includes(status)) {
-      setRun(false);
-      // Mark onboarding as completed
-      completeOnboarding();
-    }
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
-    setStepIndex(index);
-  };
+  return prefersReducedMotion;
+};
 
-  const completeOnboarding = async () => {
-    try {
-      const response = await fetch('/api/user/onboarding', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ completed: true }),
-      });
+const validateStep = (step: string, data: Partial<OnboardingData>): boolean => {
+  switch (step) {
+    case 'welcome':
+      return true;
+    case 'role':
+      return !!data.role;
+    case 'connect':
+      return Array.isArray(data.platforms) && data.platforms.length > 0;
+    case 'preferences':
+      return !!data.preferences;
+    default:
+      return false;
+  }
+};
 
-      if (!response.ok) {
-        throw new Error('Failed to update onboarding status');
+const ProgressIndicator: React.FC<{ current: number; total: number }> = ({ current, total }) => (
+  <div className="flex items-center justify-center space-x-2 mb-8">
+    {Array.from({ length: total }, (_, i) => (
+      <div
+        key={i}
+        className={`h-2 w-2 rounded-full transition-colors duration-200 ${
+          i <= current ? 'bg-blue-600' : 'bg-gray-300'
+        }`}
+      />
+    ))}
+  </div>
+);
+
+const OnboardingFlow: React.FC = () => {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [data, setData] = useState<OnboardingData>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const getOptimizedConfig = useCallback(
+    (baseConfig: typeof ANIMATION_VARIANTS) => {
+      if (prefersReducedMotion) {
+        return {
+          container: { visible: { opacity: 1 } },
+          item: { visible: { opacity: 1, y: 0 } },
+          error: {},
+        };
       }
+      return baseConfig;
+    },
+    [prefersReducedMotion]
+  );
 
-      showToast('Onboarding completed!', 'success');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      showToast('Error completing onboarding', 'error');
+  const animationConfig = useMemo(() => getOptimizedConfig(ANIMATION_VARIANTS), [getOptimizedConfig]);
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Implement final submission logic
+      router.push('/dashboard');
+    } catch (err) {
+      setError('Failed to complete onboarding');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  const handleNext = useCallback(() => {
+    if (validateStep(STEPS[currentStep].id, data)) {
+      if (currentStep === STEPS.length - 1) {
+        handleSubmit();
+      } else {
+        setCurrentStep((prev) => prev + 1);
+      }
+    } else {
+      setError('Please complete all required fields');
+    }
+  }, [currentStep, data, handleSubmit]);
+
+  const handleBack = useCallback(() => {
+    setCurrentStep((prev) => Math.max(0, prev - 1));
+    setError(null);
+  }, [setCurrentStep, setError]);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !isLoading) {
+        handleNext();
+      } else if (e.key === 'Escape') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isLoading, handleNext, handleBack]);
+
+  const handleConnect = useCallback(async (platformId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Implement platform connection logic
+      const updatedPlatforms = [...(data.platforms || []), platformId];
+      setData((prev) => ({ ...prev, platforms: updatedPlatforms }));
+    } catch (err) {
+      setError('Failed to connect platform');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  const handleSavePreferences = useCallback(async (preferences: UserPreferencesType) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Implement preferences saving logic
+      setData((prev) => ({ ...prev, preferences }));
+    } catch (err) {
+      setError('Failed to save preferences');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const renderStep = useCallback(() => {
+    const step = STEPS[currentStep];
+
+    switch (step.id) {
+      case 'welcome':
+        return (
+          <motion.div
+            variants={animationConfig.item}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-bold text-center">{step.title}</h2>
+            <p className="text-center text-gray-600">{step.description}</p>
+            <div className="flex justify-center">
+              <Button onClick={handleNext}>Get Started</Button>
+            </div>
+          </motion.div>
+        );
+
+      case 'role':
+        return (
+          <motion.div
+            variants={animationConfig.item}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-bold text-center">{step.title}</h2>
+            <p className="text-center text-gray-600">{step.description}</p>
+            <RadioGroup
+              value={data.role}
+              onValueChange={(value) => setData((prev) => ({ ...prev, role: value }))}
+              className="space-y-4"
+            >
+              {ROLES.map((role) => (
+                <div key={role.id} className="flex items-center space-x-2">
+                  <RadioGroupItem value={role.id} id={role.id} />
+                  <Label htmlFor={role.id}>
+                    <div>
+                      <div className="font-medium">{role.title}</div>
+                      <div className="text-sm text-gray-500">{role.description}</div>
+                    </div>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </motion.div>
+        );
+
+      case 'connect':
+        return (
+          <motion.div
+            variants={animationConfig.item}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-bold text-center">{step.title}</h2>
+            <p className="text-center text-gray-600">{step.description}</p>
+            <PlatformConnection
+              onConnect={handleConnect}
+              connectedPlatforms={data.platforms || []}
+            />
+          </motion.div>
+        );
+
+      case 'preferences':
+        return (
+          <motion.div
+            variants={animationConfig.item}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-bold text-center">{step.title}</h2>
+            <p className="text-center text-gray-600">{step.description}</p>
+            <UserPreferences
+              onSave={handleSavePreferences}
+              initialPreferences={data.preferences}
+            />
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
+  }, [currentStep, data, animationConfig, handleConnect, handleSavePreferences]);
 
   return (
-    <div className="onboarding-container">
-      <Joyride
-        steps={steps[role]}
-        run={run}
-        continuous
-        showProgress
-        showSkipButton
-        callback={handleJoyrideCallback}
-        stepIndex={stepIndex}
-        styles={{
-          options: {
-            primaryColor: isDark ? '#3B82F6' : '#2563EB',
-            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-            textColor: isDark ? '#F3F4F6' : '#1F2937',
-            arrowColor: isDark ? '#1F2937' : '#FFFFFF',
-          },
-        }}
-      />
-
-      <AnimatePresence>
-        {!run && !session?.user?.onboardingCompleted && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed bottom-4 right-4 z-50"
-          >
-            <Button
-              onClick={() => setRun(true)}
-              variant="primary"
-              className="flex items-center space-x-2"
+    <motion.div
+      variants={animationConfig.container}
+      initial="hidden"
+      animate="visible"
+      className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    >
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-center">Onboarding</CardTitle>
+          <CardDescription className="text-center">
+            Complete your profile setup
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProgressIndicator current={currentStep} total={STEPS.length - 1} />
+          {error && (
+            <motion.div
+              variants={animationConfig.error}
+              animate="shake"
+              className="text-red-500 text-center mb-4"
             >
-              <span>Start Tour</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+              {error}
+            </motion.div>
+          )}
+          {renderStep()}
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 0 || isLoading}
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={isLoading}
+            className="relative"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : currentStep === STEPS.length - 1 ? (
+              'Complete'
+            ) : (
+              'Next'
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
-}
+};
+
+OnboardingFlow.displayName = 'OnboardingFlow';
+
+export default OnboardingFlow;
