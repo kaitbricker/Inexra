@@ -20,66 +20,9 @@ const marketingPhrases = [
   'Say Goodbye to Communication Silos.',
 ];
 
-const stats = [
-  { label: 'Messages Analyzed', value: 1200000 },
-  { label: 'Seconds Saved', value: 350000 },
-  { label: 'Leads Identified', value: 42000 },
-];
-
-const clients = [
-  // Placeholder logos (replace with real SVGs or images)
-  'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
-  'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
-  'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
-  'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg',
-];
-
-function AnimatedCounter({ value }: { value: number }) {
-  const [display, setDisplay] = React.useState(0);
-  React.useEffect(() => {
-    let start = 0;
-    const end = value;
-    if (start === end) return;
-    let incrementTime = 10;
-    let step = Math.ceil(end / 100);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= end) {
-        start = end;
-        clearInterval(timer);
-      }
-      setDisplay(start);
-    }, incrementTime);
-    return () => clearInterval(timer);
-  }, [value]);
-  return <span>{display.toLocaleString()}</span>;
-}
-
 export default function Page() {
   return (
-    <div className="min-h-screen font-sans bg-gradient-to-br from-[#0a1837] via-[#1a2747] to-[#232b3b] text-white flex flex-col">
-      {/* Animated Hero Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <svg width="100%" height="100%" className="w-full h-full" style={{ minHeight: '100vh' }}>
-          <defs>
-            <radialGradient id="bg-gradient" cx="50%" cy="40%" r="80%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#0a1837" stopOpacity="0.9" />
-            </radialGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#bg-gradient)" />
-          {/* Abstract lines */}
-          <motion.path
-            d="M0 200 Q400 100 800 200 T1600 200"
-            stroke="#6366f1" strokeWidth="2" fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
-          />
-        </svg>
-      </div>
-
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-[#101a2b] to-[#1a2747] text-white">
       <header className="flex items-center justify-between px-10 py-7 bg-transparent relative z-10">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -97,15 +40,136 @@ export default function Page() {
       </header>
 
       {/* Hero Section */}
-      <HeroAnimated stats={stats} />
+      <section className="w-full min-h-[80vh] flex items-center justify-center px-4">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="max-w-xl space-y-8">
+            <motion.h1
+              className="text-5xl md:text-6xl font-extrabold leading-tight bg-gradient-to-r from-indigo-400 via-blue-400 to-purple-500 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              Transform Conversations into Insights. Instantly.
+            </motion.h1>
+            <motion.p
+              className="text-xl text-gray-200"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              Inexra uses cutting-edge AI to turn fragmented messages into actionable insights, helping businesses respond faster, make smarter decisions, and connect with customers on a deeper level.
+            </motion.p>
+            <motion.a
+              href="#get-started"
+              className="inline-block px-10 py-4 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-lg font-bold rounded-xl shadow-xl hover:scale-105 hover:shadow-2xl transition active:scale-95 focus:outline-none focus:ring-4 focus:ring-indigo-400"
+              whileHover={{ scale: 1.07 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Get Started
+            </motion.a>
+          </div>
+          {/* Conversation Preview Widget */}
+          <motion.div
+            className="hidden md:block relative z-10"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-2xl shadow-2xl p-7 w-96 border border-indigo-700/30">
+              <div className="flex items-center gap-3 mb-4">
+                <FaInstagram className="text-pink-500 text-2xl" />
+                <FaTwitter className="text-sky-500 text-2xl" />
+                <FaLinkedin className="text-blue-700 text-2xl" />
+              </div>
+              <div className="mb-4">
+                <div className="font-semibold text-gray-100 mb-2">Conversations</div>
+                <div className="flex items-center gap-2 mb-2">
+                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Kathryn Murphy" className="w-8 h-8 rounded-full" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-100">Kathryn Murphy</div>
+                    <div className="text-xs text-gray-400">Are you available for call?...</div>
+                  </div>
+                  <span className="text-xs text-gray-500">2h ago</span>
+                  <span className="ml-2 px-2 py-0.5 rounded bg-green-200/20 text-green-400 text-xs font-semibold">Positive</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Dariene Robertson" className="w-8 h-8 rounded-full" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-100">Dariene Robertson</div>
+                    <div className="text-xs text-gray-400">Can you tell me more about your product?</div>
+                  </div>
+                  <span className="text-xs text-gray-500">Fri</span>
+                  <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200/20 text-yellow-400 text-xs font-semibold">Neutral</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
-      {/* Trusted by Section */}
-      <section className="w-full py-10 bg-gradient-to-r from-[#101a2b] to-[#1a2747] flex flex-col items-center">
-        <div className="text-gray-300 text-lg mb-4">Trusted by leading companies</div>
-        <div className="flex gap-10 flex-wrap items-center justify-center">
-          {clients.map((logo, i) => (
-            <img key={i} src={logo} alt="Client logo" className="h-8 opacity-80 grayscale hover:opacity-100 hover:grayscale-0 transition" />
-          ))}
+      {/* What is Inexra Section */}
+      <section id="overview" className="w-full py-20 bg-gradient-to-r from-[#101a2b] to-[#1a2747]">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">What is Inexra?</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Inexra is an AI-powered digital conversation mapper designed to transform fragmented business messages into clear, actionable insights. Built for modern teams, Inexra centralizes conversations across platforms, highlights critical information, and simplifies decision-making with powerful AI.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl p-8 border border-indigo-700/30">
+              <h3 className="text-2xl font-bold mb-4 text-indigo-400">Key Benefits</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <span className="text-indigo-400">•</span>
+                  <div>
+                    <strong className="text-white">Centralize Conversations:</strong>
+                    <p className="text-gray-300">Aggregate messages from LinkedIn, Instagram, Twitter, Slack, Email, and more into a single, searchable hub.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-indigo-400">•</span>
+                  <div>
+                    <strong className="text-white">Discover Hidden Insights:</strong>
+                    <p className="text-gray-300">Use AI to identify trends, extract keywords, and classify sentiment for better customer understanding.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-indigo-400">•</span>
+                  <div>
+                    <strong className="text-white">Act Faster:</strong>
+                    <p className="text-gray-300">Identify high-value leads, optimize response strategies, and make data-driven decisions faster.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-indigo-400">•</span>
+                  <div>
+                    <strong className="text-white">Reduce Noise:</strong>
+                    <p className="text-gray-300">Filter out low-value conversations to focus on what truly matters.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-indigo-400">•</span>
+                  <div>
+                    <strong className="text-white">Streamline Communication:</strong>
+                    <p className="text-gray-300">Connect conversations to outcomes, reducing response times and improving customer satisfaction.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl p-8 border border-indigo-700/30">
+              <h3 className="text-2xl font-bold mb-4 text-indigo-400">Why Choose Inexra?</h3>
+              <ul className="space-y-4">
+                {marketingPhrases.map((phrase, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="text-indigo-400">•</span>
+                    <p className="text-gray-300 italic">{phrase}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -135,36 +199,6 @@ export default function Page() {
           <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><path d="M3 3v26h26" /><rect x="7" y="7" width="18" height="18" rx="2" /></svg>
         ),
       }]} />
-
-      {/* What is Inexra / Platform Overview */}
-      <section id="overview" className="max-w-4xl mx-auto px-8 py-16">
-        <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-2xl shadow-lg p-10 flex flex-col gap-6 border border-indigo-700/30">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">What is Inexra?</h2>
-          <p className="text-lg text-gray-200">
-            Inexra is an AI-powered digital conversation mapper that transforms fragmented business communications into structured, actionable insights. Designed for modern businesses, Inexra helps teams centralize their communication streams, identify key trends, and gain deeper understanding from customer interactions. By integrating advanced natural language processing (NLP) and sentiment analysis, Inexra turns every message into valuable context, empowering companies to make smarter, data-driven decisions.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <div>
-              <h3 className="font-bold text-lg text-indigo-400 mb-2">Platform Goals</h3>
-              <ul className="list-disc list-inside text-gray-200 space-y-1">
-                <li><b>Centralize Communication:</b> Aggregate conversations from multiple platforms (LinkedIn, Instagram, Twitter, Slack, Email) into a single, searchable repository.</li>
-                <li><b>Enhance Understanding:</b> Use AI to extract sentiment, intent, and key insights from messages.</li>
-                <li><b>Optimize Engagement:</b> Identify high-value leads, predict customer needs, and streamline response strategies.</li>
-                <li><b>Accelerate Decision-Making:</b> Provide data-driven insights for faster, more informed business actions.</li>
-                <li><b>Reduce Churn:</b> Improve customer retention through proactive engagement and support.</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg text-indigo-400 mb-2">Why Inexra?</h3>
-              <ul className="list-disc list-inside text-gray-200 space-y-1">
-                {marketingPhrases.map((phrase, idx) => (
-                  <li key={idx} className="italic">{phrase}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Expanded Features Section */}
       <section className="max-w-5xl mx-auto px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
