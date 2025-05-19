@@ -408,4 +408,4 @@ const OnboardingFlow: React.FC = () => {
 
 OnboardingFlow.displayName = 'OnboardingFlow';
 
-export default OnboardingFlow;
+export { OnboardingFlow };

@@ -1,113 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client"
 
-interface TooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
-  position?: 'top' | 'right' | 'bottom' | 'left';
-  delay?: number;
-  className?: string;
-}
+import * as React from "react"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
-export function Tooltip({
-  content,
-  children,
-  position = 'top',
-  delay = 0.2,
-  className = '',
-}: TooltipProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
+import { cn } from "@/lib/utils"
 
-  useEffect(() => {
-    if (!isVisible || !triggerRef.current || !tooltipRef.current) return;
+const TooltipProvider = TooltipPrimitive.Provider
 
-    const trigger = triggerRef.current.getBoundingClientRect();
-    const tooltip = tooltipRef.current.getBoundingClientRect();
+const Tooltip = TooltipPrimitive.Root
 
-    let x = 0;
-    let y = 0;
+const TooltipTrigger = TooltipPrimitive.Trigger
 
-    switch (position) {
-      case 'top':
-        x = trigger.left + (trigger.width - tooltip.width) / 2;
-        y = trigger.top - tooltip.height - 8;
-        break;
-      case 'right':
-        x = trigger.right + 8;
-        y = trigger.top + (trigger.height - tooltip.height) / 2;
-        break;
-      case 'bottom':
-        x = trigger.left + (trigger.width - tooltip.width) / 2;
-        y = trigger.bottom + 8;
-        break;
-      case 'left':
-        x = trigger.left - tooltip.width - 8;
-        y = trigger.top + (trigger.height - tooltip.height) / 2;
-        break;
-    }
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPrimitive.Content
+    ref={ref}
+    sideOffset={sideOffset}
+    className={cn(
+      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+))
+TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
-    // Ensure tooltip stays within viewport
-    const viewport = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
-
-    x = Math.max(8, Math.min(x, viewport.width - tooltip.width - 8));
-    y = Math.max(8, Math.min(y, viewport.height - tooltip.height - 8));
-
-    setTooltipPosition({ x, y });
-  }, [isVisible, position]);
-
-  const handleMouseEnter = () => {
-    setIsVisible(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsVisible(false);
-  };
-
-  return (
-    <div
-      ref={triggerRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="inline-block"
-    >
-      {children}
-      <AnimatePresence>
-        {isVisible && (
-          <motion.div
-            ref={tooltipRef}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15, delay }}
-            style={{
-              position: 'fixed',
-              left: tooltipPosition.x,
-              top: tooltipPosition.y,
-              zIndex: 50,
-            }}
-            className={`bg-gray-900 text-white px-3 py-2 rounded-lg text-sm shadow-lg ${className}`}
-          >
-            {content}
-            <div
-              className={`absolute w-2 h-2 bg-gray-900 transform rotate-45 ${
-                position === 'top'
-                  ? 'bottom-[-4px] left-1/2 -translate-x-1/2'
-                  : position === 'right'
-                    ? 'left-[-4px] top-1/2 -translate-y-1/2'
-                    : position === 'bottom'
-                      ? 'top-[-4px] left-1/2 -translate-x-1/2'
-                      : 'right-[-4px] top-1/2 -translate-y-1/2'
-              }`}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }

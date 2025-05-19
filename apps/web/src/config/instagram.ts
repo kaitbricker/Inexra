@@ -89,3 +89,14 @@ export function validateInstagramConfig(): string[] {
 export function getInstagramWebhookUrl(): string {
   return `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/instagram`;
 }
+
+export const instagramConfig = {
+  appId: process.env.INSTAGRAM_APP_ID,
+  appSecret: process.env.INSTAGRAM_APP_SECRET,
+  redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
+  scope: 'user_profile,user_media',
+  responseType: 'code',
+  authUrl: 'https://api.instagram.com/oauth/authorize',
+  tokenUrl: 'https://api.instagram.com/oauth/access_token',
+  graphUrl: 'https://graph.instagram.com',
+};
