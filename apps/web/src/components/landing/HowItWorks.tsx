@@ -1,4 +1,4 @@
-import { motion } from '@/lib/motion';
+import { motion } from 'framer-motion';
 import { Link2, Activity, Lightbulb } from 'lucide-react';
 
 const steps = [
@@ -26,7 +26,7 @@ export function HowItWorks() {
   return (
     <section className="py-24 bg-muted/50">
       <div className="container mx-auto px-4">
-        <Motion.div
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -37,7 +37,7 @@ export function HowItWorks() {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Three simple steps to transform your digital conversations
           </p>
-        </Motion.div>
+        </motion.div>
 
         <div className="relative">
           {/* Connection Line */}
@@ -45,7 +45,7 @@ export function HowItWorks() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((step, index) => (
-              <Motion.div
+              <motion.div
                 key={step.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -65,7 +65,7 @@ export function HowItWorks() {
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
                   {index + 1}
                 </div>
-              </Motion.div>
+              </motion.div>
             ))}
           </div>
         </div>

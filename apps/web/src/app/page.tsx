@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import { motion } from '@/lib/motion';
+import { motion } from 'framer-motion';
 
 const marketingPhrases = [
   'Turn Conversations into Clarity.',
@@ -282,6 +282,62 @@ export default function Page() {
         <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl shadow p-6 flex flex-col gap-2 border border-indigo-700/30">
           <div className="font-bold text-lg text-indigo-400 mb-1">Actionable Analytics</div>
           <div className="text-gray-200">Make data-driven decisions with powerful insights.</div>
+        </div>
+      </section>
+
+      {/* Who Can Benefit Section */}
+      <section className="w-full py-16 bg-gradient-to-r from-[#101a2b] to-[#1a2747] flex flex-col items-center">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 text-center">Who Can Benefit from Inexra?</h2>
+        <p className="text-indigo-300 text-lg mb-10 text-center">AI-Powered Communication Insights for Every Role</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl px-4">
+          {/* Sales Teams */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></span>
+              <span className="font-bold text-lg text-white">Sales Teams</span>
+            </div>
+            <p className="text-gray-300">Identify high-value leads faster, track customer sentiment, and optimize follow-up strategies.</p>
+          </div>
+          {/* Customer Success Managers */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21C12 21 7 16.5 7 12.5C7 9.46243 9.46243 7 12.5 7C15.5376 7 18 9.46243 18 12.5C18 16.5 12 21 12 21Z" /><circle cx="12" cy="12" r="3" /></svg></span>
+              <span className="font-bold text-lg text-white">Customer Success Managers</span>
+            </div>
+            <p className="text-gray-300">Reduce churn, improve response times, and track customer satisfaction.</p>
+          </div>
+          {/* Marketing Teams */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v4" /><path d="M21 15v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2" /><path d="M7 7v10" /><path d="M17 7v10" /></svg></span>
+              <span className="font-bold text-lg text-white">Marketing Teams</span>
+            </div>
+            <p className="text-gray-300">Understand audience sentiment, optimize campaigns, and track brand perception.</p>
+          </div>
+          {/* Founders and CEOs */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4" /><path d="M5.5 21a7.5 7.5 0 0 1 13 0" /></svg></span>
+              <span className="font-bold text-lg text-white">Founders and CEOs</span>
+            </div>
+            <p className="text-gray-300">Centralize communications, track business health, and improve team alignment.</p>
+          </div>
+          {/* Support Managers */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="7" width="10" height="10" rx="2" /></svg></span>
+              <span className="font-bold text-lg text-white">Support Managers</span>
+            </div>
+            <p className="text-gray-300">Collect and analyze customer feedback for product improvements.</p>
+          </div>
+          {/* Support Teams */}
+          <div className="rounded-2xl border border-indigo-700/40 bg-gradient-to-br from-[#1a2747] to-[#232b3b] p-6 shadow-lg flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-indigo-400"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg></span>
+              <span className="font-bold text-lg text-white">Support Teams</span>
+            </div>
+            <p className="text-gray-300">Reduce response time, identify common pain points, and improve customer experience.</p>
+          </div>
         </div>
       </section>
 

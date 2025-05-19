@@ -1,4 +1,4 @@
-import { motion } from '@/lib/motion';
+import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';

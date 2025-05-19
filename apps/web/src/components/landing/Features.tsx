@@ -1,4 +1,4 @@
-import { motion } from '@/lib/motion';
+import { motion } from 'framer-motion';
 import { BarChart3, Tag, Heart, Map } from 'lucide-react';
 
 const features = [
@@ -31,7 +31,7 @@ export function Features() {
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4">
-        <Motion.div
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -42,11 +42,11 @@ export function Features() {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Powerful tools to help you understand and optimize your digital conversations
           </p>
-        </Motion.div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <Motion.div
+            <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ export function Features() {
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
-            </Motion.div>
+            </motion.div>
           ))}
         </div>
       </div>
