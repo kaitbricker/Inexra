@@ -43,38 +43,35 @@ export default function Page() {
       <section className="w-full min-h-[80vh] flex items-center justify-center px-4">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="max-w-xl space-y-8">
-            <motion.h1
-              className="text-5xl md:text-6xl font-extrabold leading-tight bg-gradient-to-r from-indigo-400 via-blue-400 to-purple-500 bg-clip-text text-transparent"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Transform Conversations into Insights. Instantly.
-            </motion.h1>
-            <motion.p
-              className="text-xl text-gray-200"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              Inexra uses cutting-edge AI to turn fragmented messages into actionable insights, helping businesses respond faster, make smarter decisions, and connect with customers on a deeper level.
-            </motion.p>
-            <motion.a
+            <h1 className="text-6xl md:text-7xl font-extrabold leading-tight bg-gradient-to-r from-indigo-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Unlock the Power of Conversations
+            </h1>
+            <p className="text-xl text-gray-200">
+              Bring clarity to your conversations. Inexra uses cutting-edge AI to turn fragmented messages into actionable insights, helping businesses connect better, respond faster, and grow smarter.
+            </p>
+            <a
               href="#get-started"
               className="inline-block px-10 py-4 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-lg font-bold rounded-xl shadow-xl hover:scale-105 hover:shadow-2xl transition active:scale-95 focus:outline-none focus:ring-4 focus:ring-indigo-400"
-              whileHover={{ scale: 1.07 }}
-              whileTap={{ scale: 0.97 }}
             >
               Get Started
-            </motion.a>
+            </a>
+            <div className="flex gap-12 mt-8">
+              <div>
+                <div className="text-3xl font-extrabold text-indigo-200">1,200,000</div>
+                <div className="text-gray-400 text-sm">Messages Analyzed</div>
+              </div>
+              <div>
+                <div className="text-3xl font-extrabold text-indigo-200">350,000</div>
+                <div className="text-gray-400 text-sm">Seconds Saved</div>
+              </div>
+              <div>
+                <div className="text-3xl font-extrabold text-indigo-200">42,000</div>
+                <div className="text-gray-400 text-sm">Leads Identified</div>
+              </div>
+            </div>
           </div>
           {/* Conversation Preview Widget */}
-          <motion.div
-            className="hidden md:block relative z-10"
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
+          <div className="hidden md:block relative z-10">
             <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-2xl shadow-2xl p-7 w-96 border border-indigo-700/30">
               <div className="flex items-center gap-3 mb-4">
                 <FaInstagram className="text-pink-500 text-2xl" />
@@ -101,9 +98,17 @@ export default function Page() {
                   <span className="text-xs text-gray-500">Fri</span>
                   <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200/20 text-yellow-400 text-xs font-semibold">Neutral</span>
                 </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold">MT</div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-100">Message Templates</div>
+                    <div className="text-xs text-gray-400">Save and reuse</div>
+                  </div>
+                  <span className="ml-auto px-2 py-0.5 rounded bg-indigo-700/40 text-indigo-200 text-xs font-semibold">42</span>
+                </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -116,9 +121,8 @@ export default function Page() {
               Inexra is an AI-powered digital conversation mapper designed to transform fragmented business messages into clear, actionable insights. Built for modern teams, Inexra centralizes conversations across platforms, highlights critical information, and simplifies decision-making with powerful AI.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl p-8 border border-indigo-700/30">
+          <div className="flex justify-center">
+            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl p-8 border border-indigo-700/30 max-w-2xl w-full">
               <h3 className="text-2xl font-bold mb-4 text-indigo-400">Key Benefits</h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
@@ -156,17 +160,6 @@ export default function Page() {
                     <p className="text-gray-300">Connect conversations to outcomes, reducing response times and improving customer satisfaction.</p>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-xl p-8 border border-indigo-700/30">
-              <h3 className="text-2xl font-bold mb-4 text-indigo-400">Why Choose Inexra?</h3>
-              <ul className="space-y-4">
-                {marketingPhrases.map((phrase, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="text-indigo-400">•</span>
-                    <p className="text-gray-300 italic">{phrase}</p>
-                  </li>
-                ))}
               </ul>
             </div>
           </div>
