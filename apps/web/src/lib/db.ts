@@ -1,6 +1,36 @@
 import { PrismaClient } from '@prisma/client';
 import { productionConfig } from '@/config/production';
 
+const getDatabaseUrl = () => {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error('DATABASE_URL is not defined');
+  }
+  return url;
+};
+
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: getDatabaseUrl(),
+      },
+    },
+  });
+};
+
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+}
+
+const prisma = globalThis.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma;
+}
+
+export { prisma };
+
 class DatabaseManager {
   private static instance: DatabaseManager;
   private writeClient: PrismaClient;
