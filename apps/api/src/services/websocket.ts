@@ -1,4 +1,4 @@
-import { Server, Socket } from 'socket.io';
+import { Server, Socket, ServerOptions } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import { logger } from '../utils/logger';
 import { Message, Conversation, SocialAccount } from '@prisma/client';
@@ -11,15 +11,8 @@ export class WebSocketService {
   private io: Server;
   private connectedClients: Map<string, Set<string>> = new Map();
 
-  constructor(httpServer: HttpServer) {
-    this.io = new Server(httpServer, {
-      cors: {
-        origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
-        methods: ['GET', 'POST'],
-        credentials: true,
-      },
-    });
-
+  constructor(server: HttpServer, options?: ServerOptions) {
+    this.io = new Server(server, options);
     this.setupEventHandlers();
   }
 
@@ -134,6 +127,28 @@ export class WebSocketService {
       code: error.name,
       timestamp: new Date(),
     });
+  }
+
+  public emit(event: string, data: any) {
+    this.io.emit(event, data);
+  }
+
+  public emitToRoom(room: string, event: string, data: any) {
+    this.io.to(room).emit(event, data);
+  }
+
+  public joinRoom(socketId: string, room: string) {
+    const socket = this.io.sockets.sockets.get(socketId);
+    if (socket) {
+      socket.join(room);
+    }
+  }
+
+  public leaveRoom(socketId: string, room: string) {
+    const socket = this.io.sockets.sockets.get(socketId);
+    if (socket) {
+      socket.leave(room);
+    }
   }
 }
 

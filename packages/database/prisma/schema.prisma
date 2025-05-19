@@ -42,6 +42,7 @@ model User {
   socialAccounts    SocialAccount[]
   messages          Message[]
   conversations     Conversation[]
+  auditLogs         AuditLog[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -110,4 +111,16 @@ model LeadScore {
   conversationId    String    @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 } 

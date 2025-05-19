@@ -4,6 +4,16 @@
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -36,7 +46,7 @@
     }
   ],
   "env": {
-    "NEXTAUTH_URL": "https://your-production-domain.com",
+    "NEXTAUTH_URL": "https://inexra.vercel.app",
     "NEXTAUTH_SECRET": "NEXTAUTH_SECRET",
     "JWT_SECRET": "JWT_SECRET",
     "JWT_REFRESH_SECRET": "JWT_REFRESH_SECRET",
@@ -49,13 +59,16 @@
     "LOGROCKET_ID": "LOGROCKET_ID",
     "RATE_LIMIT_MAX": "100",
     "RATE_LIMIT_WINDOW": "900",
-    "CORS_ORIGIN": "https://your-production-domain.com",
-    "MFA_ISSUER": "YourApp",
+    "CORS_ORIGIN": "https://inexra.vercel.app",
+    "MFA_ISSUER": "Inexra",
     "CACHE_TTL": "3600",
     "ENABLE_COMPRESSION": "true",
     "ENABLE_METRICS": "true",
     "METRICS_PORT": "9090",
     "LOG_LEVEL": "info",
-    "ENABLE_REQUEST_LOGGING": "true"
+    "ENABLE_REQUEST_LOGGING": "true",
+    "API_URL": "https://inexra.vercel.app/api",
+    "WS_URL": "wss://inexra.vercel.app",
+    "NODE_ENV": "production"
   }
 } 
