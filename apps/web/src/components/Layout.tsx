@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
   ChatBubbleLeftRightIcon,
@@ -25,7 +27,7 @@ const navigation = [
 
 export default function Layout({ children }: LayoutProps) {
   const { data: session } = useSession();
-  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -40,7 +42,7 @@ export default function Layout({ children }: LayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1">
             {navigation.map(item => {
-              const isActive = router.pathname === item.href;
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}

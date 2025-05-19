@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import {
