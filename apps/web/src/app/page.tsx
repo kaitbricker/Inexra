@@ -40,77 +40,11 @@ export default function Page() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full min-h-[80vh] flex items-center justify-center px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="max-w-xl space-y-8">
-            <h1 className="text-6xl md:text-7xl font-extrabold leading-tight bg-gradient-to-r from-indigo-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Unlock the Power of Conversations
-            </h1>
-            <p className="text-xl text-gray-200">
-              Bring clarity to your conversations. Inexra uses cutting-edge AI to turn fragmented messages into actionable insights, helping businesses connect better, respond faster, and grow smarter.
-            </p>
-            <a
-              href="#get-started"
-              className="inline-block px-10 py-4 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-lg font-bold rounded-xl shadow-xl hover:scale-105 hover:shadow-2xl transition active:scale-95 focus:outline-none focus:ring-4 focus:ring-indigo-400"
-            >
-              Get Started
-            </a>
-            <div className="flex gap-12 mt-8">
-              <div>
-                <div className="text-3xl font-extrabold text-indigo-200">1,200,000</div>
-                <div className="text-gray-400 text-sm">Messages Analyzed</div>
-              </div>
-              <div>
-                <div className="text-3xl font-extrabold text-indigo-200">350,000</div>
-                <div className="text-gray-400 text-sm">Seconds Saved</div>
-              </div>
-              <div>
-                <div className="text-3xl font-extrabold text-indigo-200">42,000</div>
-                <div className="text-gray-400 text-sm">Leads Identified</div>
-              </div>
-            </div>
-          </div>
-          {/* Conversation Preview Widget */}
-          <div className="hidden md:block relative z-10">
-            <div className="bg-gradient-to-br from-[#1a2747] to-[#232b3b] rounded-2xl shadow-2xl p-7 w-96 border border-indigo-700/30">
-              <div className="flex items-center gap-3 mb-4">
-                <FaInstagram className="text-pink-500 text-2xl" />
-                <FaTwitter className="text-sky-500 text-2xl" />
-                <FaLinkedin className="text-blue-700 text-2xl" />
-              </div>
-              <div className="mb-4">
-                <div className="font-semibold text-gray-100 mb-2">Conversations</div>
-                <div className="flex items-center gap-2 mb-2">
-                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Kathryn Murphy" className="w-8 h-8 rounded-full" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-100">Kathryn Murphy</div>
-                    <div className="text-xs text-gray-400">Are you available for call?...</div>
-                  </div>
-                  <span className="text-xs text-gray-500">2h ago</span>
-                  <span className="ml-2 px-2 py-0.5 rounded bg-green-200/20 text-green-400 text-xs font-semibold">Positive</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Dariene Robertson" className="w-8 h-8 rounded-full" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-100">Dariene Robertson</div>
-                    <div className="text-xs text-gray-400">Can you tell me more about your product?</div>
-                  </div>
-                  <span className="text-xs text-gray-500">Fri</span>
-                  <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200/20 text-yellow-400 text-xs font-semibold">Neutral</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold">MT</div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-100">Message Templates</div>
-                    <div className="text-xs text-gray-400">Save and reuse</div>
-                  </div>
-                  <span className="ml-auto px-2 py-0.5 rounded bg-indigo-700/40 text-indigo-200 text-xs font-semibold">42</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroAnimated stats={[
+        { label: 'Messages Analyzed', value: 1200000 },
+        { label: 'Seconds Saved', value: 350000 },
+        { label: 'Leads Identified', value: 42000 },
+      ]} />
 
       {/* What is Inexra Section */}
       <section id="overview" className="w-full py-20 bg-gradient-to-r from-[#101a2b] to-[#1a2747]">
