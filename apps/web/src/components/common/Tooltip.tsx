@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface TooltipProps {
   content: React.ReactNode;
@@ -85,27 +87,25 @@ export function Tooltip({
       onBlur={hideTooltip}
     >
       {children}
-      <AnimatePresence>
-        {isVisible && (
-          <motion.div
-            ref={tooltipRef}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={variants}
-            transition={{ duration: 0.2 }}
-            className={`absolute z-50 ${positionClasses[position]} ${className}`}
-            role="tooltip"
-          >
-            <div className="relative bg-gray-900 text-white text-sm py-1 px-2 rounded shadow-lg">
-              {content}
-              <div
-                className={`absolute w-0 h-0 border-4 border-transparent ${arrowClasses[position]}`}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isVisible && (
+        <motion.div
+          ref={tooltipRef}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          variants={variants}
+          transition={{ duration: 0.2 }}
+          className={`absolute z-50 ${positionClasses[position]} ${className}`}
+          role="tooltip"
+        >
+          <div className="relative bg-gray-900 text-white text-sm py-1 px-2 rounded shadow-lg">
+            {content}
+            <div
+              className={`absolute w-0 h-0 border-4 border-transparent ${arrowClasses[position]}`}
+            />
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

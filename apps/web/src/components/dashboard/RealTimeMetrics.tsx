@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useSocket } from '@/hooks/useSocket';
 import {
@@ -26,10 +28,26 @@ interface LeadMetrics {
 }
 
 export function RealTimeMetrics() {
-  const { socket, isConnected } = useSocket();
+  const { socket } = useSocket();
+  const [isConnected, setIsConnected] = useState(false);
   const [messageMetrics, setMessageMetrics] = useState<MessageMetrics[]>([]);
   const [leadMetrics, setLeadMetrics] = useState<LeadMetrics[]>([]);
   const [activeUsers, setActiveUsers] = useState(0);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleConnect = () => setIsConnected(true);
+    const handleDisconnect = () => setIsConnected(false);
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (!socket) return;
@@ -107,10 +125,10 @@ export function RealTimeMetrics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
-                tickFormatter={timestamp => new Date(timestamp).toLocaleTimeString()}
+                tickFormatter={(timestamp: number) => new Date(timestamp).toLocaleTimeString()}
               />
               <YAxis />
-              <Tooltip labelFormatter={timestamp => new Date(timestamp).toLocaleString()} />
+              <Tooltip labelFormatter={(timestamp: number) => new Date(timestamp).toLocaleString()} />
               <Legend />
               <Line type="monotone" dataKey="count" stroke="#8884d8" name="Messages" />
               <Line type="monotone" dataKey="sentiment" stroke="#82ca9d" name="Sentiment" />
@@ -127,10 +145,10 @@ export function RealTimeMetrics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
-                tickFormatter={timestamp => new Date(timestamp).toLocaleTimeString()}
+                tickFormatter={(timestamp: number) => new Date(timestamp).toLocaleTimeString()}
               />
               <YAxis />
-              <Tooltip labelFormatter={timestamp => new Date(timestamp).toLocaleString()} />
+              <Tooltip labelFormatter={(timestamp: number) => new Date(timestamp).toLocaleString()} />
               <Legend />
               <Line type="monotone" dataKey="high" stroke="#ef4444" name="High Priority" />
               <Line type="monotone" dataKey="medium" stroke="#f59e0b" name="Medium Priority" />

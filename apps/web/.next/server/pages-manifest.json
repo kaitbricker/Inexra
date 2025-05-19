@@ -1,1 +1,24 @@
-{"/_app":"pages/_app.js","/_error":"pages/_error.js","/admin/roles":"pages/admin/roles.html","/admin/users":"pages/admin/users.html","/api/analytics":"pages/api/analytics.js","/api/ai/process":"pages/api/ai/process.js","/api/leaderboard":"pages/api/leaderboard.js","/api/achievements":"pages/api/achievements.js","/api/analytics/users":"pages/api/analytics/users.js","/api/referrals/create":"pages/api/referrals/create.js","/api/analytics/templates":"pages/api/analytics/templates.js","/api/metrics":"pages/api/metrics.js","/api/feedback/[id]":"pages/api/feedback/[id].js","/api/referrals":"pages/api/referrals.js","/api/feedback":"pages/api/feedback.js","/api/social/connect":"pages/api/social/connect.js","/api/social/messages":"pages/api/social/messages.js","/profile":"pages/profile.html","/dashboard":"pages/dashboard.js","/admin/feedback":"pages/admin/feedback.js","/api/analytics/activity":"pages/api/analytics/activity.js","/_document":"pages/_document.js","/404":"pages/404.html"}
+{
+  "/_error": "pages/_error.js",
+  "/admin/users": "pages/admin/users.js",
+  "/_app": "pages/_app.js",
+  "/admin/roles": "pages/admin/roles.js",
+  "/api/ai/process": "pages/api/ai/process.js",
+  "/api/achievements": "pages/api/achievements.js",
+  "/api/analytics": "pages/api/analytics.js",
+  "/api/analytics/templates": "pages/api/analytics/templates.js",
+  "/api/analytics/users": "pages/api/analytics/users.js",
+  "/api/leaderboard": "pages/api/leaderboard.js",
+  "/api/metrics": "pages/api/metrics.js",
+  "/api/feedback": "pages/api/feedback.js",
+  "/api/referrals/create": "pages/api/referrals/create.js",
+  "/api/feedback/[id]": "pages/api/feedback/[id].js",
+  "/api/referrals": "pages/api/referrals.js",
+  "/api/social/connect": "pages/api/social/connect.js",
+  "/api/social/messages": "pages/api/social/messages.js",
+  "/profile": "pages/profile.js",
+  "/admin/feedback": "pages/admin/feedback.js",
+  "/api/analytics/activity": "pages/api/analytics/activity.js",
+  "/_document": "pages/_document.js",
+  "/dashboard": "pages/dashboard.js"
+}

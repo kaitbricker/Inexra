@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
 import { motion } from 'framer-motion';
