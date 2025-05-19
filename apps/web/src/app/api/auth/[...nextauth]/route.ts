@@ -1,13 +1,14 @@
-import NextAuth, { type AuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
+import type { User, Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 import { authOptions } from '@/lib/auth';
 import { identifyUser } from '@/utils/logrocket';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import type { User } from 'next-auth';
 
-const enhancedAuthOptions: AuthOptions = {
+const enhancedAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -63,14 +64,14 @@ const enhancedAuthOptions: AuthOptions = {
       }
       return true;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
         session.user.id = token.sub as string;
         session.user.role = token.role as string;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.role = user.role;
       }
@@ -82,7 +83,7 @@ const enhancedAuthOptions: AuthOptions = {
     error: '/auth/error',
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
