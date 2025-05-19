@@ -8,6 +8,8 @@ import { prisma } from '@/lib/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
+console.log("NextAuth API route loaded");
+
 const enhancedAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -82,6 +84,10 @@ const enhancedAuthOptions = {
         console.error('Error in signIn callback:', error);
         return false;
       }
+    },
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      // Always redirect to dashboard after login
+      return baseUrl + '/dashboard';
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
