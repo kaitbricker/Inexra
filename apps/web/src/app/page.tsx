@@ -2,7 +2,11 @@ import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
 import { HeroAnimated } from '@/components/landing/HeroAnimated';
 import { FeatureHighlights } from '@/components/landing/FeatureHighlights';
 import { AnimatedCTA } from '@/components/landing/AnimatedCTA';
-import { AuthRedirect } from '@/components/AuthRedirect';
+import dynamic from 'next/dynamic';
+
+const AuthRedirect = dynamic(() => import('@/components/AuthRedirect'), {
+  ssr: false,
+});
 
 const marketingPhrases = [
   'Turn Conversations into Clarity.',

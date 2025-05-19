@@ -23,4 +23,7 @@ export function AuthRedirect() {
   }
 
   return null;
-} 
+}
+
+// Export as default for dynamic import
+export default AuthRedirect; 
