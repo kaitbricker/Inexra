@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
-import { initSocket } from '@/lib/socket';
 
-export async function GET(req: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    const res = new NextResponse();
-    const io = initSocket(res as any);
-    return res;
+    return new NextResponse('Socket route is working', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   } catch (error) {
     console.error('Socket initialization error:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return new NextResponse('Socket initialization failed', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 }
