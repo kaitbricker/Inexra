@@ -1,13 +1,8 @@
-'use client';
-
-import React from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import { motion } from 'framer-motion';
 import { HeroAnimated } from '@/components/landing/HeroAnimated';
 import { FeatureHighlights } from '@/components/landing/FeatureHighlights';
 import { AnimatedCTA } from '@/components/landing/AnimatedCTA';
+import { AuthRedirect } from '@/components/AuthRedirect';
 
 const marketingPhrases = [
   'Turn Conversations into Clarity.',
@@ -22,36 +17,10 @@ const marketingPhrases = [
   'Say Goodbye to Communication Silos.',
 ];
 
-// Create a client component for auth check
-const AuthCheck = () => {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  React.useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#101a2b] to-[#1a2747]">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (status === 'authenticated') {
-    return null;
-  }
-
-  return null;
-};
-
 export default function Page() {
   return (
     <>
-      <AuthCheck />
+      <AuthRedirect />
       <div className="min-h-screen bg-gradient-to-br from-[#101a2b] to-[#1a2747] text-white">
         <header className="flex items-center justify-between px-10 py-7 bg-transparent relative z-10">
           <div className="flex items-center gap-3">
