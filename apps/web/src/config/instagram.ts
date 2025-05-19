@@ -4,10 +4,6 @@ const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID || '';
 const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET || '';
 const INSTAGRAM_REDIRECT_URI = process.env.INSTAGRAM_REDIRECT_URI || '';
 
-if (!INSTAGRAM_CLIENT_ID || !INSTAGRAM_CLIENT_SECRET) {
-  throw new Error('Missing Instagram credentials');
-}
-
 export const INSTAGRAM_SCOPES = [
   'user_profile',
   'user_media',
@@ -18,6 +14,10 @@ export const INSTAGRAM_SCOPES = [
 ];
 
 export function getInstagramAuthUrl(redirectUri: string): string {
+  if (!INSTAGRAM_CLIENT_ID) {
+    throw new Error('Instagram integration is not configured');
+  }
+
   const baseUrl = 'https://api.instagram.com/oauth/authorize';
   const params = new URLSearchParams({
     client_id: INSTAGRAM_CLIENT_ID,
@@ -31,6 +31,10 @@ export function getInstagramAuthUrl(redirectUri: string): string {
 }
 
 export async function getInstagramAccessToken(code: string, redirectUri: string) {
+  if (!INSTAGRAM_CLIENT_ID || !INSTAGRAM_CLIENT_SECRET) {
+    throw new Error('Instagram integration is not configured');
+  }
+
   const params = new URLSearchParams({
     client_id: INSTAGRAM_CLIENT_ID,
     client_secret: INSTAGRAM_CLIENT_SECRET,
@@ -91,10 +95,10 @@ export function getInstagramWebhookUrl(): string {
 }
 
 export const instagramConfig = {
-  appId: process.env.INSTAGRAM_APP_ID,
-  appSecret: process.env.INSTAGRAM_APP_SECRET,
-  redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
-  scope: 'user_profile,user_media',
+  appId: INSTAGRAM_CLIENT_ID,
+  appSecret: INSTAGRAM_CLIENT_SECRET,
+  redirectUri: INSTAGRAM_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
+  scope: INSTAGRAM_SCOPES.join(','),
   responseType: 'code',
   authUrl: 'https://api.instagram.com/oauth/authorize',
   tokenUrl: 'https://api.instagram.com/oauth/access_token',

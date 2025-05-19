@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 import { Instagram, Linkedin, Twitter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { platformConfigs } from '@/config/platforms';
 
 interface Platform {
   id: string;
@@ -14,6 +15,7 @@ interface Platform {
   icon: React.ReactNode;
   color: string;
   description: string;
+  isConfigured: boolean;
 }
 
 const platforms: Platform[] = [
@@ -23,6 +25,7 @@ const platforms: Platform[] = [
     icon: <Instagram className="h-5 w-5" />,
     color: '#E1306C',
     description: 'Connect your Instagram account to manage comments and messages',
+    isConfigured: platformConfigs.instagram.isConfigured,
   },
   {
     id: 'linkedin',
@@ -30,6 +33,7 @@ const platforms: Platform[] = [
     icon: <Linkedin className="h-5 w-5" />,
     color: '#0077B5',
     description: 'Connect your LinkedIn account to manage professional communications',
+    isConfigured: platformConfigs.linkedin.isConfigured,
   },
   {
     id: 'twitter',
@@ -37,6 +41,7 @@ const platforms: Platform[] = [
     icon: <Twitter className="h-5 w-5" />,
     color: '#1DA1F2',
     description: 'Connect your Twitter account to manage tweets and direct messages',
+    isConfigured: platformConfigs.twitter.isConfigured,
   },
 ];
 
@@ -73,9 +78,10 @@ export function PlatformConnection({ onConnect, connectedPlatforms }: PlatformCo
                   <Card
                     className={cn(
                       'p-4 cursor-pointer transition-all',
-                      isConnected ? 'border-accent bg-accent/5' : 'hover:border-primary/50'
+                      isConnected ? 'border-accent bg-accent/5' : 'hover:border-primary/50',
+                      !platform.isConfigured && 'opacity-50 cursor-not-allowed'
                     )}
-                    onClick={() => !isConnected && handleConnect(platform.id)}
+                    onClick={() => platform.isConfigured && !isConnected && handleConnect(platform.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -87,7 +93,11 @@ export function PlatformConnection({ onConnect, connectedPlatforms }: PlatformCo
                         </div>
                         <div>
                           <h3 className="font-medium">{platform.name}</h3>
-                          <p className="text-sm text-muted-foreground">{platform.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {platform.isConfigured
+                              ? platform.description
+                              : 'Integration not configured'}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -97,7 +107,11 @@ export function PlatformConnection({ onConnect, connectedPlatforms }: PlatformCo
                             <span className="text-sm">Connected</span>
                           </div>
                         ) : (
-                          <Button variant="outline" size="sm" disabled={isLoading}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isLoading || !platform.isConfigured}
+                          >
                             {isLoading ? 'Connecting...' : 'Connect'}
                           </Button>
                         )}
@@ -107,7 +121,11 @@ export function PlatformConnection({ onConnect, connectedPlatforms }: PlatformCo
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{platform.description}</p>
+                <p>
+                  {platform.isConfigured
+                    ? platform.description
+                    : 'This integration is not configured yet. Please contact your administrator.'}
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

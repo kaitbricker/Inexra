@@ -13,6 +13,13 @@ export async function GET(req: Request) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
+    // Check if Instagram integration is configured
+    if (!instagramConfig.appId || !instagramConfig.appSecret) {
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/settings/connections?error=instagram_not_configured`
+      );
+    }
+
     const searchParams = new URL(req.url).searchParams;
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -28,10 +35,10 @@ export async function GET(req: Request) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: instagramConfig.appId || '',
-        client_secret: instagramConfig.appSecret || '',
+        client_id: instagramConfig.appId,
+        client_secret: instagramConfig.appSecret,
         grant_type: 'authorization_code',
-        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
+        redirect_uri: instagramConfig.redirectUri,
         code,
       }),
     });
