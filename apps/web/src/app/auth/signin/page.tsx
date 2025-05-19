@@ -59,14 +59,14 @@ export default function SignInPage() {
               const res = await signIn("credentials", {
                 email,
                 password,
-                callbackUrl: "/",
+                callbackUrl: "/dashboard",
                 redirect: false,
               });
               setLoading(false);
               if (res?.error) {
                 setError("Invalid email or password.");
               } else if (res?.ok) {
-                window.location.href = "/";
+                window.location.href = "/dashboard";
               }
             }}
           >

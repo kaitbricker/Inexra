@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { HeroAnimated } from '@/components/landing/HeroAnimated';
@@ -21,6 +23,27 @@ const marketingPhrases = [
 ];
 
 export default function Page() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#101a2b] to-[#1a2747]">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (status === 'authenticated') {
+    return null; // Will redirect in useEffect
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101a2b] to-[#1a2747] text-white">
       <header className="flex items-center justify-between px-10 py-7 bg-transparent relative z-10">
