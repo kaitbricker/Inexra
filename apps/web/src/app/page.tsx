@@ -30,7 +30,7 @@ export default function Page() {
           <a href="#overview" className="hover:text-indigo-600 transition">What is Inexra?</a>
           <a href="#pricing" className="hover:text-indigo-600 transition">Pricing</a>
           <a href="#support" className="hover:text-indigo-600 transition">Support</a>
-          <a href="/sign-in" className="ml-4 px-5 py-2 rounded bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition font-semibold">Sign In</a>
+          <a href="/auth/signin" className="ml-4 px-5 py-2 rounded bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition font-semibold">Sign In</a>
         </nav>
       </header>
 
