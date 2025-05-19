@@ -22,13 +22,20 @@ const authOptions: AuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            passwordHash: true,
+          },
         });
 
-        if (!user || !user.password) {
+        if (!user || !user.passwordHash) {
           throw new Error('Invalid credentials');
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
 
         if (!isPasswordValid) {
           throw new Error('Invalid credentials');

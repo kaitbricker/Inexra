@@ -56,14 +56,14 @@ export async function POST(request: Request) {
         email,
         name,
         passwordHash: hashedPassword,
-        role: role || 'BASIC_USER',
+        role: role || 'user',
       },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
-        profileImage: true,
+        image: true,
       },
     });
 

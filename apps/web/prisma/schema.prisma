@@ -79,6 +79,7 @@ model User {
   email                 String?   @unique
   emailVerified         DateTime?
   image                 String?
+  passwordHash          String?   @db.Text
   role                  String    @default("user")
   points                Int       @default(0)
   createdAt             DateTime  @default(now())
@@ -93,6 +94,8 @@ model User {
   socialAccounts        SocialAccount[]
   notificationPreferences Json?    @default("{\"email\": true, \"push\": true, \"inApp\": true}")
   conversations         Conversation[]
+
+  @@map("users")
 }
 
 model Achievement {
