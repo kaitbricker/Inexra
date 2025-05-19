@@ -6,7 +6,8 @@ const getDatabaseUrl = () => {
   if (!url) {
     throw new Error('DATABASE_URL is not defined');
   }
-  return url;
+  // URL encode the connection string to handle special characters
+  return encodeURI(url);
 };
 
 const prismaClientSingleton = () => {
