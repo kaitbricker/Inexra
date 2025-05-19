@@ -52,6 +52,7 @@ const enhancedAuthOptions: AuthOptions = {
     }),
   ],
   callbacks: {
+    ...authOptions.callbacks,
     async signIn({ user }: { user: User }) {
       if (user) {
         identifyUser({

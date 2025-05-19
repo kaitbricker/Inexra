@@ -23,13 +23,15 @@ export default function SignInPage() {
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     try {
+      console.log('Attempting registration...');
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
+      const data = await res.json();
+      console.log('Registration response:', { status: res.status, data });
       if (!res.ok) {
-        const data = await res.json();
         setRegisterError(data.error || "Registration failed.");
         setRegisterLoading(false);
         return;
@@ -37,17 +39,20 @@ export default function SignInPage() {
       setRegisterSuccess(true);
       setRegisterLoading(false);
       // Auto sign in after registration
+      console.log('Attempting auto sign-in after registration...');
       const result = await signIn("credentials", { 
         email, 
         password, 
         redirect: false 
       });
+      console.log('Auto sign-in result:', result);
       if (result?.error) {
         setRegisterError("Registration successful but sign in failed. Please try signing in manually.");
       } else {
         router.push("/dashboard");
       }
     } catch (err) {
+      console.error('Registration error:', err);
       setRegisterError("Registration failed. Please try again.");
       setRegisterLoading(false);
     }
@@ -68,11 +73,13 @@ export default function SignInPage() {
               const email = (form.elements.namedItem("email") as HTMLInputElement).value;
               const password = (form.elements.namedItem("password") as HTMLInputElement).value;
               try {
+                console.log('Attempting sign-in...');
                 const result = await signIn("credentials", {
                   email,
                   password,
                   redirect: false,
                 });
+                console.log('Sign-in result:', result);
                 setLoading(false);
                 if (result?.error) {
                   setError("Invalid email or password.");
@@ -80,6 +87,7 @@ export default function SignInPage() {
                   router.push("/dashboard");
                 }
               } catch (err) {
+                console.error('Sign-in error:', err);
                 setError("An error occurred. Please try again.");
                 setLoading(false);
               }
