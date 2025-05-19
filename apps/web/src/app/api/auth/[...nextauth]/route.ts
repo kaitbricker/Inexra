@@ -1,12 +1,13 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type AuthOptions } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { identifyUser } from '@/utils/logrocket';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
+import type { User } from 'next-auth';
 
-const authOptions: AuthOptions = {
+const enhancedAuthOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -51,7 +52,7 @@ const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user }: { user: User }) {
       if (user) {
         identifyUser({
           id: user.id,
@@ -86,5 +87,5 @@ const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(enhancedAuthOptions);
 export { handler as GET, handler as POST };
