@@ -18,51 +18,70 @@ const enhancedAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials');
+        try {
+          console.log('Authorize called with:', credentials);
+          if (!credentials?.email || !credentials?.password) {
+            console.error('Missing email or password');
+            throw new Error('Invalid credentials');
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              passwordHash: true,
+            },
+          });
+
+          console.log('User found:', user);
+
+          if (!user || !user.passwordHash) {
+            console.error('User not found or missing passwordHash');
+            throw new Error('Invalid credentials');
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+
+          console.log('Password valid:', isPasswordValid);
+
+          if (!isPasswordValid) {
+            console.error('Password is not valid');
+            throw new Error('Invalid credentials');
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('Error in authorize:', error);
+          throw error;
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            passwordHash: true,
-          },
-        });
-
-        if (!user || !user.passwordHash) {
-          throw new Error('Invalid credentials');
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
-
-        if (!isPasswordValid) {
-          throw new Error('Invalid credentials');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],
   callbacks: {
     ...authOptions.callbacks,
     async signIn({ user }: { user: User }) {
-      if (user) {
-        identifyUser({
-          id: user.id,
-          email: user.email || '',
-          name: user.name || '',
-        });
+      try {
+        console.log('signIn callback called with user:', user);
+        if (user) {
+          identifyUser({
+            id: user.id,
+            email: user.email || '',
+            name: user.name || '',
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error('Error in signIn callback:', error);
+        return false;
       }
-      return true;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
