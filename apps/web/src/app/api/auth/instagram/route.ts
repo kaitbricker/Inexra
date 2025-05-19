@@ -6,6 +6,8 @@ import { instagramConfig } from '@/config/instagram';
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
