@@ -34,6 +34,11 @@ declare module 'next-auth/jwt' {
   }
 }
 
+console.log('Initializing auth configuration...');
+console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+console.log('NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -44,40 +49,54 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('Authorize called with email:', credentials?.email);
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials');
           throw new Error('Invalid credentials');
         }
 
-        const userSelect = {
-          id: true,
-          email: true,
-          name: true,
-          image: true,
-          role: true,
-          passwordHash: true,
-        } as const;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          select: userSelect,
-        }) as Prisma.UserGetPayload<{ select: typeof userSelect }> | null;
+        try {
+          const userSelect = {
+            id: true,
+            email: true,
+            name: true,
+            image: true,
+            role: true,
+            passwordHash: true,
+          } as const;
+          
+          console.log('Looking up user in database...');
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            select: userSelect,
+          }) as Prisma.UserGetPayload<{ select: typeof userSelect }> | null;
 
-        if (!user || !user.passwordHash) {
-          throw new Error('Invalid credentials');
+          if (!user || !user.passwordHash) {
+            console.log('User not found or no password hash');
+            throw new Error('Invalid credentials');
+          }
+
+          console.log('Comparing passwords...');
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+
+          if (!isPasswordValid) {
+            console.log('Invalid password');
+            throw new Error('Invalid credentials');
+          }
+
+          console.log('Authentication successful');
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('Error in authorize:', error);
+          throw error;
         }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
-
-        if (!isPasswordValid) {
-          throw new Error('Invalid credentials');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -87,6 +106,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      console.log('JWT callback called');
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -97,6 +117,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log('Session callback called');
       if (token) {
         session.user.id = token.id;
         session.user.email = token.email;
@@ -112,4 +133,5 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
 };
