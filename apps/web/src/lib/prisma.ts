@@ -4,7 +4,10 @@ const getDatabaseUrl = () => {
   console.log('Environment variables available:', Object.keys(process.env));
   const url = process.env.DATABASE_URL;
   console.log('DATABASE_URL exists:', !!url);
-  console.log('DATABASE_URL value:', url ? `${url.substring(0, 20)}...` : 'undefined');
+  console.log('DATABASE_URL type:', typeof url);
+  console.log('DATABASE_URL length:', url?.length);
+  console.log('DATABASE_URL value:', url);
+  console.log('DATABASE_URL first 20 chars:', url?.substring(0, 20));
   
   if (!url) {
     console.error('DATABASE_URL is not defined in environment variables');
@@ -19,7 +22,7 @@ const getDatabaseUrl = () => {
   
   // Ensure the URL starts with postgresql://
   if (!url.startsWith('postgresql://') && !url.startsWith('postgres://')) {
-    console.error('Invalid DATABASE_URL format:', url.substring(0, 20) + '...');
+    console.error('Invalid DATABASE_URL format:', url);
     throw new Error('DATABASE_URL must start with postgresql:// or postgres://');
   }
 
