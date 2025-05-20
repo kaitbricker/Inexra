@@ -13,8 +13,8 @@ export function Providers({ children }: ProvidersProps) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SessionProvider>
         {children}
+        <Toaster />
       </SessionProvider>
-      <Toaster />
     </ThemeProvider>
   );
 }
