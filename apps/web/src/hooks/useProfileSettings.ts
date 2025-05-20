@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { userApi } from '../services/api';
-import useWebSocket from './useWebSocket';
+import { useWebSocket } from './useWebSocket';
 
 interface Profile {
   id: string;

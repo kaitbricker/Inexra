@@ -1,19 +1,35 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import ProfileSettings from '../components/Profile/ProfileSettings';
 import useProfileSettings from '@/hooks/useProfileSettings';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
 
 const ProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { profile, loading, error, updateProfile } = useProfileSettings();
-
-  React.useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    }
-  }, [status, router]);
 
   if (status === 'loading' || loading) {
     return <div>Loading...</div>;

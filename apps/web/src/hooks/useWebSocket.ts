@@ -12,6 +12,18 @@ export const useWebSocket = () => {
     }
   }, []);
 
+  const subscribe = useCallback((event: string, callback: (data: any) => void) => {
+    if (!wsService) {
+      return () => {};
+    }
+
+    const service = wsService;
+    service.on(event, callback);
+    return () => {
+      service.off(event, callback);
+    };
+  }, []);
+
   useEffect(() => {
     if (!wsService) return;
 
@@ -63,6 +75,7 @@ export const useWebSocket = () => {
 
   return {
     send,
+    subscribe,
     connected: isConnected,
   };
 };
