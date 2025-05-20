@@ -1,18 +1,7 @@
-import { NextResponse } from 'next/server';
+import NextAuth from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-export const dynamic = 'force-dynamic';
+const handler = NextAuth(authOptions);
 
-export async function GET() {
-  return NextResponse.json(
-    { status: 'ok', message: 'New response, cache cleared!' },
-    { headers: { 'Cache-Control': 'no-store' } }
-  );
-}
-
-export async function POST() {
-  return NextResponse.json(
-    { status: 'ok', message: 'New response, cache cleared!' },
-    { headers: { 'Cache-Control': 'no-store' } }
-  );
-}
+export { handler as GET, handler as POST };
 
