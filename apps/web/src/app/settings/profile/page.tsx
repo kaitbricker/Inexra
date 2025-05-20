@@ -19,11 +19,14 @@ export default async function ProfilePage() {
     select: {
       name: true,
       email: true,
-      image: true,
+      profileImage: true,
     },
   });
 
+  console.log('User fetched:', user);
+
   if (!user) {
+    console.error('User not found for ID:', session.user.id);
     redirect('/auth/signin');
   }
 
