@@ -4,6 +4,7 @@ const getDatabaseUrl = () => {
   console.log('Environment variables available:', Object.keys(process.env));
   const url = process.env.DATABASE_URL;
   console.log('DATABASE_URL exists:', !!url);
+  console.log('DATABASE_URL value:', url ? `${url.substring(0, 20)}...` : 'undefined');
   
   if (!url) {
     console.error('DATABASE_URL is not defined in environment variables');
@@ -21,6 +22,20 @@ const getDatabaseUrl = () => {
     console.error('Invalid DATABASE_URL format:', url.substring(0, 20) + '...');
     throw new Error('DATABASE_URL must start with postgresql:// or postgres://');
   }
+
+  // Check if the URL contains all required parts
+  const hasProtocol = url.startsWith('postgresql://') || url.startsWith('postgres://');
+  const hasUsername = url.includes('@');
+  const hasHost = url.includes('.neon.tech');
+  const hasDatabase = url.includes('/neondb');
+  
+  console.log('URL validation:', {
+    hasProtocol,
+    hasUsername,
+    hasHost,
+    hasDatabase
+  });
+
   return url;
 };
 
@@ -30,7 +45,7 @@ declare global {
 
 const prismaClientSingleton = () => {
   console.log('Creating new Prisma client...');
-  return new PrismaClient({
+  const client = new PrismaClient({
     datasources: {
       db: {
         url: getDatabaseUrl(),
@@ -38,6 +53,16 @@ const prismaClientSingleton = () => {
     },
     log: ['error', 'warn', 'query'],
   });
+
+  // Test the connection
+  client.$connect()
+    .then(() => console.log('Successfully connected to the database'))
+    .catch((error) => {
+      console.error('Failed to connect to the database:', error);
+      throw error;
+    });
+
+  return client;
 };
 
 const prisma = global.prisma ?? prismaClientSingleton();
