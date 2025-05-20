@@ -7,6 +7,10 @@ import Dashboard from '@/components/Dashboard';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 
+// Debug logging
+console.log('DATABASE_URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
+console.log('DIRECT_URL:', process.env.DIRECT_URL?.substring(0, 20) + '...');
+
 type Priority = 'HIGH' | 'MEDIUM' | 'LOW';
 
 interface ConversationData {
