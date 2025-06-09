@@ -67,6 +67,7 @@ async function main() {
       responseTime,
       resolvedAt,
       slaWindow: 86400, // 24 hours in seconds
+      sender: 'unknown'
     };
   });
 

@@ -109,7 +109,8 @@ export async function POST(request: Request) {
       sentiment: 'Neutral', // Default sentiment
       status: 'New',
       tags: [],
-      hasInsight: false
+      hasInsight: false,
+      sender: msg.sender || msg.from || 'unknown'
     }));
 
     // Insert messages in batches

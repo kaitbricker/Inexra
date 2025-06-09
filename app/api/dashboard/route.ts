@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { subDays } from 'date-fns';
 
 interface SentimentData {
-  sentiment: string;
+  sentiment: string | null;
   _count: number;
 }
 
@@ -161,6 +161,7 @@ export async function GET(request: Request) {
     };
 
     sentimentData.forEach((item: SentimentData) => {
+      if (!item.sentiment) return;
       const percentage = totalMessages > 0 ? (item._count / totalMessages) * 100 : 0;
       sentimentBreakdown[item.sentiment.toLowerCase() as keyof typeof sentimentBreakdown] = Math.round(percentage);
     });

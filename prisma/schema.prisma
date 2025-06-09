@@ -20,6 +20,7 @@ model User {
   sessions      Session[]
   createdAt     DateTime  @default(now())
   messages      Message[]
+  platformConnections PlatformConnection[]
 }
 
 model Account {
@@ -78,4 +79,21 @@ model Message {
   @@index([status])
   @@index([sentiment])
   @@index([createdAt])
+}
+
+model PlatformConnection {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  platform       String   // e.g., 'Instagram'
+  platformUserId String   // Instagram user id
+  accountName    String   // Instagram username
+  accessToken    String
+  refreshToken   String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([platform])
 } 

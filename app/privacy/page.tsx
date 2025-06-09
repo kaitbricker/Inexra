@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
               </p>
               <ul className="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
                 <li>Basic profile information (username, profile picture)</li>
-                <li>Comments and messages you've received</li>
+                <li>Comments and messages you&apos;ve received</li>
                 <li>Engagement metrics (likes, comments, shares)</li>
                 <li>Post content and metadata</li>
               </ul>
@@ -96,7 +96,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">8. Changes to This Policy</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the "Last updated" date.
+              We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the &quot;Last updated&quot; date.
             </p>
           </section>
         </div>
