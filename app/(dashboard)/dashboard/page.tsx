@@ -268,7 +268,7 @@ export default function Dashboard() {
             {error}
           </h3>
           <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            We couldn't load your dashboard data. Please try again.
+            We couldn&apos;t load your dashboard data. Please try again.
           </p>
         </div>
         <button
@@ -324,7 +324,7 @@ export default function Dashboard() {
                   <h4 className="text-sm font-semibold text-gray-800">Notifications</h4>
                 </div>
                 <ul className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                  {/* Today's Notifications */}
+                  {/* Today&apos;s Notifications */}
                   <li className="px-4 py-2 bg-gray-50">
                     <p className="text-xs text-gray-500 font-semibold">Today</p>
                   </li>
@@ -356,7 +356,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </li>
-                  {/* Yesterday's Notifications */}
+                  {/* Yesterday&apos;s Notifications */}
                   <li className="px-4 py-2 bg-gray-50">
                     <p className="text-xs text-gray-500 font-semibold">Yesterday</p>
                   </li>
@@ -649,9 +649,9 @@ export default function Dashboard() {
               <div className="flex flex-col gap-2 mb-4">
                 <button 
                   className="text-sm bg-gray-100 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 text-left transition" 
-                  onClick={() => setResponse("Thanks for your interest! I'd be happy to share more about enterprise pricing.")}
+                  onClick={() => setResponse("Thanks for your interest! I&apos;d be happy to share more about enterprise pricing.")}
                 >
-                  Thanks for your interest! I'd be happy to share more about enterprise pricing.
+                  Thanks for your interest! I&apos;d be happy to share more about enterprise pricing.
                 </button>
                 <button 
                   className="text-sm bg-gray-100 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 text-left transition" 
@@ -661,9 +661,9 @@ export default function Dashboard() {
                 </button>
                 <button 
                   className="text-sm bg-gray-100 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 text-left transition" 
-                  onClick={() => setResponse("I'll connect you with our sales team for a custom quote.")}
+                  onClick={() => setResponse("I&apos;ll connect you with our sales team for a custom quote.")}
                 >
-                  I'll connect you with our sales team for a custom quote.
+                  I&apos;ll connect you with our sales team for a custom quote.
                 </button>
               </div>
             </div>

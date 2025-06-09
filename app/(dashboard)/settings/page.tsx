@@ -20,11 +20,11 @@ const PLATFORMS = [
 ];
 
 const tabIcons = [
-  <UserCircleIcon className="w-4 h-4 mr-1 text-indigo-400" />, // Account
-  <DocumentTextIcon className="w-4 h-4 mr-1 text-purple-400" />, // Templates
-  <LinkIcon className="w-4 h-4 mr-1 text-cyan-400" />, // Sources
-  <Cog6ToothIcon className="w-4 h-4 mr-1 text-emerald-400" />, // Social Integrations
-  <ShieldCheckIcon className="w-4 h-4 mr-1 text-rose-400" />, // Security
+  <UserCircleIcon key="account" className="w-4 h-4 mr-1 text-indigo-400" />, // Account
+  <DocumentTextIcon key="templates" className="w-4 h-4 mr-1 text-purple-400" />, // Templates
+  <LinkIcon key="sources" className="w-4 h-4 mr-1 text-cyan-400" />, // Sources
+  <Cog6ToothIcon key="social" className="w-4 h-4 mr-1 text-emerald-400" />, // Social Integrations
+  <ShieldCheckIcon key="security" className="w-4 h-4 mr-1 text-rose-400" />, // Security
 ];
 
 interface UploadError {

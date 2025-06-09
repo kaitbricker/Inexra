@@ -10,11 +10,11 @@ const SORTS = ["Newest First", "Oldest First", "By Sentiment"];
 const TEMPLATE_OPTIONS = [
   {
     label: 'General Acknowledgment',
-    value: "Thank you for your message. We'll follow up shortly.",
+    value: "Thank you for your message. We&apos;ll follow up shortly.",
   },
   {
     label: 'Processing Timeline',
-    value: "We've reviewed your request and will get back to you within 1 business day.",
+    value: "We&apos;ve reviewed your request and will get back to you within 1 business day.",
   },
   {
     label: 'Warm Handoff',

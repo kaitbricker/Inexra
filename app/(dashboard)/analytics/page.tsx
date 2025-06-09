@@ -1253,12 +1253,12 @@ export default function AnalyticsPage() {
             <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-xl shadow flex items-center gap-3 animate-fade-in">
               <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500" />
               <span className="font-semibold">AI Alert:</span>
-              <span>Mentions of <span className="font-bold">'shipping'</span> rose 3x this week</span>
+              <span>It&apos;s a great day!</span>
             </div>
             <div className="bg-red-50 border-l-4 border-red-400 text-red-800 p-4 rounded-xl shadow flex items-center gap-3 animate-fade-in">
               <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
               <span className="font-semibold">AI Alert:</span>
-              <span>AI confidence dropped for <span className="font-bold">'Collab'</span> tag</span>
+              <span>&apos;shipping&apos; and &apos;Collab&apos; mentioned frequently</span>
             </div>
           </div>
         </div>
