@@ -10,8 +10,10 @@ import {
   Cog6ToothIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { useAskInexraAI } from "@/components/AskInexraAIPanel";
+import { signOut } from "next-auth/react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -72,18 +74,26 @@ export default function Sidebar() {
           );
         })}
         {/* Ask InexraAI CTA Button */}
-        <div className="mt-20 flex justify-center">
+        <div className="flex flex-col items-center" style={{ marginTop: 10 }}>
           <button
             className={`w-full max-w-[80%] rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-150 hover:from-blue-600 hover:to-purple-700 hover:scale-105 whitespace-nowrap ${isCollapsed ? "px-2" : ""}`}
             onClick={open}
           >
-            <span className={`${isCollapsed ? "hidden" : "block"}`}>
-              Ask InexraAI
-            </span>
+            <span className={`${isCollapsed ? "hidden" : "block"}`}>Ask InexraAI</span>
             <span className={`${isCollapsed ? "block" : "hidden"}`}>AI</span>
           </button>
         </div>
       </nav>
+      {/* Sidebar Footer: Log out button */}
+      <div className="mt-auto px-4 pb-6">
+        <button
+          onClick={() => signOut()}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
+        >
+          <ArrowRightOnRectangleIcon className="h-4 w-4" />
+          <span className="font-medium">Log out</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,28 @@
+{
+  "messages": [
+    {
+      "content": "Your latest video was amazing! 🔥",
+      "sender": "TikTok User 123",
+      "timestamp": "2024-03-15T14:20:00Z",
+      "type": "comment"
+    },
+    {
+      "content": "Can you make a tutorial on how you did that effect?",
+      "sender": "TikTok User 456",
+      "timestamp": "2024-03-15T14:25:00Z",
+      "type": "comment"
+    },
+    {
+      "content": "Thanks for the support! I'll definitely make a tutorial next week.",
+      "sender": "Brand Account",
+      "timestamp": "2024-03-15T14:30:00Z",
+      "type": "reply"
+    },
+    {
+      "content": "Just followed you! Love your content style 💕",
+      "sender": "TikTok User 789",
+      "timestamp": "2024-03-15T14:35:00Z",
+      "type": "comment"
+    }
+  ]
+} 

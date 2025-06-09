@@ -11,48 +11,54 @@ import {
   HandThumbUpIcon,
   ChatBubbleLeftEllipsisIcon,
   BellIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
 } from "@heroicons/react/24/outline";
 import { useState, useRef, useEffect } from "react";
 import { useAskInexraAI } from "@/components/AskInexraAIPanel";
+import { useRouter } from "next/navigation";
 
-const metrics = [
-  {
-    name: "Total Messages",
-    value: "64",
-    change: "+19%",
-    icon: ChatBubbleLeftRightIcon,
-    gradient: "from-fuchsia-400 via-purple-500 to-indigo-600",
-    iconBg: "bg-fuchsia-100/60",
-    iconRing: "ring-fuchsia-400/30",
-  },
-  {
-    name: "Leads",
-    value: "18",
-    change: "+13%",
-    icon: UserGroupIcon,
-    gradient: "from-cyan-400 via-blue-500 to-blue-700",
-    iconBg: "bg-cyan-100/60",
-    iconRing: "ring-cyan-400/30",
-  },
-  {
-    name: "Complaints",
-    value: "7",
-    change: "-23%",
-    icon: ExclamationTriangleIcon,
-    gradient: "from-rose-400 via-red-500 to-orange-500",
-    iconBg: "bg-rose-100/60",
-    iconRing: "ring-rose-400/30",
-  },
-  {
-    name: "Insights",
-    value: "5",
-    change: "+8%",
-    icon: TagIcon,
-    gradient: "from-green-400 via-emerald-500 to-teal-600",
-    iconBg: "bg-green-100/60",
-    iconRing: "ring-green-400/30",
-  },
-];
+// Add type for stats API response
+type DashboardStats = {
+  totalMessages: number;
+  totalLeads: number;
+  totalComplaints: number;
+  totalInsights: number;
+  prevTotalMessages?: number;
+  prevTotalLeads?: number;
+  prevTotalComplaints?: number;
+  prevTotalInsights?: number;
+  sentimentBreakdown: { positive: number; neutral: number; negative: number };
+  aiInsight: string;
+  platformHealth: {
+    avgResponseTime: string;
+    messagesResolved: number;
+    slaBreaches: number;
+    customerSatisfaction: number;
+  };
+  messageTrend?: number | null;
+  leadTrend?: number | null;
+  complaintTrend?: number | null;
+  insightTrend?: number | null;
+};
+
+// Add type for message API response
+type Message = {
+  id: number;
+  sender: string;
+  tag: string;
+  tagColor: string;
+  preview: string;
+  time: string;
+};
+
+function calcChange(current: number, prev?: number) {
+  if (typeof prev !== "number" || prev === 0) return "N/A";
+  const diff = current - prev;
+  const percent = (diff / prev) * 100;
+  const sign = percent > 0 ? "+" : "";
+  return `${sign}${percent.toFixed(0)}%`;
+}
 
 const messages = [
   {
@@ -103,15 +109,6 @@ const sentimentData = [
   { label: "Negative", value: 13, color: "bg-red-500" },
 ];
 
-type Message = {
-  id: number;
-  sender: string;
-  tag: string;
-  tagColor: string;
-  preview: string;
-  time: string;
-};
-
 export default function Dashboard() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [response, setResponse] = useState("");
@@ -120,6 +117,30 @@ export default function Dashboard() {
   const handleView = (message: Message) => setSelectedMessage(message);
   const handleClose = () => setSelectedMessage(null);
   const { open: openAskInexraAI } = useAskInexraAI();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const router = useRouter();
+
+  const fetchStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/dashboard");
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      const data = await res.json();
+      setStats(data);
+    } catch (e) {
+      setError("Failed to load dashboard stats. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -136,6 +157,137 @@ export default function Dashboard() {
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, [notifOpen]);
+
+  useEffect(() => {
+    fetch("/api/messages?limit=5&sort=desc")
+      .then((res) => res.json())
+      .then((data) => {
+        setMessages(data);
+      })
+      .catch((e) => {
+        console.error("Failed to load messages:", e);
+      });
+  }, []);
+
+  // Replace metrics with dynamic data
+  const metrics = stats
+    ? [
+        {
+          name: "Total Messages",
+          value: stats.totalMessages,
+          icon: ChatBubbleLeftRightIcon,
+          gradient: "from-fuchsia-400 via-purple-500 to-indigo-600",
+          iconBg: "bg-fuchsia-100/60",
+          iconRing: "ring-fuchsia-400/30",
+          trend: stats.messageTrend,
+        },
+        {
+          name: "Leads",
+          value: stats.totalLeads,
+          icon: UserGroupIcon,
+          gradient: "from-cyan-400 via-blue-500 to-blue-700",
+          iconBg: "bg-cyan-100/60",
+          iconRing: "ring-cyan-400/30",
+          trend: stats.leadTrend,
+        },
+        {
+          name: "Complaints",
+          value: stats.totalComplaints,
+          icon: ExclamationTriangleIcon,
+          gradient: "from-rose-400 via-red-500 to-orange-500",
+          iconBg: "bg-rose-100/60",
+          iconRing: "ring-rose-400/30",
+          trend: stats.complaintTrend,
+        },
+        {
+          name: "Insights",
+          value: stats.totalInsights,
+          icon: TagIcon,
+          gradient: "from-green-400 via-emerald-500 to-teal-600",
+          iconBg: "bg-green-100/60",
+          iconRing: "ring-green-400/30",
+          trend: stats.insightTrend,
+        },
+      ]
+    : [];
+
+  // Loading skeleton component
+  const StatsSkeleton = () => (
+    <div className="space-y-6">
+      {/* Metric Tiles Skeleton */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-6 animate-pulse"
+          >
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+              <div className="h-14 w-14 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Sentiment Snapshot Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg animate-pulse">
+          <div className="space-y-4">
+            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg animate-pulse">
+          <div className="space-y-4">
+            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-24 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-8 bg-gray-100 dark:bg-gray-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Error component
+  const ErrorBox = () => (
+    <div className="rounded-lg bg-red-50 dark:bg-red-900/30 p-6 text-center">
+      <div className="flex flex-col items-center gap-4">
+        <ExclamationTriangleIcon className="h-12 w-12 text-red-500" />
+        <div>
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+            {error}
+          </h3>
+          <p className="mt-2 text-sm text-red-700 dark:text-red-300">
+            We couldn't load your dashboard data. Please try again.
+          </p>
+        </div>
+        <button
+          onClick={fetchStats}
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return <StatsSkeleton />;
+  }
+
+  if (error) {
+    return <ErrorBox />;
+  }
 
   return (
     <div className="space-y-6">
@@ -247,8 +399,30 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium opacity-80">{metric.name}</p>
-                <p className="mt-2 text-3xl font-semibold drop-shadow-lg">{metric.value}</p>
-                <p className="mt-1 text-sm opacity-80">{metric.change} last 30 days</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <p className="text-3xl font-semibold drop-shadow-lg">{metric.value}</p>
+                  {/* Trend icon and value */}
+                  {typeof metric.trend === "number" && metric.trend !== null && (
+                    <span className="flex items-center ml-2 text-base font-medium">
+                      {metric.trend > 0 && (
+                        <ArrowTrendingUpIcon className="h-5 w-5 text-green-300" />
+                      )}
+                      {metric.trend < 0 && (
+                        <ArrowTrendingDownIcon className="h-5 w-5 text-red-300" />
+                      )}
+                      <span className={
+                        metric.trend > 0
+                          ? "text-green-200 ml-1"
+                          : metric.trend < 0
+                          ? "text-red-200 ml-1"
+                          : "text-gray-200 ml-1"
+                      }>
+                        {metric.trend > 0 ? "+" : ""}
+                        {metric.trend.toFixed(0)}%
+                      </span>
+                    </span>
+                  )}
+                </div>
               </div>
               <div className={`relative flex items-center justify-center h-14 w-14 ${metric.iconBg} rounded-full shadow-lg ring-4 ${metric.iconRing}`}>
                 <metric.icon className="h-7 w-7 text-gray-700/80" />
@@ -284,7 +458,8 @@ export default function Dashboard() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className="relative group flex items-stretch rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-200 overflow-hidden hover:scale-[1.015]"
+                className="relative group flex items-stretch rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-200 overflow-hidden hover:scale-[1.015] cursor-pointer"
+                onClick={() => handleView(message)}
               >
                 {/* Sender Badge */}
                 <div className="flex items-center px-4 py-4">
@@ -315,12 +490,20 @@ export default function Dashboard() {
                 {/* Hover Action Button */}
                 <button
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full px-3 py-1 text-xs font-semibold shadow-md hover:scale-105"
-                  onClick={() => handleView(message)}
+                  onClick={e => { e.stopPropagation(); handleView(message); }}
                 >
                   View
                 </button>
               </div>
             ))}
+          </div>
+          <div className="mt-4 text-center">
+            <button
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+              onClick={() => router.push("/inbox")}
+            >
+              View Full Inbox
+            </button>
           </div>
         </div>
 
@@ -330,7 +513,7 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">AI insights from the last 30 days</p>
           <div className="bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 p-3 rounded-md text-sm leading-snug shadow-sm mt-3 mb-4 dark:bg-indigo-900/30 dark:text-indigo-100 dark:border-indigo-500">
             <p className="italic font-medium">
-              You've seen a spike in positive sentiment this week. Most messages are related to new pricing inquiries.
+              {stats?.aiInsight || "Loading..."}
             </p>
           </div>
           {/* Sentiment Bars */}
@@ -341,10 +524,10 @@ export default function Dashboard() {
                 <span className="flex items-center gap-2">
                   <span className="text-green-600 text-lg">😀</span> Positive
                 </span>
-                <span className="text-gray-600 font-medium">65%</span>
+                <span className="text-gray-600 font-medium">{stats?.sentimentBreakdown.positive || 0}%</span>
               </div>
               <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-1">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${stats?.sentimentBreakdown.positive || 0}%` }}></div>
               </div>
             </div>
             {/* Neutral */}
@@ -353,10 +536,10 @@ export default function Dashboard() {
                 <span className="flex items-center gap-2">
                   <span className="text-yellow-500 text-lg">😐</span> Neutral
                 </span>
-                <span className="text-gray-600 font-medium">22%</span>
+                <span className="text-gray-600 font-medium">{stats?.sentimentBreakdown.neutral || 0}%</span>
               </div>
               <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-1">
-                <div className="bg-yellow-400 h-2 rounded-full" style={{ width: '22%' }}></div>
+                <div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${stats?.sentimentBreakdown.neutral || 0}%` }}></div>
               </div>
             </div>
             {/* Negative */}
@@ -365,10 +548,10 @@ export default function Dashboard() {
                 <span className="flex items-center gap-2">
                   <span className="text-red-500 text-lg">😡</span> Negative
                 </span>
-                <span className="text-gray-600 font-medium">13%</span>
+                <span className="text-gray-600 font-medium">{stats?.sentimentBreakdown.negative || 0}%</span>
               </div>
               <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-1">
-                <div className="bg-red-500 h-2 rounded-full" style={{ width: '13%' }}></div>
+                <div className="bg-red-500 h-2 rounded-full" style={{ width: `${stats?.sentimentBreakdown.negative || 0}%` }}></div>
               </div>
             </div>
           </div>
@@ -382,7 +565,7 @@ export default function Dashboard() {
                 <div className="flex-1">
                   <div className="text-xs text-gray-500">Avg. Response Time</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">2h 14m</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{stats?.platformHealth.avgResponseTime || "Loading..."}</span>
                     <span className="text-xs text-gray-500">Fair</span>
                   </div>
                 </div>
@@ -394,7 +577,7 @@ export default function Dashboard() {
                 <div className="flex-1">
                   <div className="text-xs text-gray-500">Messages Resolved</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">82%</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{stats?.platformHealth.messagesResolved || 0}%</span>
                     <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full font-medium">Improving</span>
                   </div>
                 </div>
@@ -405,7 +588,7 @@ export default function Dashboard() {
                 <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
                 <div className="flex-1">
                   <div className="text-xs text-gray-500">SLA Breaches</div>
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">3 SLA Breaches</span>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">{stats?.platformHealth.slaBreaches || 0} SLA Breaches</span>
                 </div>
                 <span className="text-xs text-red-500">Needs Attention</span>
               </div>
@@ -414,9 +597,9 @@ export default function Dashboard() {
                 <HandThumbUpIcon className="w-5 h-5 text-green-400" />
                 <div className="flex-1">
                   <div className="text-xs text-gray-500">Customer Satisfaction</div>
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">92% Satisfied</span>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">{stats?.platformHealth.customerSatisfaction || 0}% Satisfied</span>
                   <div className="w-full h-1 bg-gray-200 rounded mt-1">
-                    <div className="bg-green-500 h-1 rounded" style={{ width: '92%' }}></div>
+                    <div className="bg-green-500 h-1 rounded" style={{ width: `${stats?.platformHealth.customerSatisfaction || 0}%` }}></div>
                   </div>
                 </div>
                 <span className="text-xs text-green-600">Great</span>

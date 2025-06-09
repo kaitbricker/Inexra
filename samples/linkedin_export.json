@@ -1,0 +1,28 @@
+{
+  "messages": [
+    {
+      "content": "Hi there! I'm interested in learning more about your product.",
+      "sender": "John Smith",
+      "timestamp": "2024-03-15T10:30:00Z",
+      "type": "inbound"
+    },
+    {
+      "content": "Thanks for reaching out! I'd be happy to tell you more about our product. What specific aspects are you interested in?",
+      "sender": "Sarah Johnson",
+      "timestamp": "2024-03-15T10:35:00Z",
+      "type": "outbound"
+    },
+    {
+      "content": "I'm particularly interested in the analytics features and pricing.",
+      "sender": "John Smith",
+      "timestamp": "2024-03-15T10:40:00Z",
+      "type": "inbound"
+    },
+    {
+      "content": "Great! Our analytics platform offers real-time insights and customizable dashboards. Our pricing starts at $99/month for the basic plan. Would you like me to send you our detailed pricing sheet?",
+      "sender": "Sarah Johnson",
+      "timestamp": "2024-03-15T10:45:00Z",
+      "type": "outbound"
+    }
+  ]
+} 

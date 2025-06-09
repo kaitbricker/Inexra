@@ -57,14 +57,25 @@ model VerificationToken {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  timestamp DateTime
-  platform  String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  tags      String[]
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  content    String
+  sender     String
+  platform   String
+  timestamp  DateTime @default(now())
+  sentiment  String?  @default("Neutral")
+  tags       String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
+  User       User     @relation(fields: [userId], references: [id])
+  status     String   @default("Open")
+  hasInsight Boolean  @default(false)
+  responseTime Int?   // in minutes
+  resolvedAt  DateTime?
+  slaWindow  Int      @default(1440) // 24 hours in minutes
 
   @@index([userId])
+  @@index([status])
+  @@index([sentiment])
+  @@index([createdAt])
 } 
