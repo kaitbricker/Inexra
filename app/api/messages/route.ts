@@ -6,6 +6,9 @@ import { prisma } from '@/lib/prisma';
 import { getTagsFromClaude } from '@/lib/ai/claudeTagger';
 import { getVisibleTags } from '@/lib/utils/tags';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // Mock messages data
 let messages = [
   { id: 1, sender: "JD", content: "Interested in enterprise pricing...", tag: "Leads", time: "2m ago" },

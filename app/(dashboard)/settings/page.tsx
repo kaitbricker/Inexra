@@ -1,4 +1,8 @@
 "use client";
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
 import { Switch } from "@headlessui/react";

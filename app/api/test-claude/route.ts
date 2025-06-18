@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTagsFromClaude } from "@/lib/ai/claudeTagger";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { message } = await req.json();

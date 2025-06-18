@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 let notifications = [
   { id: 1, type: "insight", message: "Pricing inquiries increased 32% this week.", read: false },
   { id: 2, type: "warning", message: "3 new complaints flagged as urgent.", read: false },

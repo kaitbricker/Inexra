@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { InstagramService } from '@/lib/instagram';
 import { getTagsFromClaude } from '@/lib/ai/claudeTagger';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // Verify cron secret to ensure only authorized calls
 function verifyCronSecret(req: NextRequest) {
   const authHeader = req.headers.get('authorization');

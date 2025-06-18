@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 let templates = [
   { id: 1, title: "Welcome Reply", body: "Hi there! Thanks for reaching out.", tags: ["Welcome"] },
   { id: 2, title: "Pricing Info", body: "Our pricing starts at $99/mo. Let me know if you have questions!", tags: ["Pricing"] },

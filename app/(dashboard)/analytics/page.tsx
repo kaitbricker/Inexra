@@ -1,4 +1,8 @@
 "use client";
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChatBubbleLeftRightIcon, SparklesIcon, ExclamationTriangleIcon, FaceSmileIcon, ClockIcon, FlagIcon } from "@heroicons/react/24/outline";
 import { CalendarDaysIcon, TagIcon, FaceSmileIcon as SmileIcon, DevicePhoneMobileIcon, ArrowPathIcon, FlagIcon as FlagSolidIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ArrowUpRightIcon, ArrowDownRightIcon, EnvelopeIcon, StarIcon } from "@heroicons/react/24/solid";

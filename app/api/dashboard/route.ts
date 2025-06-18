@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { subDays } from 'date-fns';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 interface SentimentData {
   sentiment: string | null;
   _count: number;

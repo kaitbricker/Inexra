@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server';
 
+// Force dynamic rendering for this webhook route
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const mode = searchParams.get('hub.mode');

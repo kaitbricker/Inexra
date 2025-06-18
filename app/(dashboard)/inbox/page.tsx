@@ -1,4 +1,8 @@
 "use client";
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { useState, useRef, useEffect } from "react";
 import MessageCard from "@/components/MessageCard";
 import { SparklesIcon, ArrowPathIcon } from "@heroicons/react/24/outline";

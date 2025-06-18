@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 let settings = {
   fullName: "Jane Doe",
   email: "jane@brand.com",
