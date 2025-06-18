@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
 
     // Combine and format all messages with enhanced source tracking
     const allMessages = [
-      ...dbMessages.map((msg) => ({
+      ...dbMessages.map((msg: any) => ({
         id: msg.id,
         sender: msg.sender,
         tag: msg.tags[0] || 'General',

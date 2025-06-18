@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
 
     // Format the response
     const status = {
-      instagram: connections.find(c => c.platform === 'Instagram') || null,
-      linkedin: connections.find(c => c.platform === 'LinkedIn') || null,
-      tiktok: connections.find(c => c.platform === 'TikTok') || null,
+      instagram: connections.find((c: any) => c.platform === 'Instagram') || null,
+      linkedin: connections.find((c: any) => c.platform === 'LinkedIn') || null,
+      tiktok: connections.find((c: any) => c.platform === 'TikTok') || null,
     };
 
     return NextResponse.json(status);
