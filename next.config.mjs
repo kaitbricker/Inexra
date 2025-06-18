@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    // Fix for client reference manifest issue in Next.js 15
-    serverComponentsExternalPackages: ['@prisma/client'],
-    // Disable client reference manifest for Vercel compatibility
-    clientReferenceManifest: false,
-  },
+  // Use the new serverExternalPackages instead of deprecated experimental option
+  serverExternalPackages: ['@prisma/client'],
   // Ensure proper output configuration for Vercel
   output: 'standalone',
   // Add webpack configuration to handle Prisma
