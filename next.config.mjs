@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use the new serverExternalPackages option for Prisma
-  serverExternalPackages: ['@prisma/client'],
+  // Use experimental option for Next.js 14.2.3
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
 };
 
 export default nextConfig;
