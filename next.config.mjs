@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use the new serverExternalPackages instead of deprecated experimental option
-  serverExternalPackages: ['@prisma/client'],
+  experimental: {
+    // Use the correct experimental option for Next.js 14
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   // Add webpack configuration to handle Prisma
   webpack: (config, { isServer }) => {
     if (isServer) {
