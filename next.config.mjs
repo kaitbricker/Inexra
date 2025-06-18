@@ -4,13 +4,10 @@ const nextConfig = {
     // Use the correct experimental option for Next.js 14
     serverComponentsExternalPackages: ['@prisma/client'],
   },
-  // Add webpack configuration to handle Prisma
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('@prisma/client');
-    }
-    return config;
-  },
+  // Disable static generation for API routes to prevent client reference manifest issues
+  trailingSlash: false,
+  // Ensure proper output for Vercel
+  output: 'standalone',
 };
 
 export default nextConfig;
