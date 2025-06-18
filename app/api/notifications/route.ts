@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 let notifications = [
   { id: 1, type: "insight", message: "Pricing inquiries increased 32% this week.", read: false },
@@ -6,7 +8,24 @@ let notifications = [
 ];
 
 export async function GET() {
-  return NextResponse.json(notifications);
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // In a real implementation, you would:
+    // 1. Fetch notifications from your database
+    // 2. Filter notifications based on user preferences
+    // 3. Sort by timestamp
+    // 4. Apply pagination if needed
+
+    return NextResponse.json(notifications);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }
 
 export async function PUT(req: NextRequest) {

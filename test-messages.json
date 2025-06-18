@@ -1,0 +1,39 @@
+{
+  "messages": [
+    {
+      "sender": "Sarah Chen",
+      "content": "Hi there! I'm interested in learning more about your enterprise pricing plans.",
+      "timestamp": "2024-03-20T10:30:00Z",
+      "tag": "Lead",
+      "platform": "manual"
+    },
+    {
+      "sender": "Michael Rodriguez",
+      "content": "The latest update seems to have broken our integration. Can you help?",
+      "timestamp": "2024-03-20T08:15:00Z",
+      "tag": "Complaint",
+      "platform": "manual"
+    },
+    {
+      "sender": "Emma Thompson",
+      "content": "Would love to discuss a potential partnership between our companies.",
+      "timestamp": "2024-03-19T15:45:00Z",
+      "tag": "Collaboration",
+      "platform": "manual"
+    },
+    {
+      "sender": "David Kim",
+      "content": "Having trouble with the API authentication. Getting 401 errors.",
+      "timestamp": "2024-03-18T14:20:00Z",
+      "tag": "Technical",
+      "platform": "manual"
+    },
+    {
+      "sender": "Lisa Patel",
+      "content": "Just wanted to say how much we love the new dashboard features!",
+      "timestamp": "2024-03-17T11:10:00Z",
+      "tag": "Positive",
+      "platform": "manual"
+    }
+  ]
+} 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   UserGroupIcon,
   ChatBubbleLeftRightIcon,
@@ -14,9 +16,7 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
 } from "@heroicons/react/24/outline";
-import { useState, useRef, useEffect } from "react";
 import { useAskInexraAI } from "@/components/AskInexraAIPanel";
-import { useRouter } from "next/navigation";
 
 // Add type for stats API response
 type DashboardStats = {
@@ -50,6 +50,7 @@ type Message = {
   tagColor: string;
   preview: string;
   time: string;
+  profilePic?: string;
 };
 
 function calcChange(current: number, prev?: number) {
@@ -60,54 +61,31 @@ function calcChange(current: number, prev?: number) {
   return `${sign}${percent.toFixed(0)}%`;
 }
 
-const messages = [
-  {
-    id: 1,
-    sender: "JD",
-    tag: "Leads",
-    tagColor: "bg-blue-100 text-blue-800",
-    preview: "Interested in enterprise pricing...",
-    time: "2m ago",
-  },
-  {
-    id: 2,
-    sender: "MS",
-    tag: "Complaints",
-    tagColor: "bg-red-100 text-red-800",
-    preview: "Service disruption reported...",
-    time: "15m ago",
-  },
-  {
-    id: 3,
-    sender: "RK",
-    tag: "Collab",
-    tagColor: "bg-purple-100 text-purple-800",
-    preview: "Partnership opportunity...",
-    time: "1h ago",
-  },
-  {
-    id: 4,
-    sender: "TL",
-    tag: "Positive",
-    tagColor: "bg-green-100 text-green-800",
-    preview: "Great experience with support...",
-    time: "2h ago",
-  },
-  {
-    id: 5,
-    sender: "AB",
-    tag: "Technical",
-    tagColor: "bg-yellow-100 text-yellow-800",
-    preview: "API integration question...",
-    time: "3h ago",
-  },
-];
+// Helper function to get initials from a name
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
 
-const sentimentData = [
-  { label: "Positive", value: 65, color: "bg-green-500" },
-  { label: "Neutral", value: 22, color: "bg-yellow-500" },
-  { label: "Negative", value: 13, color: "bg-red-500" },
-];
+// Helper function to format timestamp
+function formatTimestamp(timestamp: string) {
+  const date = new Date(timestamp);
+  const time = date.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  });
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  });
+  return { time, date: formattedDate };
+}
 
 export default function Dashboard() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -122,15 +100,46 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchStats = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/dashboard");
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      const data = await res.json();
-      setStats(data);
+      // Fetch messages from API
+      const messagesRes = await fetch("/api/messages?limit=5&sort=desc");
+      if (!messagesRes.ok) throw new Error("Failed to fetch messages");
+      const messagesData = await messagesRes.json();
+      setMessages(messagesData);
+
+      // Use static stats for now
+      const staticStats: DashboardStats = {
+        totalMessages: 156,
+        totalLeads: 42,
+        totalComplaints: 18,
+        totalInsights: 96,
+        prevTotalMessages: 142,
+        prevTotalLeads: 38,
+        prevTotalComplaints: 15,
+        prevTotalInsights: 88,
+        sentimentBreakdown: { positive: 65, neutral: 25, negative: 10 },
+        aiInsight: "Customer satisfaction is trending up, with a 15% increase in positive sentiment this week.",
+        platformHealth: {
+          avgResponseTime: "2.5h",
+          messagesResolved: 92,
+          slaBreaches: 2,
+          customerSatisfaction: 88
+        },
+        messageTrend: 9.8,
+        leadTrend: 10.5,
+        complaintTrend: 20,
+        insightTrend: 9.1
+      };
+      setStats(staticStats);
     } catch (e) {
       setError("Failed to load dashboard stats. Please try again.");
     } finally {
@@ -139,8 +148,10 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (mounted) {
+      fetchStats();
+    }
+  }, [mounted]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -157,17 +168,6 @@ export default function Dashboard() {
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, [notifOpen]);
-
-  useEffect(() => {
-    fetch("/api/messages?limit=5&sort=desc")
-      .then((res) => res.json())
-      .then((data) => {
-        setMessages(data);
-      })
-      .catch((e) => {
-        console.error("Failed to load messages:", e);
-      });
-  }, []);
 
   // Replace metrics with dynamic data
   const metrics = stats
@@ -213,13 +213,25 @@ export default function Dashboard() {
 
   // Loading skeleton component
   const StatsSkeleton = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-pulse">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="space-y-2">
+          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        </div>
+      </div>
+
       {/* Metric Tiles Skeleton */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-6 animate-pulse"
+            className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-6"
           >
             <div className="flex items-center justify-between">
               <div className="space-y-3">
@@ -233,17 +245,24 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Sentiment Snapshot Skeleton */}
+      {/* Inbox & Sentiment Row Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg animate-pulse">
+        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
           <div className="space-y-4">
-            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                ))}
+              </div>
+            </div>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
             ))}
           </div>
         </div>
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg animate-pulse">
+        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
           <div className="space-y-4">
             <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <div className="h-24 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
@@ -260,26 +279,90 @@ export default function Dashboard() {
 
   // Error component
   const ErrorBox = () => (
-    <div className="rounded-lg bg-red-50 dark:bg-red-900/30 p-6 text-center">
-      <div className="flex flex-col items-center gap-4">
-        <ExclamationTriangleIcon className="h-12 w-12 text-red-500" />
-        <div>
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
-            {error}
-          </h3>
-          <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            We couldn&apos;t load your dashboard data. Please try again.
-          </p>
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="max-w-md w-full rounded-lg bg-red-50 dark:bg-red-900/30 p-8 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="rounded-full bg-red-100 dark:bg-red-800/50 p-3">
+            <ExclamationTriangleIcon className="h-8 w-8 text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+              {error}
+            </h3>
+            <p className="mt-2 text-sm text-red-700 dark:text-red-300">
+              We couldn&apos;t load your dashboard data. This might be due to a temporary issue or network problem.
+            </p>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={fetchStats}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
-        <button
-          onClick={fetchStats}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Try Again
-        </button>
       </div>
     </div>
   );
+
+  // Replace the notifications section with a real-time notifications system
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'insight',
+      title: 'Pricing inquiries increased 32% this week',
+      time: '2h ago',
+      icon: '📈',
+      color: 'blue'
+    },
+    {
+      id: 2,
+      type: 'warning',
+      title: '3 new complaints flagged as urgent',
+      time: 'Yesterday',
+      icon: '⚠️',
+      color: 'red'
+    },
+    {
+      id: 3,
+      type: 'opportunity',
+      title: 'New collaboration opportunity from BioLab',
+      time: '3 days ago',
+      icon: '🤝',
+      color: 'purple'
+    }
+  ]);
+
+  // Add notification fetching logic
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications');
+        if (!res.ok) throw new Error('Failed to fetch notifications');
+        const data = await res.json();
+        setNotifications(data);
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+        // Keep using static notifications as fallback
+      }
+    };
+
+    fetchNotifications();
+    // Set up polling for real-time updates
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!mounted) {
+    return <StatsSkeleton />;
+  }
 
   if (loading) {
     return <StatsSkeleton />;
@@ -311,77 +394,103 @@ export default function Dashboard() {
           {/* Notifications */}
           <div className="relative" ref={notifRef}>
             <button
-              className="relative"
+              className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setNotifOpen((v) => !v)}
               aria-label="Show notifications"
             >
-              <BellIcon className="w-6 h-6 text-gray-700 hover:text-indigo-500 transition" />
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">3</span>
+              <BellIcon className="w-6 h-6 text-gray-700 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition" />
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full animate-pulse">3</span>
             </button>
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 animate-fade-in">
-                <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-800">Notifications</h4>
-                </div>
-                <ul className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                  {/* Today&apos;s Notifications */}
-                  <li className="px-4 py-2 bg-gray-50">
-                    <p className="text-xs text-gray-500 font-semibold">Today</p>
-                  </li>
-                  <li className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer group">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-blue-100 text-blue-600 p-2 rounded-full text-sm">
-                        📈
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-800 font-medium">Pricing inquiries increased 32% this week.</p>
-                          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Insight</span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">2h ago</p>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer group">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-red-100 text-red-600 p-2 rounded-full text-sm">
-                        ⚠️
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-800 font-medium">3 new complaints flagged as urgent.</p>
-                          <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">Warning</span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">Yesterday</p>
-                      </div>
-                    </div>
-                  </li>
-                  {/* Yesterday&apos;s Notifications */}
-                  <li className="px-4 py-2 bg-gray-50">
-                    <p className="text-xs text-gray-500 font-semibold">Yesterday</p>
-                  </li>
-                  <li className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer group">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-purple-100 text-purple-600 p-2 rounded-full text-sm">
-                        🤝
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-800 font-medium">New collaboration opportunity from BioLab.</p>
-                          <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">Opportunity</span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">3 days ago</p>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-                <div className="p-3 border-t">
-                  <button className="w-full text-center text-sm text-indigo-600 font-medium py-2 hover:underline hover:text-indigo-700 flex items-center justify-center gap-1">
-                    View All Notifications
+              <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 animate-fade-in overflow-hidden">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Notifications</h4>
+                  <button 
+                    onClick={() => setNotifOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
+                </div>
+                <div className="max-h-[480px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <BellIcon className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400">No new notifications</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {notifications.map((notification) => (
+                        <div 
+                          key={notification.id} 
+                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                              notification.type === 'insight' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                              notification.type === 'warning' ? 'bg-red-100 dark:bg-red-900/30' :
+                              'bg-purple-100 dark:bg-purple-900/30'
+                            }`}>
+                              <span className="text-lg">{notification.icon}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {notification.title}
+                                </p>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  notification.type === 'insight' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                  notification.type === 'warning' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                                }`}>
+                                  {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{notification.time}</p>
+                              {notification.type === 'insight' && (
+                                <div className="mt-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-md">
+                                  <span className="font-medium">AI Analysis:</span> This trend suggests potential opportunities for engagement.
+                                </div>
+                              )}
+                              {notification.type === 'warning' && (
+                                <div className="mt-2 text-xs text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded-md">
+                                  <span className="font-medium">Action Required:</span> Please review these complaints within 24 hours.
+                                </div>
+                              )}
+                            </div>
+                            <button className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="flex items-center justify-between">
+                    <button 
+                      onClick={() => router.push('/notifications')}
+                      className="text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1"
+                    >
+                      View All Notifications
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={() => {/* Mark all as read */}}
+                      className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -464,12 +573,23 @@ export default function Dashboard() {
                 {/* Sender Badge */}
                 <div className="flex items-center px-4 py-4">
                   <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-fuchsia-500 text-lg font-bold text-white shadow-md border-2 border-white dark:border-gray-900">
-                    {message.sender}
+                    {message.profilePic ? (
+                      <img
+                        src={message.profilePic}
+                        alt={message.sender}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      getInitials(message.sender)
+                    )}
                   </div>
                 </div>
                 {/* Message Content */}
                 <div className="flex flex-1 flex-col justify-center px-2 py-4 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {message.sender}
+                    </span>
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold shadow-sm border border-white/40 dark:border-gray-800 ${message.tagColor}`}>
                       {message.tag}
                     </span>
@@ -484,7 +604,10 @@ export default function Dashboard() {
                 {/* Timestamp */}
                 <div className="flex flex-col justify-end pr-4 pb-4">
                   <span className="text-xs font-mono text-gray-400">
-                    {message.time}
+                    {formatTimestamp(message.time).time}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {formatTimestamp(message.time).date}
                   </span>
                 </div>
                 {/* Hover Action Button */}
@@ -616,7 +739,17 @@ export default function Dashboard() {
           <div className="relative w-full max-w-md h-full bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col overflow-y-auto transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)] translate-x-0">
             {/* Header - Sender Info */}
             <div className="flex items-center gap-4 mb-4 px-8 pt-8">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg">{selectedMessage.sender}</div>
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg">
+                {selectedMessage.profilePic ? (
+                  <img
+                    src={selectedMessage.profilePic}
+                    alt={selectedMessage.sender}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  getInitials(selectedMessage.sender)
+                )}
+              </div>
               <div>
                 <p className="text-sm text-gray-400">Sender</p>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{selectedMessage.sender}</h2>

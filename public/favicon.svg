@@ -1,0 +1,28 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7B2FF2" />
+      <stop offset="1" stop-color="#F357A8" />
+    </linearGradient>
+    <linearGradient id="bar-gradient" x1="0" y1="128" x2="128" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B983FF" />
+      <stop offset="1" stop-color="#7B2FF2" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg-gradient)"/>
+  <g>
+    <!-- Chat bubble -->
+    <rect x="18" y="28" width="92" height="60" rx="16" fill="#fff" fill-opacity="0.15"/>
+    <path d="M32 88 L32 108 L52 88 Z" fill="#fff" fill-opacity="0.15"/>
+    <!-- Bars -->
+    <rect x="44" y="68" width="10" height="20" rx="3" fill="url(#bar-gradient)"/>
+    <rect x="62" y="56" width="10" height="32" rx="3" fill="url(#bar-gradient)"/>
+    <rect x="80" y="40" width="10" height="48" rx="3" fill="url(#bar-gradient)"/>
+    <!-- Upward arrow -->
+    <path d="M44 78 Q64 48 90 44" stroke="#fff" stroke-width="4" fill="none"/>
+    <polygon points="88,40 98,44 88,48" fill="#fff"/>
+    <!-- Text lines -->
+    <rect x="44" y="48" width="28" height="4" rx="2" fill="#fff" fill-opacity="0.5"/>
+    <rect x="44" y="56" width="16" height="4" rx="2" fill="#fff" fill-opacity="0.3"/>
+  </g>
+</svg>

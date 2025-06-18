@@ -1,8 +1,27 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { messages, Message } from "@/app/messages";
 import MessageCard from "@/components/MessageCard";
-import { SparklesIcon } from "@heroicons/react/24/outline";
+import { SparklesIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+
+// Message type definition
+type Message = {
+  id: number;
+  sender: string;
+  tag: string;
+  tagColor: string;
+  preview: string;
+  time: string;
+  content?: string;
+  media?: { type: string; url: string }[];
+  profilePic?: string;
+  aiContext?: string;
+  aiConfidence?: number;
+  aiSuggestions?: string[];
+  platform?: string;
+  source?: string;
+  sourceIcon?: string;
+  sourceColor?: string;
+};
 
 const TAGS = ["All", "Leads", "Complaints", "Collab", "Positive", "Technical"];
 const SORTS = ["Newest First", "Oldest First", "By Sentiment"];
@@ -32,9 +51,73 @@ export default function InboxPage() {
   const [response, setResponse] = useState("");
   const [isImproving, setIsImproving] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
   const bulkActionsRef = useRef<HTMLDivElement>(null);
   const templateBtnRef = useRef<HTMLButtonElement>(null);
   const templateDropdownRef = useRef<HTMLDivElement>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch messages function
+  const fetchMessages = async () => {
+    try {
+      setRefreshing(true);
+      const res = await fetch("/api/messages?sort=desc");
+      const data = await res.json();
+      setMessages(data);
+      setLastUpdated(new Date());
+    } catch (e) {
+      console.error("Failed to load messages:", e);
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  // Auto-refresh setup
+  useEffect(() => {
+    if (autoRefreshEnabled) {
+      // Refresh every 30 seconds
+      refreshIntervalRef.current = setInterval(() => {
+        fetchMessages();
+      }, 30000);
+    } else {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [autoRefreshEnabled]);
+
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    fetchMessages();
+  };
+
+  // Format last updated time
+  const formatLastUpdated = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -118,18 +201,29 @@ export default function InboxPage() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!response.trim()) return;
-    // Handle sending the response
-    console.log('Sending response:', response);
+    
+    try {
+      // Send the response (implement actual sending logic)
+      console.log('Sending response:', response);
+      
+      // Refresh messages after sending to get updated status
+      await fetchMessages();
+      
+      // Clear the response
+      setResponse("");
+    } catch (error) {
+      console.error('Failed to send response:', error);
+    }
   };
 
   const filtered = messages
     .filter(m => filter === "All" || m.tag === filter)
     .filter(m => m.sender.toLowerCase().includes(search.toLowerCase()) || m.preview.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sort === "Newest First") return b.id - a.id;
-      if (sort === "Oldest First") return a.id - b.id;
+      if (sort === "Newest First") return new Date(b.time).getTime() - new Date(a.time).getTime();
+      if (sort === "Oldest First") return new Date(a.time).getTime() - new Date(b.time).getTime();
       return 0;
     });
 
@@ -145,9 +239,39 @@ export default function InboxPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 View and respond to messages across all categories. Powered by InexraAI.
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                {messages.length} total messages • Last updated 2 minutes ago
-              </p>
+              <div className="flex items-center gap-4 mt-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  {messages.length} total messages • Last updated {formatLastUpdated(lastUpdated)}
+                </p>
+                {autoRefreshEnabled && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-600">Live</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Auto-refresh toggle */}
+              <button
+                onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
+                  autoRefreshEnabled 
+                    ? "bg-green-100 text-green-700 border border-green-300" 
+                    : "bg-gray-100 text-gray-700 border border-gray-300"
+                }`}
+              >
+                {autoRefreshEnabled ? "Auto-refresh ON" : "Auto-refresh OFF"}
+              </button>
+              {/* Manual refresh button */}
+              <button
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition disabled:opacity-50"
+                title="Refresh messages"
+              >
+                <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
             </div>
           </div>
         </div>
@@ -249,10 +373,10 @@ export default function InboxPage() {
             <div key={msg.id} className="relative">
               <div className="pl-0">
                 <div
-                  className={`rounded-lg border border-gray-100 bg-white shadow-sm p-4 hover:bg-gray-50 transition cursor-pointer mb-2 flex items-center gap-4 ${selected && selected.id === msg.id ? 'ring-2 ring-indigo-400 border-indigo-200' : ''}`}
+                  className={`rounded-lg border border-gray-100 bg-white shadow-sm p-4 hover:bg-gray-50 transition cursor-pointer mb-2 flex items-start gap-4 ${selected && selected.id === msg.id ? 'ring-2 ring-indigo-400 border-indigo-200' : ''}`}
                   onClick={() => setSelected(msg)}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     <input
                       type="checkbox"
                       checked={selectedMessages.has(msg.id)}
@@ -263,18 +387,29 @@ export default function InboxPage() {
                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
                     <div className="h-8 w-px bg-gray-200"></div>
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-base">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
                       {msg.sender}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-sm font-medium text-gray-800">{msg.sender}</span>
-                        <p className="text-sm text-gray-500 truncate max-w-xs">{msg.preview}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-800 block truncate">{msg.sender}</span>
+                          {/* Source indicator removed as per feedback */}
+                        </div>
+                        <p className="text-sm text-gray-500 truncate">{msg.preview}</p>
                         <span className="text-xs text-gray-400">{msg.time}</span>
                       </div>
-                      <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${msg.tagColor}`}>{msg.tag}</span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${msg.tagColor}`}>{msg.tag}</span>
+                        {/* Platform badge */}
+                        {msg.platform && msg.platform !== 'Database' && (
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-white whitespace-nowrap flex-shrink-0 ${msg.sourceColor || 'bg-gray-500'}`}>
+                            {msg.platform}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -292,7 +427,18 @@ export default function InboxPage() {
               <div>
                 <span className="text-xs text-gray-400">Sender</span>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{selected.sender}</h3>
-                <span className={`inline-block mt-1 bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full`}>{selected.tag}</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-block bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full`}>{selected.tag}</span>
+                  {/* Source information */}
+                  {selected.source && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">{selected.sourceIcon}</span>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {selected.source}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             {/* AI Context */}
@@ -313,7 +459,7 @@ export default function InboxPage() {
             {/* Suggested Replies */}
             <h4 className="text-xs text-gray-400 mb-2">Suggested replies</h4>
             <div className="flex flex-col gap-2 mb-4">
-              {selected.aiSuggestions.map((s, i) => (
+              {selected.aiSuggestions?.map((s, i) => (
                 <button 
                   key={i} 
                   className="text-sm bg-gray-100 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 text-left transition"
@@ -322,6 +468,9 @@ export default function InboxPage() {
                   {s}
                 </button>
               ))}
+              {!selected.aiSuggestions || selected.aiSuggestions.length === 0 && (
+                <p className="text-sm text-gray-500 italic">No AI suggestions available</p>
+              )}
             </div>
             {/* Respond Box */}
             <div className="sticky bottom-0 z-10 bg-white dark:bg-gray-900 rounded-b-2xl border-t border-gray-200/60 dark:border-gray-800/60 px-8 py-6">

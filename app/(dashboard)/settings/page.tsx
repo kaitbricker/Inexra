@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
 import { Switch } from "@headlessui/react";
 import { Dialog } from "@headlessui/react";
 import { CheckIcon, PencilIcon, TrashIcon, PlusIcon, ExclamationTriangleIcon, Cog6ToothIcon, DocumentTextIcon, LinkIcon, ShieldCheckIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { INSTAGRAM_ENDPOINTS } from '@/lib/instagram';
+import { getInstagramUserInfo } from '@/lib/instagram';
+import { updateUserSettings } from '@/lib/actions/user';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -40,6 +42,7 @@ export default function SettingsPage() {
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifDigest, setNotifDigest] = useState(false);
   const [notifMentions, setNotifMentions] = useState(false);
+  const [tagStack, setTagStack] = useState<string>("");
 
   // Templates Tab State
   const [templates, setTemplates] = useState([
@@ -74,7 +77,7 @@ export default function SettingsPage() {
   const [sidebar, setSidebar] = useState(false);
 
   // Tab labels
-  const tabs = ["Account", "Templates", "Sources", "Social Integrations", "Security"];
+  const tabs = ["Account", "Templates", "Sources", "Security"];
 
   // Social Integrations Tab State
   const [connectedPlatforms, setConnectedPlatforms] = useState<{
@@ -92,14 +95,25 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState<{ [key: string]: boolean }>({
     Instagram: false,
     LinkedIn: false,
-    TikTok: false
+    TikTok: false,
+    Messages: false
   });
 
   const [uploadError, setUploadError] = useState<UploadError>({
     Instagram: null,
     LinkedIn: null,
     TikTok: null,
+    Messages: null
   });
+
+  // Add state for Instagram username
+  const [instagramUsername, setInstagramUsername] = useState<string | null>(null);
+
+  // Add state for message upload
+  const [messageUploadStatus, setMessageUploadStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   // Template Modal Handlers
   function openTemplateModal(template: any = null) {
@@ -144,7 +158,7 @@ export default function SettingsPage() {
     // ...delete logic
   }
 
-  // Replace the handleConnect function with this updated version
+  // Update handleConnect for Instagram
   const handleConnect = async (platform: string) => {
     try {
       if (platform === 'Instagram') {
@@ -216,8 +230,19 @@ export default function SettingsPage() {
     }
   };
 
+  // Update handleDisconnect for Instagram
   const handleDisconnect = async (platform: string) => {
     try {
+      if (platform === 'Instagram') {
+        // Remove Instagram token from session/local state
+        setConnectedPlatforms(prev => ({
+          ...prev,
+          Instagram: { connected: false, accountName: '' },
+        }));
+        setInstagramUsername(null);
+        // Optionally, call a backend endpoint to revoke the token
+        return;
+      }
       const response = await fetch('/api/platforms/disconnect', {
         method: 'POST',
         headers: {
@@ -240,6 +265,86 @@ export default function SettingsPage() {
     } catch (error) {
       console.error(`Error disconnecting from ${platform}:`, error);
       // You might want to show an error message to the user here
+    }
+  };
+
+  // On mount, check if Instagram is connected and fetch username
+  useEffect(() => {
+    async function fetchInstagramStatus() {
+      try {
+        const response = await fetch('/api/platforms/status');
+        if (!response.ok) throw new Error('Failed to fetch platform status');
+        const data = await response.json();
+        
+        if (data.instagram) {
+          setConnectedPlatforms(prev => ({
+            ...prev,
+            Instagram: { 
+              connected: true,
+              accountName: data.instagram.accountName,
+            },
+          }));
+          setInstagramUsername(data.instagram.accountName);
+        }
+      } catch (error) {
+        console.error('Error fetching Instagram status:', error);
+      }
+    }
+    fetchInstagramStatus();
+  }, []);
+
+  // Add message upload handler
+  const handleMessageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(prev => ({ ...prev, Messages: true }));
+    setUploadError(prev => ({ ...prev, Messages: null }));
+    setMessageUploadStatus(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('platform', 'manual'); // Set platform to manual for file uploads
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      setMessageUploadStatus({
+        success: true,
+        message: `Successfully uploaded ${data.count || 0} messages. They will be processed by AI if enabled.`
+      });
+    } catch (error) {
+      setUploadError(prev => ({
+        ...prev,
+        Messages: error instanceof Error ? error.message : 'Upload failed'
+      }));
+    } finally {
+      setUploading(prev => ({ ...prev, Messages: false }));
+    }
+  };
+
+  // Add this function after the other handlers
+  const handleSaveSettings = async () => {
+    try {
+      const result = await updateUserSettings({ tagStack });
+      if (result.success) {
+        alert('Settings saved successfully!');
+      } else {
+        alert('Failed to save settings. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('An error occurred while saving settings.');
     }
   };
 
@@ -290,7 +395,31 @@ export default function SettingsPage() {
                         </select>
                       </div>
                     </div>
-                    <button className="mt-6 px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-sm hover:bg-indigo-700 hover:shadow transition-all">Save Changes</button>
+                    <div className="mt-4">
+                      <label htmlFor="tagStack" className="block text-sm font-medium text-gray-700">
+                        Preferred Tag Stack
+                      </label>
+                      <select
+                        id="tagStack"
+                        value={tagStack}
+                        onChange={(e) => setTagStack(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      >
+                        <option value="">None</option>
+                        <option value="brand">Brand Manager</option>
+                        <option value="influencer">Influencer</option>
+                        <option value="success">Customer Success</option>
+                      </select>
+                      <p className="mt-1 text-sm text-gray-500">
+                        This determines which tags are shown in your inbox and dashboard views.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={handleSaveSettings}
+                      className="mt-6 px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-sm hover:bg-indigo-700 hover:shadow transition-all"
+                    >
+                      Save Changes
+                    </button>
                   </div>
                   <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-base">Notification Preferences</h3>
@@ -381,58 +510,9 @@ export default function SettingsPage() {
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
                   <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2"><LinkIcon className="w-5 h-5 text-cyan-500" /> Connected Sources</h2>
                   <div className="mb-8">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-base">Connected Platforms</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-base">Social Platforms</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {platforms.map((p, idx) => (
-                        <div key={p.name} className={classNames(
-                          "flex items-center justify-between rounded-lg px-4 py-3 border shadow-sm group transition-all hover:shadow-md",
-                          p.status === "connected"
-                            ? "bg-gray-50/50 dark:bg-gray-800/50 border-cyan-100 dark:border-cyan-900 hover:border-cyan-200 dark:hover:border-cyan-800"
-                            : p.status === "not_connected"
-                            ? "bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"
-                            : p.status === "coming_soon"
-                            ? "bg-gray-100/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700"
-                            : "bg-white dark:bg-gray-900 border-green-200 dark:border-green-800"
-                        )}>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-800 dark:text-gray-100">{p.name}</span>
-                            {p.status === "connected" && <span className="text-green-600 flex items-center gap-1 text-xs font-semibold">Connected <CheckIcon className="w-4 h-4" /></span>}
-                            {p.status === "not_connected" && <button className="text-cyan-600 underline text-xs" onClick={() => openPlatformModal(p)}>Connect</button>}
-                            {p.status === "coming_soon" && <span className="text-gray-400 text-xs">Coming Soon</span>}
-                            {p.status === "enabled" && <span className="text-green-600 text-xs">Enabled</span>}
-                          </div>
-                          {p.status === "connected" && <button className="px-3 py-1 rounded-md bg-cyan-600 text-white text-xs font-semibold hover:bg-cyan-700 transition" onClick={() => openPlatformModal(p)}>Manage</button>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <Dialog open={showPlatformModal} onClose={() => setShowPlatformModal(false)} className="fixed z-50 inset-0 overflow-y-auto">
-                    <div className="flex items-center justify-center min-h-screen px-4">
-                      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                      <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md mx-auto p-6 z-10 animate-fade-in scale-95 animate-in">
-                        <Dialog.Title className="text-lg font-bold mb-4 text-cyan-700">Manage {platformToManage?.name}</Dialog.Title>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">API Key / Credentials</label>
-                          <input className="mt-1 w-full border rounded-lg px-3 py-2" placeholder="Enter credentials..." />
-                        </div>
-                        <div className="flex gap-2 justify-end mt-6">
-                          <button className="px-4 py-2 rounded bg-gray-200" onClick={() => setShowPlatformModal(false)}>Cancel</button>
-                          <button className="px-4 py-2 rounded bg-cyan-600 text-white font-bold shadow" onClick={savePlatformCreds}>Save</button>
-                        </div>
-                      </div>
-                    </div>
-                  </Dialog>
-                </div>
-              </Tab.Panel>
-              {/* Social Integrations Tab */}
-              <Tab.Panel>
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-                  <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Cog6ToothIcon className="w-5 h-5 text-emerald-500" /> Social Integrations
-                  </h2>
-                  <div className="space-y-4">
-                    {/* Instagram */}
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {/* Instagram */}
                       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <div className="flex items-center space-x-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500">
@@ -449,7 +529,7 @@ export default function SettingsPage() {
                           {connectedPlatforms.Instagram.connected ? (
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600 dark:text-gray-300">
-                                Connected as {connectedPlatforms.Instagram.accountName}
+                                Connected as {connectedPlatforms.Instagram.accountName || instagramUsername || 'Instagram User'}
                               </span>
                               <button
                                 onClick={() => handleDisconnect('Instagram')}
@@ -461,14 +541,10 @@ export default function SettingsPage() {
                           ) : (
                             <button
                               onClick={() => handleConnect('Instagram')}
-                              disabled={uploading.Instagram}
-                              className="w-full rounded-md bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-4 py-2 text-sm font-medium text-white hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+                              className="w-full rounded-md bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-400 dark:hover:bg-indigo-900"
                             >
-                              {uploading.Instagram ? 'Connecting...' : 'Connect with Instagram'}
+                              Connect Instagram
                             </button>
-                          )}
-                          {uploadError.Instagram && (
-                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{uploadError.Instagram}</p>
                           )}
                         </div>
                       </div>
@@ -478,19 +554,19 @@ export default function SettingsPage() {
                         <div className="flex items-center space-x-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600">
                             <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                             </svg>
                           </div>
                           <div>
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">LinkedIn</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Upload Export File</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Upload messages</p>
                           </div>
                         </div>
                         <div className="mt-4">
                           {connectedPlatforms.LinkedIn.connected ? (
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600 dark:text-gray-300">
-                                Connected as {connectedPlatforms.LinkedIn.accountName}
+                                Connected as {connectedPlatforms.LinkedIn.accountName || 'LinkedIn User'}
                               </span>
                               <button
                                 onClick={() => handleDisconnect('LinkedIn')}
@@ -502,14 +578,10 @@ export default function SettingsPage() {
                           ) : (
                             <button
                               onClick={() => handleConnect('LinkedIn')}
-                              disabled={uploading.LinkedIn}
-                              className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                              className="w-full rounded-md bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-400 dark:hover:bg-indigo-900"
                             >
-                              {uploading.LinkedIn ? 'Uploading...' : 'Upload Export'}
+                              Connect LinkedIn
                             </button>
-                          )}
-                          {uploadError.LinkedIn && (
-                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{uploadError.LinkedIn}</p>
                           )}
                         </div>
                       </div>
@@ -524,33 +596,61 @@ export default function SettingsPage() {
                           </div>
                           <div>
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">TikTok</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Upload Export File</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Coming soon</p>
                           </div>
                         </div>
                         <div className="mt-4">
-                          {connectedPlatforms.TikTok.connected ? (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-300">
-                                Connected as {connectedPlatforms.TikTok.accountName}
-                              </span>
-                              <button
-                                onClick={() => handleDisconnect('TikTok')}
-                                className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-900"
-                              >
-                                Disconnect
-                              </button>
+                          <button
+                            disabled
+                            className="w-full rounded-md bg-gray-50 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500"
+                          >
+                            Coming Soon
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* File Upload */}
+                      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600">
+                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">File Upload</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Upload JSON, CSV, or Excel</p>
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <label className="block w-full">
+                            <span className="sr-only">Choose file</span>
+                            <input
+                              type="file"
+                              accept=".json,.csv,.xlsx,.xls"
+                              onChange={handleMessageUpload}
+                              className="block w-full text-sm text-gray-500 dark:text-gray-400
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-emerald-50 file:text-emerald-700
+                                dark:file:bg-emerald-900/50 dark:file:text-emerald-300
+                                hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/70
+                                cursor-pointer"
+                            />
+                          </label>
+                          {uploading.Messages && (
+                            <div className="mt-2 flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500"></div>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => handleConnect('TikTok')}
-                              disabled={uploading.TikTok}
-                              className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
-                            >
-                              {uploading.TikTok ? 'Uploading...' : 'Upload Export'}
-                            </button>
                           )}
-                          {uploadError.TikTok && (
-                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{uploadError.TikTok}</p>
+                          {uploadError.Messages && (
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{uploadError.Messages}</p>
+                          )}
+                          {messageUploadStatus && (
+                            <p className={`mt-2 text-sm ${messageUploadStatus.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {messageUploadStatus.message}
+                            </p>
                           )}
                         </div>
                       </div>

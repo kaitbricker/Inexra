@@ -21,6 +21,7 @@ model User {
   createdAt     DateTime  @default(now())
   messages      Message[]
   platformConnections PlatformConnection[]
+  tagStack      String?   // 'brand' | 'influencer' | 'success'
 }
 
 model Account {

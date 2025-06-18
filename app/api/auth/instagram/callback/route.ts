@@ -1,92 +1,84 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { INSTAGRAM_CONFIG, INSTAGRAM_ENDPOINTS, getInstagramUserInfo, getInstagramMessages, transformInstagramMessages } from '@/lib/instagram';
+import { INSTAGRAM_CONFIG, INSTAGRAM_ENDPOINTS, getInstagramUserInfo } from '@/lib/instagram';
 
-interface SessionUser {
-  id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-}
-
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession();
-    const user = session?.user as SessionUser | undefined;
-    
-    if (!user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session?.user?.id) {
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
+    const searchParams = req.nextUrl.searchParams;
     const code = searchParams.get('code');
-    
+
     if (!code) {
-      return NextResponse.json({ error: 'No authorization code provided' }, { status: 400 });
+      return new NextResponse('No code provided', { status: 400 });
     }
 
     // Exchange code for access token
-    const tokenResponse = await fetch(INSTAGRAM_ENDPOINTS.accessToken, {
+    const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: INSTAGRAM_CONFIG.clientId!,
-        client_secret: INSTAGRAM_CONFIG.clientSecret!,
+        client_id: process.env.INSTAGRAM_CLIENT_ID!,
+        client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
         grant_type: 'authorization_code',
-        redirect_uri: INSTAGRAM_CONFIG.redirectUri,
+        redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`,
         code,
       }),
     });
 
     if (!tokenResponse.ok) {
-      throw new Error('Failed to exchange code for access token');
+      throw new Error('Failed to get access token');
     }
 
-    const { access_token, user_id } = await tokenResponse.json();
+    const tokenData = await tokenResponse.json();
 
-    // Get user info
-    const userInfo = await getInstagramUserInfo(access_token);
+    // Get Instagram user info
+    const userInfo = await getInstagramUserInfo(tokenData.access_token);
 
-    // Store the connection in the database
-    await prisma.platformConnection.create({
-      data: {
-        userId: user.id,
+    // Check if connection exists
+    const existingConnection = await prisma.platformConnection.findFirst({
+      where: {
+        userId: session.user.id,
         platform: 'Instagram',
-        platformUserId: user_id,
-        accessToken: access_token,
-        accountName: userInfo.username,
-        metadata: {
-          accountType: userInfo.account_type,
-        },
       },
     });
 
-    // Fetch and store initial messages
-    const messages = await getInstagramMessages(access_token, user_id);
-    const transformedMessages = transformInstagramMessages(messages.data);
-
-    // Store messages in batches
-    const batchSize = 100;
-    for (let i = 0; i < transformedMessages.length; i += batchSize) {
-      const batch = transformedMessages.slice(i, i + batchSize);
-      await prisma.message.createMany({
-        data: batch.map(msg => ({
-          ...msg,
-          userId: user.id,
-        })),
+    if (existingConnection) {
+      // Update existing connection
+      await prisma.platformConnection.update({
+        where: {
+          id: existingConnection.id,
+        },
+        data: {
+          accessToken: tokenData.access_token,
+          platformUserId: userInfo.id,
+          accountName: userInfo.username,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new connection
+      await prisma.platformConnection.create({
+        data: {
+          userId: session.user.id,
+          platform: 'Instagram',
+          platformUserId: userInfo.id,
+          accountName: userInfo.username,
+          accessToken: tokenData.access_token,
+        },
       });
     }
 
-    // Redirect back to settings page
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=social-integrations`);
+    // Redirect back to settings
+    return NextResponse.redirect(new URL('/settings', process.env.NEXTAUTH_URL!));
   } catch (error) {
-    console.error('Instagram OAuth callback error:', error);
-    return NextResponse.json(
-      { error: 'Failed to complete Instagram connection' },
-      { status: 500 }
-    );
+    console.error('Instagram callback error:', error);
+    return new NextResponse('Authentication failed', { status: 500 });
   }
 } 
