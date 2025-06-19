@@ -17,9 +17,9 @@ import { signOut } from "next-auth/react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-  { name: "Inbox", href: "/inbox", icon: InboxIcon },
-  { name: "Analytics", href: "/analytics", icon: ChartBarIcon },
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+  { name: "Inbox", href: "/dashboard/inbox", icon: InboxIcon },
+  { name: "Analytics", href: "/dashboard/analytics", icon: ChartBarIcon },
+  { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
 ];
 
 export default function Sidebar() {

@@ -479,7 +479,7 @@ export default function Dashboard() {
                 <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <div className="flex items-center justify-between">
                     <button 
-                      onClick={() => router.push('/notifications')}
+                      onClick={() => router.push('/dashboard/notifications')}
                       className="text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1"
                     >
                       View All Notifications
@@ -626,7 +626,7 @@ export default function Dashboard() {
           <div className="mt-4 text-center">
             <button
               className="text-indigo-600 hover:text-indigo-800 font-medium"
-              onClick={() => router.push("/inbox")}
+              onClick={() => router.push("/dashboard/inbox")}
             >
               View Full Inbox
             </button>
